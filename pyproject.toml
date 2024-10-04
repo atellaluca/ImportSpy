@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "importspy"
-version = "0.1.3"
+version = "0.1.4"
 description = "A tool to monitor and trace module imports in Python projects."
 license = "MIT"
 authors = ["Luca Atella <atellaluca@outlook.it>"]

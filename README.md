@@ -62,7 +62,7 @@ else:
 
 ## 📚 Documentation
 
-You can find the full documentation for ImportSpy at [importspy.readthedocs.io](https://importspy.readthedocs.io).
+You can find the full documentation for ImportSpy at [this link](https://importspy.readthedocs.io).
 
 The documentation includes:
 - Detailed usage examples
