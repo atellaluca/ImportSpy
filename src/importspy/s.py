@@ -10,6 +10,27 @@ class Spy:
     def importspy(self, 
                    validation: Callable[[ModuleType], bool] | 
                    None = None) -> ModuleType:
+        """
+        Imports the module that called this function dynamically, with an optional validation step.
+        
+        This method inspects the stack to find the caller's module and re-imports it dynamically.
+        If a validation function is provided, the module is returned only if it passes the validation.
+        Raises a ValueError if recursion within the same module is detected.
+
+        :param validation: 
+            A callable that takes the imported module as an argument and returns 
+            a boolean indicating whether the module passes validation. If `None`, 
+            no validation is performed.
+        :type validation: Callable[[ModuleType], bool] | None
+
+        :raises ValueError: 
+            If the method detects recursion within the same module, i.e., when 
+            the caller and current frames originate from the same file.
+
+        :return: 
+            The imported module, or `None` if the validation function is provided and fails.
+        :rtype: ModuleType | None
+        """
         stack = inspect.stack()
         current_frame : inspect.FrameInfo = stack[1]
         caller_frame: inspect.FrameInfo = stack[-1]
