@@ -10,9 +10,7 @@ python:
 sphinx:
   configuration: docs/source/conf.py
 
-formats:
-  - html
-  - pdf
+formats: htmlzip
 
 poetry:
   version: ^1.8
