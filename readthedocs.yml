@@ -10,8 +10,6 @@ python:
 sphinx:
   configuration: docs/source/conf.py
 
-formats: htmlzip
-
 poetry:
   version: ^1.8
   dev-dependencies: true
