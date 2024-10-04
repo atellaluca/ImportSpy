@@ -1,6 +1,6 @@
 # 🕵️‍♂️ ImportSpy
 
-![ImportSpy Image](./assets/ImportSpy.png)
+![ImportSpy Image](https://github.com/atellaluca/ImportSpy/blob/main/assets/ImportSpy.png)
 
 [![GitHub issues](https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square)](https://github.com/atellaluca/ImportSpy/issues)
 [![GitHub stars](https://img.shields.io/github/stars/atellaluca/ImportSpy?style=flat-square)](https://github.com/atellaluca/ImportSpy/stargazers)
@@ -43,6 +43,7 @@ Setting up ImportSpy is simple! You can install it directly from PyPI with:
 
 ```bash
 pip install importspy
+```
 
 Then, start using it by importing and configuring the Spy:
 
