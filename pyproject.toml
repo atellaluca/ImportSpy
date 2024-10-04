@@ -11,8 +11,13 @@ python = "^3.10"
 
 
 [tool.poetry.group.dev.dependencies]
-sphinx = "^8.0.2"
+sphinx = ">=5,<8"
 pytest = "^8.3.3"
+sphinx-rtd-theme = "^2.0.0"
+
+[tool.poetry.urls]
+repository = "https://github.com/atellaluca/importspy"
+documentation = "https://importspy.readthedocs.io"
 
 [build-system]
 requires = ["poetry-core"]
