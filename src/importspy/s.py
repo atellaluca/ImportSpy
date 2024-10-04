@@ -7,8 +7,9 @@ from .errors import Errors
 
 class Spy:
 
-    def find_imported_module(self, 
-                             validation: Callable[[ModuleType], bool] | None = None) -> ModuleType:
+    def importspy(self, 
+                   validation: Callable[[ModuleType], bool] | 
+                   None = None) -> ModuleType:
         stack = inspect.stack()
         current_frame : inspect.FrameInfo = stack[1]
         caller_frame: inspect.FrameInfo = stack[-1]

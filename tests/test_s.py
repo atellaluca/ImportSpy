@@ -12,25 +12,26 @@ def condition(module: ModuleType):
 
 class TestSpy:
     
-    def test_find_imported_module_without_validation(self, spy_instance, mock_import_functions):
-        imported_module = spy_instance.find_imported_module()
+    def test_importspy_without_validation(self, spy_instance, mock_import_functions):
+        imported_module = spy_instance.importspy()
         assert imported_module.__name__ == 'mock_module'
 
-    def test_find_imported_module_with_plugin_validation(self, spy_instance, mock_import_functions):
-        imported_module = spy_instance.find_imported_module(condition)
+    def test_importspy_with_plugin_validation(self, spy_instance, mock_import_functions):
+        imported_module = spy_instance.importspy(condition)
         assert imported_module.__name__ == 'mock_module'
  
-    def test_find_imported_module_no_plugin(self, spy_instance, mock_import_no_plugin):
-        imported_module = spy_instance.find_imported_module(condition)
+    def test_importspy_no_plugin(self, spy_instance, mock_import_no_plugin):
+        
+        imported_module = spy_instance.importspy(condition)
         assert imported_module is None
 
-    def test_find_imported_module_recursion_error(self, spy_instance, monkeypatch):
+    def test_importspy_recursion_error(self, spy_instance, monkeypatch):
         monkeypatch.setattr('inspect.stack', lambda: [
             inspect.FrameInfo(None, 'same_file.py', 1, None, None, None),
             inspect.FrameInfo(None, 'same_file.py', 1, None, None, None)
         ])
 
         with pytest.raises(ValueError) as excinfo:
-            spy_instance.find_imported_module()
+            spy_instance.importspy()
 
         assert str(excinfo.value) == Errors.ANALYSIS_RECURSION_WARNING

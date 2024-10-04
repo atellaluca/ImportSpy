@@ -10,4 +10,4 @@ def condition(module:ModuleType):
             return True
     return False
 
-print(Spy().find_imported_module(validation=condition))
+print(Spy().importspy(validation=condition))
