@@ -12,6 +12,7 @@ python = "^3.10"
 
 [tool.poetry.group.dev.dependencies]
 sphinx = "^8.0.2"
+pytest = "^8.3.3"
 
 [build-system]
 requires = ["poetry-core"]
