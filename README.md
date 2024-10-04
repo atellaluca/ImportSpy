@@ -1,6 +1,6 @@
 # 🕵️‍♂️ ImportSpy
 
-![ImportSpy Image](./assets/dining-philosophers-problem.png)
+![ImportSpy Image](./assets/ImportSpy.png)
 
 [![GitHub issues](https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square)](https://github.com/atellaluca/ImportSpy/issues)
 [![GitHub stars](https://img.shields.io/github/stars/atellaluca/ImportSpy?style=flat-square)](https://github.com/atellaluca/ImportSpy/stargazers)
