@@ -9,6 +9,20 @@
 
 **ImportSpy** is a tool that allows you to monitor and dynamically trace imported modules in a Python script, with advanced features like module re-importing and optional validation. The core of the package is the `Spy` class, which inspects the stack and safely re-imports modules, even handling recursion detection.
 
+## Table of Contents
+1. [What is ImportSpy?](#-what-is-importspy)
+2. [Key Features](#-key-features)
+3. [Use Cases](#-use-cases)
+4. [Installation](#-installation)
+5. [Documentation](#-documentation)
+6. [How to Use ImportSpy](#-how-to-use-importspy)
+7. [Usage Example](#%EF%B8%8F-usage-example)
+8. [Handling Dynamic Imports and Recursion](#-handling-dynamic-imports-and-recursion)
+9. [Why Use ImportSpy?](#-why-use-importspy)
+10. [Contributing](#%EF%B8%8F-contributing)
+11. [License](#-license)
+12. [Contact](#-contact)
+
 ---
 
 ## 🔍 What is ImportSpy?
