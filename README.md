@@ -162,7 +162,7 @@ your_project/
 
 2. Run the `my_plugin.py` script to dynamically import and validate the plugin:
    ```bash
-   python my_plugin.py
+   python3 my_plugin.py
    ```
 
 If the plugin is successfully imported and validated, the module will be printed in the console. Otherwise, it will return `None`.
