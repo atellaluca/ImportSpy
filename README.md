@@ -160,7 +160,7 @@ your_project/
    pip install importspy
    ```
 
-2. Run the `main.py` script to dynamically import and validate the plugin:
+2. Run the `my_plugin.py` script to dynamically import and validate the plugin:
    ```bash
    python main.py
    ```
