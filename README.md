@@ -80,22 +80,80 @@ The core of ImportSpy is the `Spy` class, designed to facilitate dynamic import 
 2. **Use `importspy` to dynamically re-import a module**: Call the `importspy` method to re-import the calling module. You can also pass an optional validation function.
 3. **Handle recursion errors**: If the method detects recursion within the same module (the caller and current frames originate from the same file), a `ValueError` is raised to prevent infinite loops.
 
-### Example
+---
+
+## 🛠️ Usage Example
+
+**ImportSpy** can be integrated into projects that use plugin-based architectures to dynamically load and validate modules. Here's an example that demonstrates how to use **ImportSpy** to import and validate a plugin that extends a base `Plugin` class.
+
+### 1. Setting up the Spy in your main project
+
+In your main project, you want to dynamically import and validate a plugin. The validation function checks if the imported module contains a class that extends `Plugin`.
 
 ```python
 from importspy import Spy
+import inspect
+from types import ModuleType
 
-spy = Spy()
+class Plugin:
+    pass
 
-# Dynamically re-import the calling module with validation
-module = spy.importspy(validation=lambda mod: mod.__name__ == "target_module")
+def condition(module: ModuleType) -> bool:
+    for class_name, class_obj in inspect.getmembers(module, inspect.isclass):
+        if issubclass(class_obj, Plugin) and class_obj is not Plugin:
+            return True
+    return False
 
-# If the module is valid, proceed with the code
-if module:
-    print(f"Module {module.__name__} imported and validated!")
-else:
-    print("Module import failed or did not pass validation.")
+# Import the plugin using Spy with the validation function
+imported_module = Spy().importspy(validation=condition)
+
+# Output the result of the import, whether successful or None
+print(imported_module)
 ```
+
+In this example, the `Spy` class is used to dynamically import a module. The `condition` function checks if the imported module contains a subclass of `Plugin`, ensuring the correct plugin structure is loaded.
+
+### 2. Creating the plugin
+
+Here's an example of how you can create a plugin that extends the base `Plugin` class. This plugin would be dynamically imported and validated by **ImportSpy**.
+
+```python
+import importspy
+from your_package import Plugin
+
+class MyPlugin(Plugin):
+    def add_extension(self):
+        print("The extension was added")
+```
+
+### 3. Project Structure
+
+Here is how your project should be structured to run this example:
+
+```
+your_project/
+│
+├── main.py         # Main script using ImportSpy to load the plugin
+├── plugin.py       # The plugin to be dynamically imported
+└── your_package/
+    └── __init__.py # The package containing the base Plugin class
+```
+
+### 4. Running the Example
+
+1. Ensure you have **ImportSpy** installed in your environment:
+   ```bash
+   pip install importspy
+   ```
+
+2. Run the `main.py` script to dynamically import and validate the plugin:
+   ```bash
+   python main.py
+   ```
+
+If the plugin is successfully imported and validated, the module will be printed in the console. Otherwise, it will return `None`.
+
+---
 
 ### How it works:
 
