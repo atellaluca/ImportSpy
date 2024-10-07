@@ -2,6 +2,15 @@ import inspect
 import importlib.util
 import sys
 from types import ModuleType
+from typing import List
+from collections import namedtuple
+import importlib.metadata
+import logging
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
+
+ClassInfo = namedtuple('ClassInfo', ['name', 'methods', 'superclasses'])
 
 def inspect_module():
     """
@@ -19,8 +28,11 @@ def inspect_module():
     :rtype: tuple (inspect.FrameInfo, inspect.FrameInfo)
     """
     stack = inspect.stack()
+    logger.debug(f"Stack detected: {stack}")
     current_frame = stack[1]
+    logger.debug(f"Current frame: {current_frame}")
     caller_frame = stack[-1]
+    logger.debug(f"Caller frame: {caller_frame}")
     return current_frame, caller_frame
     
 def get_info_module(caller_frame: inspect.FrameInfo) -> ModuleType | None:
@@ -65,3 +77,44 @@ def load_module(info_module: ModuleType) -> ModuleType | None:
         sys.modules[module.__name__] = module
         return module
     return None
+
+def extract_version(info_module: ModuleType) -> str | None:
+    if hasattr(info_module, '__version__'):
+        return info_module.__version__
+    try:
+        return importlib.metadata.version(info_module.__name__)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def extract_functions(info_module: ModuleType) -> List[str] | None:
+    functions = [
+            func_name
+            for func_name, obj in inspect.getmembers(info_module, inspect.isfunction)
+            if obj.__module__ == info_module.__name__
+        ]
+    return functions
+
+def extract_classes(info_module: ModuleType) -> List[ClassInfo]:
+    classes = []
+    for class_name, cls_obj in inspect.getmembers(info_module, inspect.isclass):
+            if cls_obj.__module__ == info_module.__name__:
+                methods = [
+                    method_name for method_name, _ in inspect.getmembers(cls_obj, inspect.isfunction)
+                ]
+                superclasses = [base.__name__ for base in cls_obj.__bases__]
+                current_class = ClassInfo(class_name, methods, superclasses)
+                classes.append(current_class)
+    return classes
+
+def extract_superclasses(module: ModuleType) -> List[str]:
+    superclasses = set()
+    logger.debug("Extract superclasses...")
+    for class_name, cls_obj in inspect.getmembers(module, inspect.isclass):
+        logger.debug(f"Current class name: {class_name}")
+        if cls_obj.__module__ == module.__name__:
+            for base in cls_obj.__bases__:
+                superclasses.add(base.__name__)
+                logger.debug(f"Add {superclasses} to set, {superclasses}")
+    logger.debug(f"Superclasses: {superclasses}")
+    return list(superclasses)
