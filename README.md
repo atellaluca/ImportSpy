@@ -71,7 +71,7 @@ from plugin_interface import Plugin
 from typing import List
 
 class PluginSpy(SpyModel):
-    classes: List[ClassModel] = [ClassModel(name="RequiredClass", methods=["required_metod1, "required_method_2])]
+    classes: List[ClassModel] = [ClassModel(name="RequiredClass", methods=["required_metod1, "required_method_2"])]
 
 # Example validation function to ensure the module has a required attribute
 module = Spy().importspy(spymodel=PluginSpy)
