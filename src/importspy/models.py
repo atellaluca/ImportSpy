@@ -1,4 +1,4 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel
 from typing import Optional, List
 from types import ModuleType
 from .utils import module_utils
