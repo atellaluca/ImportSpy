@@ -1,9 +1,10 @@
-import inspect
-import importlib.util
-import sys
+import warnings
 from typing import Callable
 from types import ModuleType
 from .errors import Errors
+from .models import SpyModel
+from .utils import module_utils
+
 
 class Spy:
 
@@ -11,34 +12,40 @@ class Spy:
                    validation: Callable[[ModuleType], bool] | 
                    None = None) -> ModuleType:
         """
-        Imports the module that called this function dynamically, with an optional validation step.
-        
-        This method inspects the stack to find the caller's module and re-imports it dynamically.
-        If a validation function is provided, the module is returned only if it passes the validation.
-        Raises a ValueError if recursion within the same module is detected.
+        [Deprecated since version 0.1.6] Dynamically imports the module that called this function,
+        with an optional validation step.
+
+        .. warning::
+            This function is deprecated as of version 0.1.6 due to a security vulnerability where 
+            the module is imported before being validated, which may allow malicious code to execute 
+            prior to validation.
 
         :param validation: 
-            A callable that takes the imported module as an argument and returns 
-            a boolean indicating whether the module passes validation. If `None`, 
-            no validation is performed.
+            A callable that takes the imported module as an argument and returns a boolean indicating 
+            whether the module passes validation. If `None`, no validation is performed. This parameter 
+            is deprecated due to security concerns.
         :type validation: Callable[[ModuleType], bool] | None
-
-        :raises ValueError: 
-            If the method detects recursion within the same module, i.e., when 
-            the caller and current frames originate from the same file.
 
         :return: 
             The imported module, or `None` if the validation function is provided and fails.
         :rtype: ModuleType | None
+
+        :deprecated: 
+            Since 0.1.6, the method is vulnerable because the validation occurs after the module is loaded.
+            It will be removed in future versions. Use the `importspy` method with `SpyModel` instead.
         """
-        stack = inspect.stack()
-        current_frame : inspect.FrameInfo = stack[1]
-        caller_frame: inspect.FrameInfo = stack[-1]
+        warnings.warn(
+            "The `importspy` method with validation is deprecated as of version 0.1.6 due to a security vulnerability. "
+            "It will be removed in future versions.",
+            DeprecationWarning
+        )
+        info_module = self._spy_module()
+        module = module_utils.load_module(info_module)
+        return module if not validation else module if validation(module) else None
+    
+    def _spy_module(self) -> ModuleType | None:
+        caller_frame, current_frame = module_utils.inspect_module()
         if current_frame.filename == caller_frame.filename:
             raise ValueError(Errors.ANALYSIS_RECURSION_WARNING)
-        info_module = inspect.getmodule(caller_frame.frame)
-        spec = importlib.util.spec_from_file_location(info_module.__name__, info_module.__file__)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        sys.modules[module.__name__] = module
-        return module if not validation else module if validation(module) else None
+        info_module = module_utils.get_info_module(caller_frame)
+        return info_module
