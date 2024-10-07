@@ -10,26 +10,31 @@ logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
 logger.addHandler(logging.NullHandler())
 
 class Spy:
-
     """
     A class responsible for dynamic module importation and validation against specified models.
 
     The `Spy` class facilitates the import of modules at runtime, allowing for optional validation
     against `SpyModel` instances. It provides a mechanism to ensure that dynamically imported modules
     conform to expected structures or behaviors, enhancing security and reliability.
-
-    Attributes:
-        logger (logging.Logger): A logger instance for logging debug information and warnings.
     
     Methods:
+
         importspy(spymodel: SpyModel | None = None, 
                   validation: Callable[[ModuleType], bool] | None = None) -> ModuleType:
+
             Dynamically imports a module and validates it against a provided `SpyModel` or 
             a custom validation function.
-        
+
         _spy_module() -> ModuleType | None:
+        
             Inspects the calling module and returns information about it, raising an error
             if recursion is detected.
+
+    .. warning::
+
+        This class is designed to facilitate dynamic imports and should be used with caution.
+        Ensure that the modules being imported are trusted to avoid executing malicious code.
+        
     """
 
     def importspy(self,
