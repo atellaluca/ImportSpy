@@ -11,53 +11,59 @@ class ClassModel(BaseModel):
     """
     Model representing a class within a module.
 
+    This class serves as a data structure to encapsulate the information about a specific class,
+    including its name, methods, and superclasses.
+
     Attributes:
         name (Optional[str]): The name of the class. It can be `None` if the name is not available. Defaults to `None`.
         methods (Optional[List[str]]): A list of method names defined in the class. Defaults to an empty list.
         superclasses (Optional[List[str]]): A list of names of the superclasses from which this class inherits. Defaults to an empty list.
 
     Example:
-        class_model = ClassModel(
-            name="MyClass", 
-            methods=["method1", "method2"], 
-            superclasses=["BaseClass"]
-        )
+        >>> class_model = ClassModel(
+        ...     name="MyClass", 
+        ...     methods=["method1", "method2"], 
+        ...     superclasses=["BaseClass"]
+        ... )
     """
     name: Optional[str] = None
     methods: Optional[List[str]] = []
     superclasses: Optional[List[str]] = []
 
 
+
 class SpyModel(BaseModel):
     """
     Model representing metadata of a module, including information about its functions and classes.
 
+    This model encapsulates details about a Python module, including its name, version, and the 
+    functions and classes defined within it. It allows for structured representation of module metadata.
+
     Attributes:
-        name (Optional[str]): The name of the module. It can be `None` if the name is not available. Defaults to `None`.
+        filename (Optional[str]): The name of the module file. It can be `None` if the name is not available. Defaults to `None`.
         version (Optional[str]): The version of the module. It can be `None` if the version is not available. Defaults to `None`.
         functions (Optional[List[str]]): A list of function names defined in the module. Defaults to an empty list.
         classes (Optional[List[ClassModel]]): A list of classes defined in the module, represented by `ClassModel`. Defaults to an empty list.
         superclasses (Optional[List[str]]): A list of superclasses from which module-level classes inherit. Defaults to an empty list.
 
     Example:
-        spy_model = SpyModel(
-            name="MyModule",
-            version="1.0.0",
-            functions=["my_function"],
-            classes=[
-                ClassModel(name="MyClass", methods=["my_method"], superclasses=["BaseClass"])
-            ]
-        )
+        >>> spy_model = SpyModel(
+        ...     filename="MyModule.py",
+        ...     version="1.0.0",
+        ...     functions=["my_function"],
+        ...     classes=[
+        ...         ClassModel(name="MyClass", methods=["my_method"], superclasses=["BaseClass"])
+        ...     ]
+        ... )
 
     Validator:
-        deserialize_info_module:
-            Pre-validator method that extracts information from a `ModuleType` object and populates the fields of the `SpyModel`.
-            This includes extracting the module name, version, functions, and classes.
+        from_module:
+            Class method that extracts information from a `ModuleType` object and populates the fields of the `SpyModel`.
+            This includes extracting the module filename, version, functions, and classes.
     
     Args:
         info_module (ModuleType): The module from which to extract metadata.
     """
-
     filename: Optional[str] = None
     version: Optional[str] = None
     functions: Optional[List[str]] = []
@@ -79,3 +85,4 @@ class SpyModel(BaseModel):
             functions=functions,
             classes=classes
         )
+
