@@ -3,12 +3,16 @@ from typing import Callable
 from types import ModuleType
 from .errors import Errors
 from .models import SpyModel
-from .utils import module_utils
+from .utils import module_utils, model_utils
+import logging
 
+logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
+logger.addHandler(logging.NullHandler())
 
 class Spy:
 
-    def importspy(self, 
+    def importspy(self,
+                   spymodel: SpyModel | None = None, 
                    validation: Callable[[ModuleType], bool] | 
                    None = None) -> ModuleType:
         """
@@ -34,18 +38,29 @@ class Spy:
             Since 0.1.6, the method is vulnerable because the validation occurs after the module is loaded.
             It will be removed in future versions. Use the `importspy` method with `SpyModel` instead.
         """
-        warnings.warn(
-            "The `importspy` method with validation is deprecated as of version 0.1.6 due to a security vulnerability. "
-            "It will be removed in future versions.",
-            DeprecationWarning
-        )
         info_module = self._spy_module()
-        module = module_utils.load_module(info_module)
-        return module if not validation else module if validation(module) else None
+        logger.debug(f"info_module: {info_module}")
+        if spymodel:
+            logger.debug(f"SpyModel detected: {spymodel}")
+            spy_module = SpyModel.from_module(info_module)
+            logger.debug(f"Spy module: {spy_module}")
+            return module_utils.load_module(info_module) if model_utils.is_subset(spymodel(), spy_module) else None
+        elif validation:
+            warnings.warn(
+                "The `importspy` method with validation is deprecated as of version 0.1.6 due to a security vulnerability. "
+                "It will be removed in future versions. Please use the `importspy` method with SpyModel instead.",
+                DeprecationWarning
+            )
+            module = module_utils.load_module(info_module)
+            return module if validation(module) else None
+        return module_utils.load_module(info_module)
+        
+        
     
     def _spy_module(self) -> ModuleType | None:
-        caller_frame, current_frame = module_utils.inspect_module()
+        current_frame, caller_frame = module_utils.inspect_module()
         if current_frame.filename == caller_frame.filename:
             raise ValueError(Errors.ANALYSIS_RECURSION_WARNING)
         info_module = module_utils.get_info_module(caller_frame)
+        logger.debug(f"Spy info_module: {info_module}")
         return info_module
