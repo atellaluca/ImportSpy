@@ -15,8 +15,8 @@ Code Example
 Explanation
 -----------
 
-1. The `condition` function uses `inspect.getmembers` to check for classes in the imported module that extend the `Plugin` class. This ensures that only valid plugins are loaded.
-2. The `Spy().importspy()` method is used to dynamically import the calling module and validate it using the `condition` function, allowing the framework to reactively integrate the plugin while maintaining control over its structure.
+1. A `PluginSpy` class is defined, inheriting from `SpyModel`. It contains a list of classes, ensuring that at least one class is a subclass of `Plugin`.
+2. The `Spy().importspy()` method is called with `spymodel=PluginSpy`, dynamically importing the calling module and validating it against the specified `PluginSpy` model. This integration allows the framework to reactively manage the plugin while maintaining control over its structure.
 3. ImportSpy helps in **isolating plugins**, preventing them from interfering with each other by managing imports in separate contexts, which reduces the risk of dependency conflicts.
 
 Requirements
