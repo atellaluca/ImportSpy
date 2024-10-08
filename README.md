@@ -103,6 +103,7 @@ This example demonstrates how to use ImportSpy to dynamically import and validat
 1. **Setting up the Spy in your main project**:
 
 ```python
+#main_project.py
 from importspy import Spy
 from importspy.models import SpyModel, ClassModel
 from types import ModuleType
@@ -111,22 +112,56 @@ from plugin_interface import Plugin
 from typing import List
 
 class PluginSpy(SpyModel):
-    classes: List[ClassModel] = [ClassModel(superclasses=["Plugin"])]
+    # This declaration defines the structure of the Python module to be matched, 
+    # specifying the classes and their associated methods for the PluginSpy.
+    # It helps in organizing the code and ensuring that the necessary 
+    # functionalities are implemented correctly within the module.
+    classes: List[ClassModel] = [
+    ClassModel(
+        methods=["add_extension", "remove_extension", "http_get_request"],
+            superclasses=["Plugin"]
+        ),
+        ClassModel(
+            name="Foo",
+            methods=["get_bar"]
+        )]
+    filename: str = "extension.py"
 
 # Import the plugin using Spy with the validation function
 imported_module = Spy().importspy(spymodel=PluginSpy)
 
-print(imported_module)
+imported_module.Foo().get_bar()
 ```
 
 2. **Creating a plugin**:
 
 ```python
+#plugin.py
+import main_project
 from your_package import Plugin
 
-class MyPlugin(Plugin):
+class Extension(Plugin):
+    
     def add_extension(self):
-        print("The extension was added")
+        print("Extension has added")
+    
+    def remove_extension(self):
+        print("Extension has removed")
+    
+    def http_get_request(self):
+        print("done")
+
+class Foo:
+
+    def get_bar(self):
+        print("Foobar")
+```
+3. **Run**:
+
+```bash
+python3 plugin.py
+
+#Foobar
 ```
 
 ## Handling Dynamic Imports and Recursion
