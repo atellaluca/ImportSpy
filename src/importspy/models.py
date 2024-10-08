@@ -71,6 +71,7 @@ class SpyModel(BaseModel):
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
+        info_module = module_utils.load_module(info_module)
         logger.debug(f"Create SpyModel from info_module: {ModuleType}")
         filename = "/".join(info_module.__file__.split('/')[-1:])
         version = module_utils.extract_version(info_module)
@@ -79,6 +80,9 @@ class SpyModel(BaseModel):
             ClassModel(name=name, methods=methods, superclasses=superclasses)
             for name, methods, superclasses in module_utils.extract_classes(info_module)
         ]
+        module_utils.unload_module(info_module)
+        logger.debug("Unload module")
+        logger.debug(f"filename: {filename}, version: {version}, function: {functions}, classes: {classes}")
         return cls(
             filename=filename,
             version=version,
