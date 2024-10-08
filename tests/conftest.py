@@ -1,12 +1,13 @@
 import pytest
 import inspect
 import importlib.util
+from importspy.utils import module_utils
 from types import ModuleType
 from importspy import Spy
-from example.plugin_interface import Plugin
 import logging
+from example.plugin_interface import Plugin
 
-logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
+logger = logging.getLogger("/".join(__file__.split('/')[-1:]))
 logger.addHandler(logging.NullHandler())
 
 @pytest.fixture
@@ -22,7 +23,6 @@ def mock_import_functions(monkeypatch):
             inspect.FrameInfo(None, 'package.py', 1, None, None, None),
             inspect.FrameInfo(None, 's.py', 1, None, None, None),
             inspect.FrameInfo(None, 'extensions.py', 1, None, None, None),  
-            
         ]
     
     monkeypatch.setattr(inspect, 'stack', mock_stack)
@@ -91,3 +91,13 @@ def mock_import_no_plugin(monkeypatch):
         return mock_module
 
     monkeypatch.setattr(importlib.util, 'module_from_spec', mock_module_from_spec)
+
+    def mock_load_module(info_module):
+        logger.debug(f"load module: {info_module}")
+    
+    monkeypatch.setattr(module_utils, 'load_module', mock_load_module)
+
+    def mock_unload_module(info_module):
+        logger.debug(f"unload module: {info_module}")
+    
+    monkeypatch.setattr(module_utils, 'unload_module', mock_unload_module)
