@@ -103,6 +103,7 @@ def load_module(info_module: ModuleType) -> ModuleType | None:
         The reloaded module if the loading is successful, or None if it fails.
     :rtype: ModuleType | None
     """
+    logger.debug("Run load_module")
     spec = importlib.util.spec_from_file_location(info_module.__name__, info_module.__file__)
     if spec and spec.loader:
         module = importlib.util.module_from_spec(spec)
@@ -110,6 +111,19 @@ def load_module(info_module: ModuleType) -> ModuleType | None:
         sys.modules[module.__name__] = module
         return module
     return None
+
+def unload_module(module: ModuleType):
+    logger.debug("Run unload_module")
+    module_name = module.__name__
+    if module_name in sys.modules:
+        try:
+            del sys.modules[module_name]
+            if module_name in globals():
+                globals().pop(module_name, None)
+        except Exception as e:
+            logger.error(f"Error while unloading the module {module_name}: {e}")
+    else:
+        logger.warning(f"The module {module_name} is not loaded and cannot be unloaded.")
 
 def extract_version(info_module: ModuleType) -> str | None:
     """
