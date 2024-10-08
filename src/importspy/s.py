@@ -3,7 +3,7 @@ from typing import Callable
 from types import ModuleType
 from .errors import Errors
 from .models import SpyModel
-from .utils import module_utils, model_utils
+from .utils import spy_model_utils, spy_module_utils
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -78,16 +78,16 @@ class Spy:
             logger.debug(f"SpyModel detected: {spymodel}")
             spy_module = SpyModel.from_module(info_module)
             logger.debug(f"Spy module: {spy_module}")
-            return module_utils.load_module(info_module) if model_utils.is_subset(spymodel(), spy_module) else None
+            return spy_module_utils.load_module(info_module) if spy_model_utils.is_subset(spymodel(), spy_module) else None
         elif validation:
             warnings.warn(
                 "The `importspy` method with validation is deprecated as of version 0.1.6 due to a security vulnerability. "
                 "It will be removed in future versions. Please use the `importspy` method with SpyModel instead.",
                 DeprecationWarning
             )
-            module = module_utils.load_module(info_module)
+            module = spy_module_utils.load_module(info_module)
             return module if validation(module) else None
-        return module_utils.load_module(info_module)
+        return spy_module_utils.load_module(info_module)
         
         
     
@@ -107,9 +107,9 @@ class Spy:
             The module object that contains information about the caller module.
         :rtype: ModuleType | None
         """
-        current_frame, caller_frame = module_utils.inspect_module()
+        current_frame, caller_frame = spy_module_utils.inspect_module()
         if current_frame.filename == caller_frame.filename:
             raise ValueError(Errors.ANALYSIS_RECURSION_WARNING)
-        info_module = module_utils.get_info_module(caller_frame)
+        info_module = spy_module_utils.get_info_module(caller_frame)
         logger.debug(f"Spy info_module: {info_module}")
         return info_module

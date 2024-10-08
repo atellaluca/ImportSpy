@@ -1,5 +1,6 @@
 from importspy import Spy
 from importspy.models import SpyModel, ClassModel
+from importspy.utils import spy_model_utils
 from typing import List
 
 class PluginSpy(SpyModel):
@@ -14,4 +15,6 @@ class PluginSpy(SpyModel):
         )]
     filename: str = "extension.py"
 
-print(Spy().importspy(spymodel=PluginSpy))
+caller_module = Spy().importspy(spymodel=PluginSpy)
+
+caller_module.Foo().get_bar()

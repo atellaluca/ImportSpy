@@ -29,8 +29,8 @@ class TestSpy:
             module.__file__ = "extension.py"
             return module
 
-        monkeypatch.setattr('importspy.models.module_utils.load_module', mock_load_module)
-        monkeypatch.setattr('importspy.models.module_utils.unload_module', lambda module: logger.debug("Mock unload module"))
+        monkeypatch.setattr('importspy.utils.spy_module_utils.load_module', mock_load_module)
+        monkeypatch.setattr('importspy.utils.spy_module_utils.unload_module', lambda module: logger.debug("Mock unload module"))
 
         imported_module = spy_instance.importspy(spymodel=PluginSpy)
         assert imported_module.__name__ == 'mock_module'

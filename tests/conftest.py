@@ -1,7 +1,7 @@
 import pytest
 import inspect
 import importlib.util
-from importspy.utils import module_utils
+from importspy.utils import spy_module_utils
 from types import ModuleType
 from importspy import Spy
 import logging
@@ -95,9 +95,9 @@ def mock_import_no_plugin(monkeypatch):
     def mock_load_module(info_module):
         logger.debug(f"load module: {info_module}")
     
-    monkeypatch.setattr(module_utils, 'load_module', mock_load_module)
+    monkeypatch.setattr(spy_module_utils, 'load_module', mock_load_module)
 
     def mock_unload_module(info_module):
         logger.debug(f"unload module: {info_module}")
     
-    monkeypatch.setattr(module_utils, 'unload_module', mock_unload_module)
+    monkeypatch.setattr(spy_module_utils, 'unload_module', mock_unload_module)
