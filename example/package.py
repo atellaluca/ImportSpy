@@ -1,12 +1,20 @@
 from importspy import Spy
-from types import ModuleType
-import inspect
-from plugin_interface import Plugin
+from importspy.models import SpyModel, ClassModel
+from importspy.utils import spy_model_utils
+from typing import List
 
-def condition(module: ModuleType) -> bool:
-    for class_name, class_obj in inspect.getmembers(module, inspect.isclass):
-        if issubclass(class_obj, Plugin) and class_obj is not Plugin:
-            return True
-    return False
+class PluginSpy(SpyModel):
+    classes: List[ClassModel] = [
+        ClassModel(
+            methods=["add_extension", "remove_extension", "http_get_request"],
+            superclasses=["Plugin"]
+        ),
+        ClassModel(
+            name="Foo",
+            methods=["get_bar"]
+        )]
+    filename: str = "extension.py"
 
-print(Spy().importspy(validation=condition))
+caller_module = Spy().importspy(spymodel=PluginSpy)
+
+caller_module.Foo().get_bar()

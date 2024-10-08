@@ -64,16 +64,17 @@ Then, start using it by importing and configuring the `Spy` class:
 
 ```python
 from importspy import Spy
-import inspect
+from importspy.models import SpyModel, ClassModel
 from types import ModuleType
+import inspect
+from plugin_interface import Plugin
+from typing import List
+
+class PluginSpy(SpyModel):
+    classes: List[ClassModel] = [ClassModel(name="RequiredClass", methods=["required_metod1", "required_method_2"])]
 
 # Example validation function to ensure the module has a required attribute
-module = Spy().importspy(validation=lambda mod: hasattr(mod, 'required_attribute'))
-
-if module:
-    print(f"Module {module.__name__} imported successfully!")
-else:
-    print("Module import failed validation.")
+module = Spy().importspy(spymodel=PluginSpy)
 ```
 
 ## Documentation
@@ -102,33 +103,65 @@ This example demonstrates how to use ImportSpy to dynamically import and validat
 1. **Setting up the Spy in your main project**:
 
 ```python
+#main_project.py
 from importspy import Spy
-import inspect
+from importspy.models import SpyModel, ClassModel
 from types import ModuleType
+import inspect
+from plugin_interface import Plugin
+from typing import List
 
-class Plugin:
-    pass
-
-def condition(module: ModuleType) -> bool:
-    for class_name, class_obj in inspect.getmembers(module, inspect.isclass):
-        if issubclass(class_obj, Plugin) and class_obj is not Plugin:
-            return True
-    return False
+class PluginSpy(SpyModel):
+    # This declaration defines the structure of the Python module to be matched, 
+    # specifying the classes and their associated methods for the PluginSpy.
+    # It helps in organizing the code and ensuring that the necessary 
+    # functionalities are implemented correctly within the module.
+    classes: List[ClassModel] = [
+    ClassModel(
+        methods=["add_extension", "remove_extension", "http_get_request"],
+            superclasses=["Plugin"]
+        ),
+        ClassModel(
+            name="Foo",
+            methods=["get_bar"]
+        )]
+    filename: str = "extension.py"
 
 # Import the plugin using Spy with the validation function
-imported_module = Spy().importspy(validation=condition)
+imported_module = Spy().importspy(spymodel=PluginSpy)
 
-print(imported_module)
+imported_module.Foo().get_bar()
 ```
 
 2. **Creating a plugin**:
 
 ```python
+#plugin.py
+import main_project
 from your_package import Plugin
 
-class MyPlugin(Plugin):
+class Extension(Plugin):
+    
     def add_extension(self):
-        print("The extension was added")
+        print("Extension has added")
+    
+    def remove_extension(self):
+        print("Extension has removed")
+    
+    def http_get_request(self):
+        print("done")
+
+class Foo:
+
+    def get_bar(self):
+        print("Foobar")
+```
+3. **Run**:
+
+```bash
+python3 plugin.py
+
+#Foobar
 ```
 
 ## Handling Dynamic Imports and Recursion
