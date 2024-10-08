@@ -8,7 +8,7 @@ from importspy.models import SpyModel
 from typing import List
 import logging
 
-logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
+logger = logging.getLogger("/".join(__file__.split('/')[-1:]))
 logger.addHandler(logging.NullHandler())
 
 class PluginSpy(SpyModel):
@@ -22,7 +22,16 @@ def condition(module: ModuleType):
 
 class TestSpy:
 
-    def test_importspy_with_spymodel_plugin_validation(self, spy_instance, mock_import_functions):
+    def test_importspy_with_spymodel_plugin_validation(self, spy_instance, monkeypatch):
+
+        def mock_load_module(info_module):
+            module = ModuleType("mock_module")
+            module.__file__ = "extension.py"
+            return module
+
+        monkeypatch.setattr('importspy.models.module_utils.load_module', mock_load_module)
+        monkeypatch.setattr('importspy.models.module_utils.unload_module', lambda module: logger.debug("Mock unload module"))
+
         imported_module = spy_instance.importspy(spymodel=PluginSpy)
         assert imported_module.__name__ == 'mock_module'
     
