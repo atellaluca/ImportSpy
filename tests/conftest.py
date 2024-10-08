@@ -20,8 +20,8 @@ def mock_import_functions(monkeypatch):
     def mock_stack():
         logger.info("Mocking stack...")
         return [
-            inspect.FrameInfo(None, 'package.py', 1, None, None, None),
             inspect.FrameInfo(None, 's.py', 1, None, None, None),
+            inspect.FrameInfo(None, 'package.py', 1, None, None, None),
             inspect.FrameInfo(None, 'extensions.py', 1, None, None, None),  
         ]
     
@@ -61,8 +61,8 @@ def mock_import_no_plugin(monkeypatch):
     logger.info("Mocking for no plugin...")
     def mock_stack():
         return [
-            inspect.FrameInfo(None, 'package.py', 1, None, None, None),
             inspect.FrameInfo(None, 's.py', 1, None, None, None),
+            inspect.FrameInfo(None, 'package.py', 1, None, None, None),
             inspect.FrameInfo(None, 'extensions.py', 1, None, None, None),  
         ]
     
