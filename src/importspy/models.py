@@ -133,4 +133,3 @@ class SpyModel(BaseModel):
             classes=classes
         )
 
-

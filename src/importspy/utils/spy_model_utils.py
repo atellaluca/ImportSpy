@@ -13,31 +13,25 @@ def is_subset(spy_model_1: SpyModel, spy_model_2: SpyModel) -> bool:
     module complies with the expected structure defined by the developer's code. If any field 
     in `spy_model_1` is empty (such as functions, classes, etc.), it is ignored during the validation.
 
-    ## Parameters:
-    - **spy_model_1** (`SpyModel`): The first `SpyModel` that contains the structure and rules 
-      to be validated against another module.
+    Parameters:
+    -----------
+
+    - **spy_model_1** (`SpyModel`): The first `SpyModel` that contains the structure and rules to be validated against another module.
     - **spy_model_2** (`SpyModel`): The second `SpyModel` that represents the module being validated.
 
-    ## Returns:
-    - **bool**: Returns `True` if all non-empty attributes (functions, classes, methods, superclasses, 
-      filename, and version) in `spy_model_1` are present in `spy_model_2`. Otherwise, it returns `False`.
+    Returns:
+    --------
 
-    ## How it works:
-    - **Filename validation**: If a filename is provided in `spy_model_1`, it checks whether the filename 
-      in `spy_model_2` matches.
-    - **Version validation**: If a version is specified in `spy_model_1`, it ensures that `spy_model_2` 
-      has the same version.
-    - **Functions and classes validation**: It checks whether all functions and classes defined in 
-      `spy_model_1` are present in `spy_model_2`, along with their respective methods and superclasses.
+    - **bool**: Returns `True` if all non-empty attributes (functions, classes, methods, superclasses, filename, and version) in `spy_model_1` are present in `spy_model_2`. Otherwise, it returns `False`.
 
-    ### Example:
-    ```python
-    if is_subset(spy_model_1, spy_model_2):
-        print("The importing module is compliant with the expected structure.")
-    else:
-        print("The importing module does not comply with the expected structure.")
-    ```
 
+    How it works:
+    -------------
+
+    - **Filename validation**: If a filename is provided in `spy_model_1`, it checks whether the filename in `spy_model_2` matches.
+    - **Version validation**: If a version is specified in `spy_model_1`, it ensures that `spy_model_2` has the same version.
+    - **Functions and classes validation**: It checks whether all functions and classes defined in `spy_model_1` are present in `spy_model_2`, along with their respective methods and superclasses.
+    
     This function helps ensure that any importing module respects the rules set by the developer, 
     reducing the risk of improper usage and integration issues.
     """
