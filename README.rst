@@ -2,6 +2,8 @@ ImportSpy
 =========
 
 .. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
+   :width: 830px
+   :height: 415px
 
 .. image:: https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/issues
