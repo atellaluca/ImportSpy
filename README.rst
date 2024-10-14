@@ -1,11 +1,3 @@
-ImportSpy
-=========
-
-.. raw:: html
-
-   <img src="https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png" width="830" height="415" alt="ImportSpy Image">
-   <br>
-
 .. image:: https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/issues
 
@@ -17,7 +9,14 @@ ImportSpy
 
 .. image:: https://img.shields.io/github/license/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/blob/master/LICENSE
+   
+ImportSpy
+=========
 
+.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
+   :width: 830
+   :height: 415
+   :alt: ImportSpy Image
 
 Proactive Python Import Control Library
 =======================================
