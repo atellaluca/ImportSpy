@@ -4,7 +4,7 @@ version = "0.1.7"
 description = "ImportSpy is a lightweight Python library that enables proactive control over how your code is used when imported by other modules or packages. It allows developers to define rules that importing modules must follow, ensuring proper use and preventing misuse or errors."
 license = "MIT"
 authors = ["Luca Atella <atellaluca@outlook.it>"]
-readme = "README.md"
+readme = "README.rst"
 packages = [{include = "importspy", from = "src"}]
 
 [tool.poetry.dependencies]
