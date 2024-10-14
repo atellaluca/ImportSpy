@@ -11,66 +11,52 @@ logger.addHandler(logging.NullHandler())
 
 class Spy:
     """
-    A class responsible for dynamic module importation and validation against specified models.
+    Spy is a class responsible for dynamic module importation and validation, allowing you to ensure that
+    imported modules follow expected rules or structures defined by `SpyModel` or custom validation logic.
 
-    The `Spy` class facilitates the import of modules at runtime, allowing for optional validation
-    against `SpyModel` instances. It provides a mechanism to ensure that dynamically imported modules
-    conform to expected structures or behaviors, enhancing security and reliability.
+    This class provides a flexible way to dynamically load Python modules at runtime, with optional validation
+    steps that can improve security and enforce standards across your project.
+
+    ## Key Methods:
     
-    Methods:
-
-        importspy(spymodel: SpyModel | None = None, 
-                  validation: Callable[[ModuleType], bool] | None = None) -> ModuleType:
-
-            Dynamically imports a module and validates it against a provided `SpyModel` or 
-            a custom validation function.
-
-        _spy_module() -> ModuleType | None:
-        
-            Inspects the calling module and returns information about it, raising an error
-            if recursion is detected.
+    - **importspy**: Dynamically imports a module and validates it using `SpyModel` or a custom validation function.
+    - **_spy_module**: Retrieves information about the calling module, with safeguards against recursion.
 
     .. warning::
-
-        This class is designed to facilitate dynamic imports and should be used with caution.
-        Ensure that the modules being imported are trusted to avoid executing malicious code.
-        
+        Use this class with caution when dynamically importing code, especially from untrusted sources. Always
+        ensure that imported modules are secure to prevent the execution of malicious code.
     """
 
-    def importspy(self,
-                   spymodel: SpyModel | None = None, 
-                   validation: Callable[[ModuleType], bool] | 
-                   None = None) -> ModuleType:
+    def importspy(self, spymodel: SpyModel | None = None, validation: Callable[[ModuleType], bool] | None = None) -> ModuleType:
         """
-        Dynamically imports the module that invoked this function, with an optional validation step.
+        Dynamically imports the module that called this function and validates it against an optional `SpyModel` or
+        custom validation logic.
 
-        This method allows for the import of a module and its validation against a specified `SpyModel`.
-        Note that the validation process is only applicable if the `validation` parameter is provided.
+        This method allows you to import a module at runtime and check if it follows predefined rules. The rules
+        can be specified using a `SpyModel` or, for backward compatibility, a validation function.
 
-        .. warning::
-            The `validation` parameter is deprecated as of version 0.1.6 due to a security vulnerability 
-            where the module is imported before being validated, potentially allowing malicious code to execute 
-            prior to validation.
+        ### Parameters:
 
-        :param spymodel: 
-            An optional instance of `SpyModel` used to validate the imported module. 
-            If provided, the module will be loaded only if it is a subset of the `spymodel`.
-        :type spymodel: SpyModel | None
+        - **spymodel** (`SpyModel | None`, optional): Defines the rules that the imported module should follow. 
+          If provided, the module is loaded only if it matches the `SpyModel`.
+        - **validation** (`Callable[[ModuleType], bool] | None`, optional): A custom validation function that takes
+          the imported module and returns `True` if it passes validation. This parameter is deprecated and will be
+          removed in future versions.
 
-        :param validation: 
-            A callable that takes the imported module as an argument and returns a boolean indicating 
-            whether the module passes validation. If `None`, no validation is performed. 
-            This parameter is deprecated and will be removed in future versions.
-        :type validation: Callable[[ModuleType], bool] | None
+        ### Returns:
+        - **ModuleType**: The imported module if it passes the validation. Returns `None` if validation fails or no
+          validation is applied.
 
-        :return: 
-            The imported module if it passes validation, or `None` if validation fails or no 
-            `spymodel` is provided.
-        :rtype: ModuleType | None
+        ### Warning:
+        The `validation` parameter is deprecated as of version 0.1.6 due to a security concern. In future versions, 
+        only `SpyModel` will be supported for validation.
 
-        :deprecated: 
-            The `validation` parameter is deprecated due to security concerns. 
-            It will be removed in future versions. Use the `importspy` method with `SpyModel` instead.
+        ### Example:
+
+        ```python
+        spy = Spy()
+        module = spy.importspy(spymodel=my_spy_model)
+        ```
         """
         info_module = self._spy_module()
         logger.debug(f"info_module: {info_module}")
@@ -88,24 +74,21 @@ class Spy:
             module = spy_module_utils.load_module(info_module)
             return module if validation(module) else None
         return spy_module_utils.load_module(info_module)
-        
-        
-    
+
     def _spy_module(self) -> ModuleType | None:
         """
-        Inspects the calling module and retrieves information about it.
+        Retrieves information about the calling module that invoked this method.
 
-        This method analyzes the current execution context to identify the module that called
-        the `importspy` method. It raises an error if recursion is detected, preventing 
-        unintended behavior or infinite loops.
+        This method inspects the calling context to identify the module from which the `importspy` method
+        was invoked. It also prevents recursion by ensuring that the current module is not the same as the 
+        calling module, which would lead to unintended behavior.
 
-        :raises ValueError: 
-            If recursion is detected, indicating that the current module and the caller module 
-            are the same, which is not permitted.
+        ### Returns:
+        - **ModuleType | None**: The module object representing the caller, or `None` if an error occurs.
 
-        :return: 
-            The module object that contains information about the caller module.
-        :rtype: ModuleType | None
+        ### Raises:
+        - **ValueError**: Raised if recursion is detected, meaning the current module and the calling module
+          are the same.
         """
         current_frame, caller_frame = spy_module_utils.inspect_module()
         if current_frame.filename == caller_frame.filename:

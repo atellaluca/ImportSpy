@@ -9,60 +9,80 @@ logger.addHandler(logging.NullHandler())
 
 class ClassModel(BaseModel):
     """
-    Model representing a class within a module.
+    A data model that defines the structure of a class within a Python module, allowing the developer to 
+    proactively specify the expected structure of the class for external modules that import their code.
 
-    This class serves as a data structure to encapsulate the information about a specific class,
-    including its name, methods, and superclasses.
+    `ClassModel` is part of the **proactive programming** approach enabled by `ImportSpy`, where developers 
+    define in advance how imported modules should be structured, ensuring proper integration and usage.
 
-    Attributes:
-        name (Optional[str]): The name of the class. It can be `None` if the name is not available. Defaults to `None`.
-        methods (Optional[List[str]]): A list of method names defined in the class. Defaults to an empty list.
-        superclasses (Optional[List[str]]): A list of names of the superclasses from which this class inherits. Defaults to an empty list.
+    ## Attributes:
+    - **name** (`Optional[str]`): The name of the class. This can be `None` if the class name is unavailable. Defaults to `None`.
+    - **methods** (`Optional[List[str]]`): A list of method names that are expected to be present in the class. Defaults to an empty list.
+    - **superclasses** (`Optional[List[str]]`): A list of names of the superclasses from which this class inherits. Defaults to an empty list.
 
-    Example:
-        >>> class_model = ClassModel(
-        ...     name="MyClass", 
-        ...     methods=["method1", "method2"], 
-        ...     superclasses=["BaseClass"]
-        ... )
+    ## Example:
+    ```python
+    class_model = ClassModel(
+        name="MyClass",
+        methods=["method1", "method2"],
+        superclasses=["BaseClass"]
+    )
+    ```
+    This defines a `ClassModel` where a class named `MyClass` is expected to have two methods (`method1`, `method2`) 
+    and inherit from `BaseClass`. External modules importing your code can then be validated to follow this structure.
     """
     name: Optional[str] = None
     methods: Optional[List[str]] = []
     superclasses: Optional[List[str]] = []
 
 
-
 class SpyModel(BaseModel):
     """
-    Model representing metadata of a module, including information about its functions and classes.
+    A model that defines the expected structure of a Python module, allowing developers to declare in advance 
+    how external modules that import their code should be organized, promoting **proactive programming**.
 
-    This model encapsulates details about a Python module, including its name, version, and the 
-    functions and classes defined within it. It allows for structured representation of module metadata.
+    `SpyModel` allows you to describe the expected metadata of a module, such as its functions, classes, and version, 
+    ensuring that external modules adhere to the correct structure and usage of your code.
 
-    Attributes:
-        filename (Optional[str]): The name of the module file. It can be `None` if the name is not available. Defaults to `None`.
-        version (Optional[str]): The version of the module. It can be `None` if the version is not available. Defaults to `None`.
-        functions (Optional[List[str]]): A list of function names defined in the module. Defaults to an empty list.
-        classes (Optional[List[ClassModel]]): A list of classes defined in the module, represented by `ClassModel`. Defaults to an empty list.
-        superclasses (Optional[List[str]]): A list of superclasses from which module-level classes inherit. Defaults to an empty list.
+    ## Attributes:
+    - **filename** (`Optional[str]`): The name of the module file. If the name is unavailable, it can be `None`. Defaults to `None`.
+    - **version** (`Optional[str]`): The expected version of the module. Defaults to `None` if the version is not available.
+    - **functions** (`Optional[List[str]]`): A list of function names that are expected to be defined within the module. Defaults to an empty list.
+    - **classes** (`Optional[List[ClassModel]]`): A list of class definitions within the module, represented by `ClassModel`. Defaults to an empty list.
 
-    Example:
-        >>> spy_model = SpyModel(
-        ...     filename="MyModule.py",
-        ...     version="1.0.0",
-        ...     functions=["my_function"],
-        ...     classes=[
-        ...         ClassModel(name="MyClass", methods=["my_method"], superclasses=["BaseClass"])
-        ...     ]
-        ... )
+    ## Example:
+    ```python
+    spy_model = SpyModel(
+        filename="MyModule.py",
+        version="1.0.0",
+        functions=["my_function"],
+        classes=[
+            ClassModel(name="MyClass", methods=["my_method"], superclasses=["BaseClass"])
+        ]
+    )
+    ```
+    This defines a `SpyModel` for a module called `MyModule.py`, version 1.0.0, that is expected to include a function 
+    `my_function` and a class `MyClass` with a method `my_method`, inheriting from `BaseClass`. This model can be used to 
+    validate external modules importing your code, ensuring that they follow this structure.
 
-    Validator:
-        from_module:
-            Class method that extracts information from a `ModuleType` object and populates the fields of the `SpyModel`.
-            This includes extracting the module filename, version, functions, and classes.
-    
-    Args:
-        info_module (ModuleType): The module from which to extract metadata.
+    ## Class Method:
+    ### from_module(info_module: ModuleType) -> SpyModel:
+    This method extracts metadata from an imported module and populates a `SpyModel` instance with the expected structure, 
+    such as the module's filename, version, functions, and classes.
+
+    - **Args**:
+        - `info_module` (`ModuleType`): The module from which to extract the metadata.
+
+    - **Returns**:
+        - `SpyModel`: A `SpyModel` object that represents the structure and metadata of the given module, ready to be used 
+          for validation.
+
+    ## Example:
+    ```python
+    spy_model = SpyModel.from_module(my_module)
+    ```
+    This will extract the necessary metadata from `my_module` and create a `SpyModel` instance that describes the module's 
+    structure, which can then be compared to the expected structure defined by the developer.
     """
     filename: Optional[str] = None
     version: Optional[str] = None
@@ -71,6 +91,29 @@ class SpyModel(BaseModel):
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
+        """
+        Dynamically extracts metadata from a Python module and creates a `SpyModel` that represents 
+        its structure.
+
+        This method allows developers to proactively define the structure of modules that import their 
+        code by extracting information like filename, version, functions, and classes, and populating a 
+        `SpyModel` instance. This ensures that external modules adhere to the expected structure when they 
+        interact with the developer's code.
+
+        ## Parameters:
+        - **info_module** (`ModuleType`): The Python module from which to extract the metadata.
+
+        ## Returns:
+        - **SpyModel**: A `SpyModel` populated with metadata such as the module's filename, version, functions, 
+          and classes, based on the given module.
+
+        ## Example:
+        ```python
+        spy_model = SpyModel.from_module(my_module)
+        ```
+        This extracts the metadata from `my_module` and creates a `SpyModel` instance that reflects the module's 
+        structure, which can then be used for validation against a predefined model.
+        """
         info_module = spy_module_utils.load_module(info_module)
         logger.debug(f"Create SpyModel from info_module: {ModuleType}")
         filename = "/".join(info_module.__file__.split('/')[-1:])
@@ -82,11 +125,12 @@ class SpyModel(BaseModel):
         ]
         spy_module_utils.unload_module(info_module)
         logger.debug("Unload module")
-        logger.debug(f"filename: {filename}, version: {version}, function: {functions}, classes: {classes}")
+        logger.debug(f"filename: {filename}, version: {version}, functions: {functions}, classes: {classes}")
         return cls(
             filename=filename,
             version=version,
             functions=functions,
             classes=classes
         )
+
 
