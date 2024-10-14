@@ -15,7 +15,6 @@ ImportSpy
 
 .. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
    :width: 830
-   :height: 415
    :alt: ImportSpy Image
 
 Proactive Python Import Control Library
