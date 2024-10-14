@@ -1,29 +1,20 @@
 ImportSpy
 =========
 
-.. raw:: html
+.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
 
-   <div style="text-align: left;margin-bottom: 40px">
-        <img src="https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png" 
-                    alt="ImportSpy Image">
-       <div style="margin-top: 20px;">
-           <a href="https://pepy.tech/project/importspy">
-               <img src="https://static.pepy.tech/badge/importspy" alt="Downloads">
-           </a>
-           <a href="https://github.com/atellaluca/ImportSpy/stargazers">
-               <img src="https://img.shields.io/github/stars/atellaluca/ImportSpy?style=flat-square" alt="GitHub stars">
-           </a>
-           <a href="https://github.com/atellaluca/ImportSpy/issues">
-               <img src="https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square" alt="GitHub issues">
-           </a>
-           <a href="https://github.com/atellaluca/ImportSpy/network">
-               <img src="https://img.shields.io/github/forks/atellaluca/ImportSpy?style=flat-square" alt="GitHub forks">
-           </a>
-           <a href="https://github.com/atellaluca/ImportSpy/blob/master/LICENSE">
-               <img src="https://img.shields.io/github/license/atellaluca/ImportSpy?style=flat-square" alt="GitHub license">
-           </a>
-       </div>
-   </div>
+.. image:: https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square
+   :target: https://github.com/atellaluca/ImportSpy/issues
+
+.. image:: https://img.shields.io/github/stars/atellaluca/ImportSpy?style=flat-square
+   :target: https://github.com/atellaluca/ImportSpy/stargazers
+
+.. image:: https://img.shields.io/github/forks/atellaluca/ImportSpy?style=flat-square
+   :target: https://github.com/atellaluca/ImportSpy/network
+
+.. image:: https://img.shields.io/github/license/atellaluca/ImportSpy?style=flat-square
+   :target: https://github.com/atellaluca/ImportSpy/blob/master/LICENSE
+
 
 Proactive Python Import Control Library
 =======================================
