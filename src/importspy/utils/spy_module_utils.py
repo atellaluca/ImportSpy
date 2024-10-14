@@ -7,38 +7,6 @@ from collections import namedtuple
 import importlib.metadata
 import logging
 
-"""
-Module utilities for dynamic module inspection and loading.
-
-This module provides a set of functions to inspect and dynamically load Python modules,
-extracting relevant information such as functions, classes, and their respective superclasses.
-It facilitates the analysis of modules at runtime, allowing for the retrieval of metadata
-and re-importation of modified modules without restarting the interpreter.
-
-Functions:
-    inspect_module() -> tuple:
-        Inspects the stack to find the calling module and re-import it dynamically.
-        
-    get_info_module(caller_frame: inspect.FrameInfo) -> ModuleType | None:
-        Retrieves module information from a given caller frame.
-        
-    load_module(info_module: ModuleType) -> ModuleType | None:
-        Loads the module dynamically from its file location.
-        
-    extract_version(info_module: ModuleType) -> str | None:
-        Extracts the version of the specified module, if available.
-        
-    extract_functions(info_module: ModuleType) -> List[str] | None:
-        Extracts a list of function names defined in the specified module.
-        
-    extract_classes(info_module: ModuleType) -> List[ClassInfo]:
-        Extracts class information (name, methods, superclasses) from the specified module.
-        
-    extract_superclasses(module: ModuleType) -> List[str]:
-        Extracts a list of all unique superclasses defined in the specified module.
-"""
-
-
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
@@ -46,19 +14,23 @@ ClassInfo = namedtuple('ClassInfo', ['name', 'methods', 'superclasses'])
 
 def inspect_module() -> tuple:
     """
-    Inspect the stack to find the calling module and re-import it dynamically.
+    Proactively inspect the current stack to identify the module that called this function and 
+    attempt to dynamically re-import it.
 
-    This method analyzes the call stack to identify the module from which the current function 
-    was called, and then attempts to re-import that module. If recursion is detected (i.e., 
-    if the caller's module is the same as the current frame's module), a `ValueError` is raised.
+    This function allows for proactive control over module execution, ensuring that you can
+    analyze the module calling your code and reload it if necessary. If recursion is detected 
+    (i.e., the caller module is the same as the current one), it raises a `ValueError` to prevent
+    unintended behavior.
 
-    :raises ValueError: 
-        If recursion within the same module is detected, meaning that the caller and the current 
-        frame originated from the same module.
+    Raises:
+    -------
+    - **ValueError**: If recursion within the same module is detected, meaning that the caller
+      and the current module are the same.
 
-    :return: 
-        A tuple containing the current frame and caller frame information.
-    :rtype: tuple (inspect.FrameInfo, inspect.FrameInfo)
+    Returns:
+    --------
+    - **tuple (inspect.FrameInfo, inspect.FrameInfo)**: A tuple containing information about the 
+      current frame and the caller frame.
     """
     stack = inspect.stack()
     logger.debug(f"Stack detected: {stack}")
@@ -67,41 +39,44 @@ def inspect_module() -> tuple:
     caller_frame = stack[-1]
     logger.debug(f"Caller frame: {caller_frame}")
     return current_frame, caller_frame
-    
+
 def get_info_module(caller_frame: inspect.FrameInfo) -> ModuleType | None:
     """
-    Retrieve module information from a given caller frame.
+    Retrieve the module information from a given caller frame, allowing for insight into the
+    context from which a function was called.
 
-    This function takes the caller frame information and retrieves the corresponding module
-    using the `inspect.getmodule` method. This can be used to identify the module where
-    a function call originates.
+    This function uses the `inspect.getmodule` method to return the module associated with
+    the caller frame. It helps in gaining a better understanding of the module that originated
+    the function call.
 
-    :param caller_frame: 
-        The caller frame information obtained from the call stack.
-    :type caller_frame: inspect.FrameInfo
+    Parameters:
+    -----------
+    - **caller_frame** (`inspect.FrameInfo`): The caller frame information from the stack.
 
-    :return: 
-        The module information for the caller frame, or None if the module cannot be determined.
-    :rtype: ModuleType | None
+    Returns:
+    --------
+    - **ModuleType | None**: The module information associated with the caller frame, or `None` 
+      if it cannot be determined.
     """
     info_module = inspect.getmodule(caller_frame.frame)
     return info_module
 
 def load_module(info_module: ModuleType) -> ModuleType | None:
     """
-    Load the module dynamically from its file location.
+    Dynamically load or reload a module from its file location, allowing modifications
+    to be applied without restarting the interpreter.
 
-    Given a module's information, this method re-imports the module dynamically from the 
-    file where it is located. This is useful when modifications are made to a module, and 
-    it needs to be reloaded without restarting the interpreter.
+    This method attempts to dynamically re-import a module based on its file location, which 
+    can be particularly useful when the module has been modified and needs to be reloaded 
+    to reflect the changes.
 
-    :param info_module: 
-        The module information used to locate and load the module.
-    :type info_module: ModuleType
+    Parameters:
+    -----------
+    - **info_module** (`ModuleType`): The module information used to locate and load the module.
 
-    :return: 
-        The reloaded module if the loading is successful, or None if it fails.
-    :rtype: ModuleType | None
+    Returns:
+    --------
+    - **ModuleType | None**: The reloaded module if the loading is successful, or `None` if it fails.
     """
     logger.debug("Run load_module")
     spec = importlib.util.spec_from_file_location(info_module.__name__, info_module.__file__)
@@ -113,6 +88,17 @@ def load_module(info_module: ModuleType) -> ModuleType | None:
     return None
 
 def unload_module(module: ModuleType):
+    """
+    Unload a module from memory, freeing up resources and allowing for the re-importation of updated modules.
+
+    This function removes a module from the global namespace and `sys.modules`, allowing the module
+    to be reloaded or discarded as necessary. This is useful in dynamic systems where modules might 
+    need to be refreshed during execution.
+
+    Parameters:
+    -----------
+    - **module** (`ModuleType`): The module to be unloaded.
+    """
     logger.debug("Run unload_module")
     module_name = module.__name__
     if module_name in sys.modules:
@@ -127,19 +113,20 @@ def unload_module(module: ModuleType):
 
 def extract_version(info_module: ModuleType) -> str | None:
     """
-    Extract the version of the specified module, if available.
+    Extract the version information of a module, if available, ensuring compatibility with 
+    other parts of the system.
 
-    This function checks if the module has a `__version__` attribute. If not, it attempts to
-    retrieve the version using the `importlib.metadata.version` function. If the module is not found
-    in the package metadata, it returns None.
+    This function checks if the module has a `__version__` attribute. If not, it attempts to 
+    retrieve the version using `importlib.metadata`. This is useful for managing dependencies 
+    and ensuring that the correct module version is loaded.
 
-    :param info_module: 
-        The module from which to extract the version.
-    :type info_module: ModuleType
+    Parameters:
+    -----------
+    - **info_module** (`ModuleType`): The module from which to extract version information.
 
-    :return: 
-        The version of the module as a string, or None if the version is not available.
-    :rtype: str | None
+    Returns:
+    --------
+    - **str | None**: The version of the module as a string, or `None` if it is unavailable.
     """
     if hasattr(info_module, '__version__'):
         return info_module.__version__
@@ -148,69 +135,72 @@ def extract_version(info_module: ModuleType) -> str | None:
     except importlib.metadata.PackageNotFoundError:
         return None
 
-
 def extract_functions(info_module: ModuleType) -> List[str] | None:
     """
-    Extract a list of function names defined in the specified module.
+    Extract a list of function names defined in a module, ensuring that external modules adhere to
+    the expected function structure.
 
-    This function inspects the provided module and gathers all functions that are defined 
-    within it, returning their names as a list.
+    This function retrieves all function names defined within the specified module, allowing
+    developers to verify the functions implemented in the module and ensure they align with expectations.
 
-    :param info_module: 
-        The module from which to extract function names.
-    :type info_module: ModuleType
+    Parameters:
+    -----------
+    - **info_module** (`ModuleType`): The module from which to extract function names.
 
-    :return: 
-        A list of function names defined in the module, or None if there are no functions.
-    :rtype: List[str] | None
+    Returns:
+    --------
+    - **List[str] | None**: A list of function names defined in the module, or `None` if no functions are found.
     """
     functions = [
-            func_name
-            for func_name, obj in inspect.getmembers(info_module, inspect.isfunction)
-            if obj.__module__ == info_module.__name__
-        ]
+        func_name
+        for func_name, obj in inspect.getmembers(info_module, inspect.isfunction)
+        if obj.__module__ == info_module.__name__
+    ]
     return functions
 
 def extract_classes(info_module: ModuleType) -> List[ClassInfo]:
     """
-    Extract class information (name, methods, superclasses) from the specified module.
+    Extract information about classes in a module, including their methods and superclasses, 
+    providing a clear picture of the module's class structure.
 
-    This function inspects the provided module and gathers information about all classes defined 
-    within it. For each class, it retrieves its name, methods, and superclasses.
+    This function retrieves class information from the specified module, including class names, 
+    the methods they define, and their superclasses. This can be used to ensure that the module's 
+    class structure adheres to predefined expectations.
 
-    :param info_module: 
-        The module from which to extract class information.
-    :type info_module: ModuleType
+    Parameters:
+    -----------
+    - **info_module** (`ModuleType`): The module from which to extract class information.
 
-    :return: 
-        A list of `ClassInfo` namedtuples containing class names, methods, and superclasses.
-    :rtype: List[ClassInfo]
+    Returns:
+    --------
+    - **List[ClassInfo]**: A list of `ClassInfo` namedtuples containing class names, methods, and superclasses.
     """
     classes = []
     for class_name, cls_obj in inspect.getmembers(info_module, inspect.isclass):
-            if cls_obj.__module__ == info_module.__name__:
-                methods = [
-                    method_name for method_name, _ in inspect.getmembers(cls_obj, inspect.isfunction)
-                ]
-                superclasses = [base.__name__ for base in cls_obj.__bases__]
-                current_class = ClassInfo(class_name, methods, superclasses)
-                classes.append(current_class)
+        if cls_obj.__module__ == info_module.__name__:
+            methods = [
+                method_name for method_name, _ in inspect.getmembers(cls_obj, inspect.isfunction)
+            ]
+            superclasses = [base.__name__ for base in cls_obj.__bases__]
+            current_class = ClassInfo(class_name, methods, superclasses)
+            classes.append(current_class)
     return classes
 
 def extract_superclasses(module: ModuleType) -> List[str]:
     """
-    Extract a list of all unique superclasses defined in the specified module.
+    Extract all unique superclasses from a module, helping to understand the inheritance hierarchy 
+    of the classes within the module.
 
-    This function inspects the provided module to identify all classes and retrieves their
-    superclasses. It returns a list of unique superclass names.
+    This function identifies all superclasses for the classes defined in the specified module and 
+    returns a list of unique superclass names.
 
-    :param module: 
-        The module from which to extract superclass information.
-    :type module: ModuleType
+    Parameters:
+    -----------
+    - **module** (`ModuleType`): The module from which to extract superclass information.
 
-    :return: 
-        A list of unique superclass names defined in the module.
-    :rtype: List[str]
+    Returns:
+    --------
+    - **List[str]**: A list of unique superclass names defined in the module.
     """
     superclasses = set()
     logger.debug("Extract superclasses...")
@@ -219,6 +209,6 @@ def extract_superclasses(module: ModuleType) -> List[str]:
         if cls_obj.__module__ == module.__name__:
             for base in cls_obj.__bases__:
                 superclasses.add(base.__name__)
-                logger.debug(f"Add {superclasses} to set, {superclasses}")
+                logger.debug(f"Added {base.__name__} to superclasses set")
     logger.debug(f"Superclasses: {superclasses}")
     return list(superclasses)

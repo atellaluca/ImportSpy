@@ -5,7 +5,7 @@ from importspy.utils import spy_module_utils
 from types import ModuleType
 from importspy import Spy
 import logging
-from example.plugin_interface import Plugin
+from examples.plugin_based_architecture.plugin_interface import Plugin
 
 logger = logging.getLogger("/".join(__file__.split('/')[-1:]))
 logger.addHandler(logging.NullHandler())
