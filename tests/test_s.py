@@ -3,7 +3,7 @@ import inspect
 from types import ModuleType
 from importspy import Spy
 from importspy.errors import Errors
-from example.plugin_interface import Plugin
+from examples.plugin_based_architecture.plugin_interface import Plugin
 from importspy.models import SpyModel
 from typing import List
 import logging
