@@ -204,4 +204,4 @@ Your sponsorship will help us to dedicate more time to improvements, new feature
 License
 =======
 
-This project is licensed under the MIT License. See the `LICENSE`_ file for details.
+This project is licensed under the MIT License. See the `LICENSE <https://github.com/atellaluca/ImportSpy/blob/docs-enhancement/LICENSE>`_ file for details.
