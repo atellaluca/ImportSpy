@@ -5,7 +5,7 @@ ImportSpy
 
    <div style="text-align: left;margin-bottom: 40px">
         <img src="https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png" 
-                    alt="ImportSpy Image" style="width: 600px">
+                    alt="ImportSpy Image">
        <div style="margin-top: 20px;">
            <a href="https://pepy.tech/project/importspy">
                <img src="https://static.pepy.tech/badge/importspy" alt="Downloads">
