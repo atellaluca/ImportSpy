@@ -10,7 +10,13 @@ import logging
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-ClassInfo = namedtuple('ClassInfo', ['name', 'methods', 'superclasses'])
+ClassInfo = namedtuple('ClassInfo', [
+    'name',
+    'class_attr',
+    'instance_attr',
+    'methods',
+    'superclasses'
+    ])
 
 def inspect_module() -> tuple:
     """
@@ -135,13 +141,12 @@ def extract_version(info_module: ModuleType) -> str | None:
     except importlib.metadata.PackageNotFoundError:
         return None
 
-def extract_functions(info_module: ModuleType) -> List[str] | None:
+def extract_variables(info_module:ModuleType) -> List[str]:
     """
-    Extract a list of function names defined in a module, ensuring that external modules adhere to
-    the expected function structure.
+    Extract a list of variables names defined in a module.
 
-    This function retrieves all function names defined within the specified module, allowing
-    developers to verify the functions implemented in the module and ensure they align with expectations.
+    This function retrieves all variables names defined within the specified module, allowing
+    developers to verify the variables defined in the module.
 
     Parameters:
     -----------
@@ -149,23 +154,45 @@ def extract_functions(info_module: ModuleType) -> List[str] | None:
 
     Returns:
     --------
-    - **List[str] | None**: A list of function names defined in the module, or `None` if no functions are found.
+    - **List[str]: A list of variables names defined in the module.
     """
-    functions = [
+    return [
+        var_name
+        for var_name, obj in inspect.getmembers(info_module)
+        if not callable(obj)
+        and not isinstance(obj, ModuleType)
+        and not (var_name.startswith("__") and var_name.endswith("__"))
+    ]
+
+
+def extract_functions(info_module: ModuleType) -> List[str]:
+    """
+    Extract a list of function names defined in a module.
+
+    This function retrieves all function names defined within the specified module, allowing
+    developers to verify the functions implemented in the module.
+
+    Parameters:
+    -----------
+    - **info_module** (`ModuleType`): The module from which to extract function names.
+
+    Returns:
+    --------
+    - **List[str]: A list of function names defined in the module.
+    """
+    return [
         func_name
         for func_name, obj in inspect.getmembers(info_module, inspect.isfunction)
         if obj.__module__ == info_module.__name__
     ]
-    return functions
 
 def extract_classes(info_module: ModuleType) -> List[ClassInfo]:
     """
-    Extract information about classes in a module, including their methods and superclasses, 
-    providing a clear picture of the module's class structure.
+    Extract information about classes in a module, including their methods, class attributes, 
+    instance attributes, and superclasses, providing a clear picture of the module's class structure.
 
     This function retrieves class information from the specified module, including class names, 
-    the methods they define, and their superclasses. This can be used to ensure that the module's 
-    class structure adheres to predefined expectations.
+    class attributes, instance attributes, methods they define, and their superclasses.
 
     Parameters:
     -----------
@@ -173,16 +200,29 @@ def extract_classes(info_module: ModuleType) -> List[ClassInfo]:
 
     Returns:
     --------
-    - **List[ClassInfo]**: A list of `ClassInfo` namedtuples containing class names, methods, and superclasses.
+    - **List[ClassInfo]**: A list of `ClassInfo` namedtuples containing class names, class_attr, instance_attr, methods, and superclasses.
     """
     classes = []
     for class_name, cls_obj in inspect.getmembers(info_module, inspect.isclass):
         if cls_obj.__module__ == info_module.__name__:
+            class_attr = [
+                attr_name for attr_name, attr_value in cls_obj.__dict__.items() 
+                if not callable(attr_value) and not attr_name.startswith('__')
+            ]
+            instance_attr = []
+            init_method = cls_obj.__dict__.get('__init__')
+            if init_method:
+                source_lines = inspect.getsourcelines(init_method)[0]
+                for line in source_lines:
+                    line = line.strip()
+                    if line.startswith('self.') and '=' in line:
+                        attr_name = line.split('=')[0].strip().split('.')[1]
+                        instance_attr.append(attr_name)
             methods = [
                 method_name for method_name, _ in inspect.getmembers(cls_obj, inspect.isfunction)
             ]
             superclasses = [base.__name__ for base in cls_obj.__bases__]
-            current_class = ClassInfo(class_name, methods, superclasses)
+            current_class = ClassInfo(class_name, class_attr, instance_attr, methods, superclasses)
             classes.append(current_class)
     return classes
 
