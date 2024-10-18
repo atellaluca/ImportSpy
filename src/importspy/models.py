@@ -17,6 +17,8 @@ class ClassModel(BaseModel):
 
     ## Attributes:
     - **name** (`Optional[str]`): The name of the class. This can be `None` if the class name is unavailable. Defaults to `None`.
+    - **class_attr* (`Optional[List[str]]`): A list of class attributes names that are expected to be present in the class. Defaults to an empty list.
+    - *instance_attr* (`Optional[List[str]]`): A list of class isntance attributes names that are expected to be present in the class. Defaults to an empty list.
     - **methods** (`Optional[List[str]]`): A list of method names that are expected to be present in the class. Defaults to an empty list.
     - **superclasses** (`Optional[List[str]]`): A list of names of the superclasses from which this class inherits. Defaults to an empty list.
 
@@ -32,6 +34,8 @@ class ClassModel(BaseModel):
     and inherit from `BaseClass`. External modules importing your code can then be validated to follow this structure.
     """
     name: Optional[str] = None
+    class_attr: Optional[List[str]] = []
+    instance_attr: Optional[List[str]] = []
     methods: Optional[List[str]] = []
     superclasses: Optional[List[str]] = []
 
@@ -47,6 +51,7 @@ class SpyModel(BaseModel):
     ## Attributes:
     - **filename** (`Optional[str]`): The name of the module file. If the name is unavailable, it can be `None`. Defaults to `None`.
     - **version** (`Optional[str]`): The expected version of the module. Defaults to `None` if the version is not available.
+    - **variables** (`Optional[List[str]]`): A list of variables names that are expected to be defined within the module. Defaults to an empty list.
     - **functions** (`Optional[List[str]]`): A list of function names that are expected to be defined within the module. Defaults to an empty list.
     - **classes** (`Optional[List[ClassModel]]`): A list of class definitions within the module, represented by `ClassModel`. Defaults to an empty list.
 
@@ -84,8 +89,9 @@ class SpyModel(BaseModel):
     This will extract the necessary metadata from `my_module` and create a `SpyModel` instance that describes the module's 
     structure, which can then be compared to the expected structure defined by the developer.
     """
-    filename: Optional[str] = None
-    version: Optional[str] = None
+    filename: Optional[str] = ""
+    version: Optional[str] = ""
+    variables: Optional[List[str]] = []
     functions: Optional[List[str]] = []
     classes: Optional[List[ClassModel]] = []
 
@@ -118,17 +124,30 @@ class SpyModel(BaseModel):
         logger.debug(f"Create SpyModel from info_module: {ModuleType}")
         filename = "/".join(info_module.__file__.split('/')[-1:])
         version = spy_module_utils.extract_version(info_module)
+        variables = spy_module_utils.extract_variables(info_module)
         functions = spy_module_utils.extract_functions(info_module)
         classes = [
-            ClassModel(name=name, methods=methods, superclasses=superclasses)
-            for name, methods, superclasses in spy_module_utils.extract_classes(info_module)
+            ClassModel(name=name, 
+                       class_attr=class_attr, 
+                       instance_attr=instance_attr,
+                       methods=methods,
+                       superclasses=superclasses)
+            for 
+            name,
+            class_attr,
+            instance_attr,
+            methods,
+            superclasses 
+            in spy_module_utils.extract_classes(info_module)
         ]
         spy_module_utils.unload_module(info_module)
         logger.debug("Unload module")
-        logger.debug(f"filename: {filename}, version: {version}, functions: {functions}, classes: {classes}")
+        logger.debug(f"filename: {filename}, version: {version}, \
+                     functions: {functions}, classes: {classes}")
         return cls(
             filename=filename,
             version=version,
+            variables=variables,
             functions=functions,
             classes=classes
         )
