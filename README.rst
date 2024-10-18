@@ -60,23 +60,40 @@ Here's a simple example showing how to use **ImportSpy** to validate that an imp
     from importspy.models import SpyModel, ClassModel
     from typing import List
 
-    # Define the rules for how your Python code should be used
+    # Define the rules for how your Python code should be structured and used by external modules
     class MyLibrarySpy(SpyModel):
-        functions: List[str] = ["required_function"]  # Required function in the importing module
+        # List of required variables that must be present in the importing module
+        variables: List[str] = ["required_var1", "required_var2"]  # Required variables
+
+        # List of required functions that must be defined in the importing module
+        functions: List[str] = ["required_function"]  # Required function
+
+        # Define the required classes, their attributes, and methods
         classes: List[ClassModel] = [
             ClassModel(
-                name="MyRequiredClass",  # Required class name
-                methods=["required_method1", "required_method2"]  # Required methods in the class
+                name="MyRequiredClass",  # Name of the required class
+
+                # Required class-level attributes (e.g., static variables)
+                class_attr=["attr_1", "attr_2"],  # Class attributes
+
+                # Required instance-level attributes (must exist in the class instances)
+                instance_attr=["attr_3"],  # Instance attributes
+
+                # Methods that the required class must implement
+                methods=["required_method1", "required_method2"]  # Required methods
             )
         ]
 
-    # Check if the importing module complies with the rules
+    # Use ImportSpy to check if the importing module complies with the defined rules
     module = Spy().importspy(spymodel=MyLibrarySpy)
 
+    # If the module passes validation, you can safely use it; otherwise, ImportSpy raises an error
     if module:
-        print(f"Module {module.__name__} is using your library correctly!")
+        print(f"Module '{module.__name__}' complies with the specified rules and is ready to use!")
     else:
-        print("The importing module is not complying with the rules.")
+        print("The importing module does not comply with the required structure.")
+
+    # Now you can access all the attributes of the module that imports your code
 
 Example of a Compliant Importing Python Module
 ==============================================
