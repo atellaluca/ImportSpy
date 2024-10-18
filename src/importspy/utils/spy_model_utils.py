@@ -35,33 +35,29 @@ def is_subset(spy_model_1: SpyModel, spy_model_2: SpyModel) -> bool:
     This function helps ensure that any importing module respects the rules set by the developer, 
     reducing the risk of improper usage and integration issues.
     """
-    
-    # Check if the filenames match, if provided
     if spy_model_1.filename and spy_model_1.filename != spy_model_2.filename:
         return False
-
-    # Check if the versions match, if provided
     if spy_model_1.version and spy_model_1.version != spy_model_2.version:
         return False
-
-    # Check if all functions in spy_model_1 are present in spy_model_2
+    if spy_model_1.variables:
+        if not set(spy_model_1.variables).issubset(spy_model_2.variables):
+            return False
     if spy_model_1.functions:
         if not set(spy_model_1.functions).issubset(spy_model_2.functions):
             return False
-
-    # Check if all classes in spy_model_1 are present in spy_model_2
     for class_1 in spy_model_1.classes:
-        # Find the corresponding class in spy_model_2
         class_2 = next((cls for cls in spy_model_2.classes if cls.name == class_1.name or class_1.name is None), None)
         if not class_2:
             return False
-        
-        # Check if all methods in class_1 are present in class_2
+        if class_1.class_attr:
+            if not set(class_1.class_attr).issubset(class_2.class_attr):
+                return False
+        if class_1.instance_attr:
+            if not set(class_1.instance_attr).issubset(class_2.instance_attr):
+                return False
         if class_1.methods:
             if not set(class_1.methods).issubset(class_2.methods):
                 return False
-
-        # Check if all superclasses in class_1 are present in class_2
         if class_1.superclasses:
             if not set(class_1.superclasses).issubset(class_2.superclasses):
                 return False
