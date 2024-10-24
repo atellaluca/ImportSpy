@@ -39,3 +39,7 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run pytest
+    - name: Sphinx build
+      run: |
+        cd docs
+        make html
