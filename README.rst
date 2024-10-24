@@ -1,10 +1,13 @@
-.. image:: https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml/badge.svg
+.. image:: https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?style=flat-square
+   :target: https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml
+   :align: left
 
 .. image:: https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/issues
 
 .. image:: https://img.shields.io/github/license/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/blob/master/LICENSE
+
    
 ImportSpy
 =========
