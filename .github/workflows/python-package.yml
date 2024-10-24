@@ -42,4 +42,4 @@ jobs:
     - name: Sphinx build
       run: |
         cd docs
-        make html
+        poetry run make html
