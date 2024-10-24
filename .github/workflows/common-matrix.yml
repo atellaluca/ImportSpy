@@ -1,14 +1,21 @@
 name: Common Matrix
 
 on:
-  workflow_call:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   matrix-job:
-    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, windows-2022, macos-12]
         python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Build package
+        uses: ./.github/workflows/python-package.yml
