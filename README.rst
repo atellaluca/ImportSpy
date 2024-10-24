@@ -1,11 +1,7 @@
+.. image:: https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml/badge.svg
+
 .. image:: https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/issues
-
-.. image:: https://img.shields.io/github/stars/atellaluca/ImportSpy?style=flat-square
-   :target: https://github.com/atellaluca/ImportSpy/stargazers
-
-.. image:: https://img.shields.io/github/forks/atellaluca/ImportSpy?style=flat-square
-   :target: https://github.com/atellaluca/ImportSpy/network
 
 .. image:: https://img.shields.io/github/license/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/blob/master/LICENSE
