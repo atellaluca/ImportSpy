@@ -1,8 +1,8 @@
+.. image:: https://static.pepy.tech/badge/importspy
+   :target: https://pepy.tech/project/importspy
+
 .. image:: https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml
-
-.. image:: https://img.shields.io/github/issues/atellaluca/ImportSpy?style=flat-square
-   :target: https://github.com/atellaluca/ImportSpy/issues
 
 .. image:: https://img.shields.io/github/license/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/blob/master/LICENSE
