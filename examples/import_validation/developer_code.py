@@ -24,10 +24,8 @@ class MyLibrarySpy(SpyModel):
 spy = Spy()
 
 # Dynamically import the module and check if it complies with the rules
-module = spy.importspy(spymodel=MyLibrarySpy)
-
-# Check if the module follows the rules defined by the developer
-if module:
-    print(f"Module {module.__name__} is using your library correctly!")
-else:
-    print("The importing module does not comply with the rules.")
+try:
+    module = spy.importspy(spymodel=MyLibrarySpy)
+    print(f"Module {"/".join(module.__file__.split('/')[-2:])} is using your library correctly!")
+except ValueError as ve:
+    print("Something wrong: ", ve)
