@@ -83,15 +83,13 @@ Here's a simple example showing how to use **ImportSpy** to validate that an imp
         ]
 
     # Use ImportSpy to check if the importing module complies with the defined rules
-    module = Spy().importspy(spymodel=MyLibrarySpy)
-
-    # If the module passes validation, you can safely use it; otherwise, ImportSpy raises an error
-    if module:
-        print(f"Module '{module.__name__}' complies with the specified rules and is ready to use!")
-    else:
-        print("The importing module does not comply with the required structure.")
-
-    # Now you can access all the attributes of the module that imports your code
+   try:
+       module = Spy().importspy(spymodel=MyLibrarySpy)
+       # If the module passes validation, you can safely use it; otherwise, ImportSpy raises a ValueError
+       print(f"Module '{module.__name__}' complies with the specified rules and is ready to use!")
+       # Now you can access all the attributes of the module that imports your code
+   except ValueError as ve:
+       print("The importing module does not comply with the required structure:", ve)
 
 Example of a Compliant Importing Python Module
 ==============================================
@@ -164,11 +162,7 @@ In the developer's code:
 
     spy = Spy()
     module = spy.importspy(spymodel=MyLibrarySpy)
-
-    if module:
-        print(f"Module {module.__name__} is using your library correctly!")
-    else:
-        print("The importing module is not complying with the rules.")
+    # If the module passes validation, you can safely use it; otherwise, ImportSpy raises a ValueError
 
 In the external module that imports the developer's code:
 
