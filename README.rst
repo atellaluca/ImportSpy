@@ -75,20 +75,43 @@ Start by creating a ``SpyModel`` that defines what is expected from modules impo
 
     from importspy import Spy
     from importspy.models import SpyModel, ClassModel
-    from typing import List
+    from typing import List, Optional
 
+    
     class MyLibrarySpy(SpyModel):
+        # Name of the expected module file
+        filename: Optional[str] = "expected_module.py"
+    
+        # Expected version of the module
+        version: Optional[str] = "1.0.0"
+    
+        # Required variables defined within the module (name-value pairs)
+        variables: dict = {
+            "default_timeout": "30",
+            "max_connections": "100"
+        }
+    
         # Required functions
         functions: List[str] = ["process_data", "log_results"]
-
+    
         # Required classes
         classes: List[ClassModel] = [
             ClassModel(
-                name="DataProcessor",
-                methods=["process", "save"]
+                name="DataProcessor",  # Class name
+                class_attr=["processor_type", "status"],  # Required class-level attributes
+                instance_attr=["input_data", "output_data"],  # Required instance-level attributes
+                methods=["process", "save"],  # Required methods
+                superclasses=["BaseProcessor"]  # Expected superclasses
+            ),
+            ClassModel(
+                name="Logger",
+                class_attr=["log_level"],
+                instance_attr=["log_file"],
+                methods=["log_message", "clear_logs"],
+                superclasses=[]
             )
         ]
-
+    
         # Required environment variables
         env_vars: dict = {
             "CI": "true",
