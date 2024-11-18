@@ -13,6 +13,9 @@ logger.addHandler(logging.NullHandler())
 
 class PluginSpy(SpyModel):
     superclasses: List[str] = ['Plugin']
+
+class EnvSpy(SpyModel):
+    env_vars: dict = {"CI": "true", "GITHUB_ACTIONS": "true"}
     
 def condition(module: ModuleType):
     for class_name, class_obj in inspect.getmembers(module, inspect.isclass):
@@ -31,9 +34,15 @@ class TestSpy:
 
         monkeypatch.setattr('importspy.utils.spy_module_utils.load_module', mock_load_module)
         monkeypatch.setattr('importspy.utils.spy_module_utils.unload_module', lambda module: logger.debug("Mock unload module"))
-
+        monkeypatch.setenv("CI", "true")
+        monkeypatch.setenv("GITHUB_ACTIONS", "true")
         imported_module = spy_instance.importspy(spymodel=PluginSpy)
         assert imported_module.__name__ == 'mock_module'
+        imported_module = spy_instance.importspy(spymodel=EnvSpy)
+        assert imported_module
+        monkeypatch.setenv("CI", "false")
+        with pytest.raises(ValueError, match=r"Value mismatch for environment variable 'CI'"):
+            imported_module = spy_instance.importspy(spymodel=EnvSpy)
     
     def test_importspy_without_validation(self, spy_instance, mock_import_functions):
         imported_module = spy_instance.importspy()
