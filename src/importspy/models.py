@@ -1,5 +1,8 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import (
+    Optional, 
+    List
+)
 from types import ModuleType
 from .utils import spy_module_utils
 import logging
@@ -39,7 +42,6 @@ class ClassModel(BaseModel):
     methods: Optional[List[str]] = []
     superclasses: Optional[List[str]] = []
 
-
 class SpyModel(BaseModel):
     """
     A model that defines the expected structure of a Python module, allowing developers to declare in advance 
@@ -54,6 +56,7 @@ class SpyModel(BaseModel):
     - **variables** (`Optional[List[str]]`): A list of variables names that are expected to be defined within the module. Defaults to an empty list.
     - **functions** (`Optional[List[str]]`): A list of function names that are expected to be defined within the module. Defaults to an empty list.
     - **classes** (`Optional[List[ClassModel]]`): A list of class definitions within the module, represented by `ClassModel`. Defaults to an empty list.
+    - **env_vars** (`Optional[dict]`):  A dictionary representing required environment variables. Each key is the variable name, and the corresponding value is the expected value. Defaults to an empty dictionary.
 
     ## Example:
     ```python
@@ -63,7 +66,8 @@ class SpyModel(BaseModel):
         functions=["my_function"],
         classes=[
             ClassModel(name="MyClass", methods=["my_method"], superclasses=["BaseClass"])
-        ]
+        ],
+        env_vars={"CI":"true", "GITHUB_ACTIONS:"true"}
     )
     ```
     This defines a `SpyModel` for a module called `MyModule.py`, version 1.0.0, that is expected to include a function 
@@ -94,6 +98,7 @@ class SpyModel(BaseModel):
     variables: Optional[List[str]] = []
     functions: Optional[List[str]] = []
     classes: Optional[List[ClassModel]] = []
+    env_vars: Optional[dict] = {}
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
@@ -140,6 +145,7 @@ class SpyModel(BaseModel):
             superclasses 
             in spy_module_utils.extract_classes(info_module)
         ]
+        env_vars = spy_module_utils.extract_env_vars()
         spy_module_utils.unload_module(info_module)
         logger.debug("Unload module")
         logger.debug(f"filename: {filename}, version: {version}, \
@@ -149,6 +155,7 @@ class SpyModel(BaseModel):
             version=version,
             variables=variables,
             functions=functions,
-            classes=classes
+            classes=classes,
+            env_vars=env_vars
         )
 
