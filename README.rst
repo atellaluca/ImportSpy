@@ -228,9 +228,7 @@ Thank you for believing in this project and helping take ImportSpy to the next l
 Contribute to ImportSpy
 -----------------------
 
-Want to contribute? Add new features, provide feedback, or report bugs on GitHub:
-
-https://github.com/atellaluca/ImportSpy
+Want to contribute? Add new features, provide feedback, or report bugs.
 
 License
 -------
