@@ -35,6 +35,14 @@ def is_subset(spy_model_1: SpyModel, spy_model_2: SpyModel) -> bool:
         raise ValueError(f"Filename mismatch: {spy_model_1.filename} != {spy_model_2.filename}")
     if spy_model_1.version and spy_model_1.version != spy_model_2.version:
         raise ValueError(f"Version mismatch: {spy_model_1.version} != {spy_model_2.version}")
+    spy_model_2_env_vars = spy_model_2.env_vars
+    for expected_key, expected_value in spy_model_1.env_vars.items():
+        if expected_key in spy_model_2_env_vars:
+            if expected_value != spy_model_2_env_vars[expected_key]:
+                raise ValueError(f"Value mismatch for environment variable '{expected_key}': expected '{expected_value}', found '{spy_model_2_env_vars[expected_key]}'."
+            ) 
+        else:
+            raise ValueError(f"Missing environment variable: '{expected_key}'. Ensure it is defined in the system.")
     if spy_model_1.variables and not set(spy_model_1.variables).issubset(spy_model_2.variables):
         raise ValueError("Variables mismatch: Some variables are not present in the second model.")
     if spy_model_1.functions and not set(spy_model_1.functions).issubset(spy_model_2.functions):
