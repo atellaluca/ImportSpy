@@ -30,32 +30,36 @@ ImportSpy allows developers to:
 - **Improve project quality**: Reduce bugs caused by improper imports or misconfigured environments.
 
 Key Features
-------------
+============
 
-🔒 **Proactive Import Validation**
+🔒 Proactive Import Validation
+------------------------------
 - Define what an external module must include to import your code:
-- Required functions and classes.
-- Mandatory methods and attributes.
-- Structural dependencies such as superclasses.
+ - Required functions and classes.
+ - Mandatory methods and attributes.
+ - Structural dependencies such as superclasses.
 
 📋 **Environment Variable Validation**
+--------------------------------------
 - Ensure the environment is correctly configured:
-- Check for critical environment variables.
-- Validate their values against predefined expectations.
-- Essential for CI/CD pipelines or distributed systems.
+ - Check for critical environment variables.
+ - Validate their values against predefined expectations.
+ - Essential for CI/CD pipelines or distributed systems.
 
 🧩 **Optimized for Modular Architectures**
+------------------------------------------
 - Supports complex systems:
-- Prevents cyclic dependencies.
-- Facilitates seamless integration of plugins and scalable components.
+ - Prevents cyclic dependencies.
+ - Facilitates seamless integration of plugins and scalable components.
 
 🔄 **Import Monitoring**
+------------------------
 - Gather data on how modules interact with your code:
-- Track external imports.
-- Provide valuable debugging insights.
+ - Track external imports.
+ - Provide valuable debugging insights.
 
 Installation
-------------
+============
 
 You can install ImportSpy via PyPI with a single command:
 
