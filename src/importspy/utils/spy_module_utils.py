@@ -1,8 +1,9 @@
 import inspect
 import importlib.util
 import sys
+import os
 from types import ModuleType
-from typing import List
+from typing import List, Tuple
 from collections import namedtuple
 import importlib.metadata
 import logging
@@ -252,3 +253,38 @@ def extract_superclasses(module: ModuleType) -> List[str]:
                 logger.debug(f"Added {base.__name__} to superclasses set")
     logger.debug(f"Superclasses: {superclasses}")
     return list(superclasses)
+
+def extract_env_vars() -> dict:
+    """
+    Extract all current environment variables and their values as a dictionary.
+
+    This function retrieves all environment variables available in the system's current execution
+    context and returns them in a dictionary format. Each key in the dictionary represents the
+    name of an environment variable, and its corresponding value represents the value assigned 
+    to that variable.
+
+    Parameters:
+    -----------
+    None
+
+    Returns:
+    --------
+    - **dict**: A dictionary where:
+        - **Key** (`str`): The name of the environment variable.
+        - **Value** (`str`): The value assigned to the environment variable.
+
+    Example Usage:
+    --------------
+    ```python
+    env_vars = extract_env_vars()
+    print(env_vars)
+    # Output: {'PATH': '/usr/bin:/bin', 'CI': 'true', ...}
+    ```
+
+    Notes:
+    ------
+    - This function is useful for debugging or validating the runtime environment.
+    - It relies on `os.environ`, which reflects the environment at the time the function is called.
+    - Sensitive data (e.g., API keys) might be included in the output; handle with care.
+    """
+    return dict(os.environ)
