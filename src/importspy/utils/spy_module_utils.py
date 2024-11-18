@@ -142,28 +142,31 @@ def extract_version(info_module: ModuleType) -> str | None:
     except importlib.metadata.PackageNotFoundError:
         return None
 
-def extract_variables(info_module:ModuleType) -> List[str]:
+def extract_variables(info_module: ModuleType) -> dict:
     """
-    Extract a list of variables names defined in a module.
+    Extract a dictionary of variable names and their values defined in a module.
 
-    This function retrieves all variables names defined within the specified module, allowing
-    developers to verify the variables defined in the module.
+    This function retrieves all variable names and their corresponding values defined within 
+    the specified module, allowing developers to verify the variables and their values.
 
     Parameters:
     -----------
-    - **info_module** (`ModuleType`): The module from which to extract function names.
+    - **info_module** (`ModuleType`): The module from which to extract variable names and values.
 
     Returns:
     --------
-    - **List[str]: A list of variables names defined in the module.
+    - **dict**: A dictionary where:
+        - **Key** (`str`): The name of the variable.
+        - **Value** (`Any`): The value assigned to the variable in the module.
     """
-    return [
-        var_name
+    return {
+        var_name: obj
         for var_name, obj in inspect.getmembers(info_module)
         if not callable(obj)
         and not isinstance(obj, ModuleType)
         and not (var_name.startswith("__") and var_name.endswith("__"))
-    ]
+    }
+
 
 
 def extract_functions(info_module: ModuleType) -> List[str]:
