@@ -43,8 +43,14 @@ def is_subset(spy_model_1: SpyModel, spy_model_2: SpyModel) -> bool:
             ) 
         else:
             raise ValueError(f"Missing environment variable: '{expected_key}'. Ensure it is defined in the system.")
-    if spy_model_1.variables and not set(spy_model_1.variables).issubset(spy_model_2.variables):
-        raise ValueError("Variables mismatch: Some variables are not present in the second model.")
+    spy_model_2_variables = spy_model_2.variables
+    for expected_key, expected_value in spy_model_1.variables.items():
+        if expected_key in spy_model_2_variables:
+            if expected_value != spy_model_2_variables[expected_key]:
+                raise ValueError(f"Value mismatch for variable '{expected_key}': expected '{expected_value}', found '{spy_model_2_variables[expected_key]}'."
+            )
+        else:
+            raise ValueError(f"Missing variable: '{expected_key}'. Ensure it is defined.")
     if spy_model_1.functions and not set(spy_model_1.functions).issubset(spy_model_2.functions):
         raise ValueError("Functions mismatch: Some functions are not present in the second model.")
     for class_1 in spy_model_1.classes:

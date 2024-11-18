@@ -19,7 +19,7 @@ class ClassModel(BaseModel):
     define in advance how imported modules should be structured, ensuring proper integration and usage.
 
     ## Attributes:
-    - **name** (`Optional[str]`): The name of the class. This can be `None` if the class name is unavailable. Defaults to `None`.
+    - **name** (`str`): The name of the class. This field is required and must uniquely identify the class.
     - **class_attr* (`Optional[List[str]]`): A list of class attributes names that are expected to be present in the class. Defaults to an empty list.
     - *instance_attr* (`Optional[List[str]]`): A list of class isntance attributes names that are expected to be present in the class. Defaults to an empty list.
     - **methods** (`Optional[List[str]]`): A list of method names that are expected to be present in the class. Defaults to an empty list.
@@ -36,7 +36,7 @@ class ClassModel(BaseModel):
     This defines a `ClassModel` where a class named `MyClass` is expected to have two methods (`method1`, `method2`) 
     and inherit from `BaseClass`. External modules importing your code can then be validated to follow this structure.
     """
-    name: Optional[str] = None
+    name: str
     class_attr: Optional[List[str]] = []
     instance_attr: Optional[List[str]] = []
     methods: Optional[List[str]] = []
@@ -53,7 +53,7 @@ class SpyModel(BaseModel):
     ## Attributes:
     - **filename** (`Optional[str]`): The name of the module file. If the name is unavailable, it can be `None`. Defaults to `None`.
     - **version** (`Optional[str]`): The expected version of the module. Defaults to `None` if the version is not available.
-    - **variables** (`Optional[List[str]]`): A list of variables names that are expected to be defined within the module. Defaults to an empty list.
+    - **variables** (`Optional[dict]`): A dictionary of variables expected to be defined within the module. Each key represents the name of the variable, and its corresponding value represents the expected value. Defaults to an empty dictionary.
     - **functions** (`Optional[List[str]]`): A list of function names that are expected to be defined within the module. Defaults to an empty list.
     - **classes** (`Optional[List[ClassModel]]`): A list of class definitions within the module, represented by `ClassModel`. Defaults to an empty list.
     - **env_vars** (`Optional[dict]`):  A dictionary representing required environment variables. Each key is the variable name, and the corresponding value is the expected value. Defaults to an empty dictionary.
@@ -95,7 +95,7 @@ class SpyModel(BaseModel):
     """
     filename: Optional[str] = ""
     version: Optional[str] = ""
-    variables: Optional[List[str]] = []
+    variables: Optional[dict] = {}
     functions: Optional[List[str]] = []
     classes: Optional[List[ClassModel]] = []
     env_vars: Optional[dict] = {}
