@@ -25,7 +25,7 @@ Why ImportSpy?
 
 ImportSpy allows developers to:
 
-- **Define clear rules**: Specify required functions, classes, and environment variables for every module importing your code.
+- **Define clear rules**: Specify required variables, functions, classes, and environment variables for every module importing your code.
 - **Validate imports**: Ensure external modules comply with these rules before they can interact with your code.
 - **Improve project quality**: Reduce bugs caused by improper imports or misconfigured environments.
 
@@ -35,8 +35,8 @@ Key Features
 🔒 Proactive Import Validation
 ------------------------------
 Define what an external module must include to import your code:
- - Required functions and classes.
- - Mandatory methods and attributes.
+ - Required environment variables, functions, variables and classes.
+ - Both class and instance attributes, as well as mandatory class methods.
  - Structural dependencies such as superclasses.
 
 📋 **Environment Variable Validation**
