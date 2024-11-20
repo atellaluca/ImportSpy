@@ -40,21 +40,26 @@ def is_subset(spy_model_1: SpyModel, spy_model_2: SpyModel) -> bool:
     dict_compare(spy_model_1.env_vars, spy_model_2.env_vars, Errors.ENV_VAR_MISSING, Errors.ENV_VAR_MISMATCH)
     #Variables validation
     dict_compare(spy_model_1.variables, spy_model_2.variables, Errors.VAR_MISSING, Errors.VAR_MISMATCH)
-    if spy_model_1.functions and not set(spy_model_1.functions).issubset(spy_model_2.functions):
-        raise ValueError(Errors.GENERIC_FUNCTIONS_MISMATCH)
+    #Functions validation
+    list_compare(spy_model_1.functions, spy_model_2.functions, Errors.FUNCTIONS_MISSING)
     for class_1 in spy_model_1.classes:
         class_2 = next((cls for cls in spy_model_2.classes if cls.name == class_1.name), None)
         if not class_2:
             raise ValueError(Errors.CLASS_MISSING.format(class_1.name))
-        if class_1.class_attr and not set(class_1.class_attr).issubset(class_2.class_attr):
-            raise ValueError(Errors.GENERIC_CLASS_ATTRIBUTES_MISMATCH.format(class_1.name))
-        if class_1.instance_attr and not set(class_1.instance_attr).issubset(class_2.instance_attr):
-            raise ValueError(Errors.GENERIC_INSTANCE_ATTRIBUTES_MISMATCH.format(class_1.name))
-        if class_1.methods and not set(class_1.methods).issubset(class_2.methods):
-            raise ValueError(Errors.GENERIC_CLASS_METHODS_MISMATCH.format(class_1.name))
-        if class_1.superclasses and not set(class_1.superclasses).issubset(class_2.superclasses):
-            raise ValueError(Errors.GENERIC_CLASS_SUPERCLASSES_MISMATCH.format(class_1.name))
+        # Class attributes validation
+        list_compare(class_1.class_attr, class_2.class_attr, Errors.CLASS_ATTRIBUTE_MISSING, class_2.name)
+        # Class instance attributes validation
+        list_compare(class_1.instance_attr, class_2.instance_attr, Errors.CLASS_INSTANCE_ATTRIBUTE_MISSING, class_2.name)
+        # Class methods validation
+        list_compare(class_1.methods, class_2.methods, Errors.CLASS_METHOD_MISSING, class_2.name)
+        # Superclasses validation
+        list_compare(class_1.superclasses, class_2.superclasses, Errors.CLASS_SUPERCLASS_MISSING, class_2.name)
     return True
+
+def list_compare(list1:list, list2:list, missing_error:str, *args):
+    for expected_element in list1:
+        if expected_element not in list2:
+            raise ValueError(missing_error.format(expected_element, *args))
 
 def dict_compare(dict1:dict, dict2:dict, missing_error:str, mismatch_error:str):
     for expected_key, expected_value in dict1.items():
