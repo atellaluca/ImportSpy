@@ -6,7 +6,7 @@ def is_subset(spy_model_1: SpyModel, spy_model_2: SpyModel) -> bool:
     Determine if the first SpyModel is a subset of the second SpyModel.
 
     This function checks whether all relevant attributes (such as functions, classes, methods, 
-    superclassesf"Superclass mismatch in {}", filename, and version) specified in `spy_model_1` are present in `spy_model_2`. 
+    superclasses, filename, and version) specified in `spy_model_1` are present in `spy_model_2`. 
     It throws a ValueError with a specific message indicating the type of mismatch.
 
     Parameters:
