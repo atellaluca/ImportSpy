@@ -3,10 +3,11 @@ import importlib.util
 import sys
 import os
 from types import ModuleType
-from typing import List, Tuple
+from typing import List
 from collections import namedtuple
 import importlib.metadata
 import logging
+import platform
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -291,3 +292,30 @@ def extract_env_vars() -> dict:
     - Sensitive data (e.g., API keys) might be included in the output; handle with care.
     """
     return dict(os.environ)
+
+def extract_arch() -> str:
+    """
+    Extract the current hardware architecture of the system.
+
+    This function retrieves the machine's hardware architecture using the `platform` module 
+and returns it as a string. The architecture describes the hardware type, such as `x86_64` 
+for 64-bit Intel/AMD processors or `arm64` for 64-bit ARM processors.
+
+    Returns:
+    --------
+    - **str**: A string representing the current hardware architecture of the system.
+
+    Example Usage:
+    --------------
+    ```python
+    arch = extract_arch()
+    print(arch)
+    # Output: 'x86_64', 'arm64', or similar based on the system
+    ```
+
+    Notes:
+    ------
+    - The output depends on the hardware of the machine and not the operating system.
+    - This function is useful for determining compatibility with specific binaries or packages.
+    """
+    return platform.machine()
