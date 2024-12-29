@@ -18,3 +18,6 @@ class Errors:
     CLASS_INSTANCE_ATTRIBUTE_MISSING = "Missing class instance attribute: '{0}'. Ensure it is defined in class '{1}'."
     CLASS_METHOD_MISSING = "Missing class method: '{0}'. Ensure it is defined in class '{1}'."
     CLASS_SUPERCLASS_MISSING = "Missing class superclass: '{0}'. Make sure that '{1}' extends {0}."
+    
+    ### SpyArchModule validation
+    INVALID_ARCHITECTURE = "Invalid architecture '{0}'. Known architectures are: {1}"
