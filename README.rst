@@ -7,7 +7,6 @@
 .. image:: https://img.shields.io/github/license/atellaluca/ImportSpy?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/blob/master/LICENSE
 
-   
 ImportSpy
 =========
 
@@ -15,235 +14,181 @@ ImportSpy
    :width: 830
    :alt: ImportSpy Image
 
-ImportSpy
-=========
+Overview 🌀
+--------
 
-**ImportSpy** is the ultimate Python library for proactive import control. Designed for complex and modular environments, ImportSpy ensures that external modules adhere to precise rules, improving the stability and security of your project.
-
-Why ImportSpy?
---------------
-
-ImportSpy allows developers to:
-
-- **Define clear rules**: Specify required variables, functions, classes, and environment variables for every module importing your code.
-- **Validate imports**: Ensure external modules comply with these rules before they can interact with your code.
-- **Improve project quality**: Reduce bugs caused by improper imports or misconfigured environments.
+**ImportSpy** is an innovative Python library that redefines how developers manage module imports and runtime environments. By integrating robust validation through Pydantic models, ImportSpy empowers developers to enforce rules and standards for external modules interacting with their code. This approach ensures consistency, stability, and security across projects.
 
 Key Features
 ============
 
-🔒 Proactive Import Validation
-------------------------------
-Define what an external module must include to import your code:
- - Required environment variables, functions, variables and classes.
- - Both class and instance attributes, as well as mandatory class methods.
- - Structural dependencies such as superclasses.
+🛡️ Proactive Import Validation
+---------------------------
 
-📋 **Environment Variable Validation**
---------------------------------------
-Ensure the environment is correctly configured:
- - Check for critical environment variables.
- - Validate their values against predefined expectations.
- - Essential for CI/CD pipelines or distributed systems.
+ImportSpy provides the capability to enforce strict rules on how modules interact with your code. Developers can define what is required from external modules, such as specific variables, methods, and class structures. This proactive approach ensures that only compliant modules integrate with your system, minimizing runtime errors and improving overall code reliability.
 
-🧩 **Optimized for Modular Architectures**
-------------------------------------------
-Supports complex systems:
- - Prevents cyclic dependencies.
- - Facilitates seamless integration of plugins and scalable components.
+🏗️ Architecture-Aware Validation
+-----------------------------
 
-🔄 **Import Monitoring**
-------------------------
-Gather data on how modules interact with your code:
- - Track external imports.
- - Provide valuable debugging insights.
+With support for architecture-specific rules via `SpyArchModule`, ImportSpy makes it possible to validate modules against platform constraints like `x86_64` or `ARM`. This feature is especially useful in distributed systems where compatibility between different environments must be ensured.
 
-Installation
-============
+🌍 Environment Validation
+-----------------------
 
-You can install ImportSpy via PyPI with a single command:
+ImportSpy simplifies the process of validating execution environments by verifying the presence and correctness of critical environment variables. This is particularly beneficial for CI/CD pipelines, ensuring consistent configurations across deployment environments.
+
+🔍 Dynamic Module Metadata Extraction
+-----------------------------------
+
+ImportSpy can dynamically extract metadata from modules at runtime. This includes functions, variables, and classes. By using `SpyModel`, developers can validate that modules adhere to predefined structures and ensure alignment with expected behaviors.
+
+📊 Debugging and Monitoring
+-------------------------
+
+ImportSpy tracks how external modules interact with your code, offering insights into runtime behavior. This feature enables developers to debug more effectively, identify integration issues, and maintain a robust system architecture.
+
+⚙️ Installation
+------------
+
+Install ImportSpy using pip:
 
 .. code-block:: bash
 
     pip install importspy
 
-Quick Start
------------
+💡 Advanced Example: Plugin Validation
+-----------------------------------
 
-Defining Validation Rules
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Start by creating a ``SpyModel`` that defines what is expected from modules importing your code:
+Here is a sophisticated use case leveraging ImportSpy to validate plugin implementations:
 
 .. code-block:: python
 
     from importspy import Spy
-    from importspy.models import SpyModel, ClassModel
+    from importspy.models import SpyModel, ClassModel, SpyArchModule
+    from importspy.constants import Constants
     from typing import List, Optional
 
-    
-    class MyLibrarySpy(SpyModel):
-        # Name of the expected module file
-        filename: Optional[str] = "expected_module.py"
-    
-        # Expected version of the module
-        version: Optional[str] = "1.0.0"
-    
-        # Required variables defined within the module (name-value pairs)
-        variables: dict = {
-            "default_timeout": "30",
-            "max_connections": "100"
-        }
-    
-        # Required functions
-        functions: List[str] = ["process_data", "log_results"]
-    
-        # Required classes
-        classes: List[ClassModel] = [
-            ClassModel(
-                name="DataProcessor",  # Class name
-                class_attr=["processor_type", "status"],  # Required class-level attributes
-                instance_attr=["input_data", "output_data"],  # Required instance-level attributes
-                methods=["process", "save"],  # Required methods
-                superclasses=["BaseProcessor"]  # Expected superclasses
-            ),
-            ClassModel(
-                name="Logger",
-                class_attr=["log_level"],
-                instance_attr=["log_file"],
-                methods=["log_message", "clear_logs"],
-                superclasses=[]
+    class PluginSpy(SpyModel):
+        spies: List[SpyArchModule] = [
+            SpyArchModule(
+                arch=Constants.ARCH_x86_64,
+                module=SpyModel(
+                    variables={
+                        "engine": "docker"
+                    }
+                )
             )
         ]
-    
-        # Required environment variables
-        env_vars: dict = {
-            "CI": "true",
-            "DATA_PATH": "/data/"
+        variables: dict = {
+            "plugin_name": "plugin name",
+            "plugin_description": "plugin description"
         }
-
-Validating During Import
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Use ImportSpy to validate a module:
-
-.. code-block:: python
+        classes: List[ClassModel] = [
+            ClassModel(
+                name="Extension",
+                class_attr=["extension_name"],
+                instance_attr=["extension_instance_name"],
+                methods=["add_extension", "remove_extension", "http_get_request"],
+                superclasses=["Plugin"]
+            ),
+            ClassModel(
+                name="Foo",
+                methods=["get_bar"]
+            )
+        ]
+        filename: str = "extension.py"
 
     spy = Spy()
 
     try:
-        module = spy.importspy(spymodel=MyLibrarySpy)
+        module = spy.importspy(spymodel=PluginSpy)
         print(f"Module '{module.__name__}' complies with the specified rules.")
     except ValueError as ve:
         print(f"Validation error: {ve}")
 
-Real-World Use Cases
---------------------
+What This Does:
+---------------
 
-✅ **CI/CD Pipelines**
-^^^^^^^^^^^^^^^^^^^^^^
+This example demonstrates how ImportSpy can validate a plugin against defined structural rules. It checks the architecture, validates critical variables, and ensures the presence of specific classes with defined methods and attributes. This ensures smooth integration and consistent behavior across plugins.
 
-Ensure the CI/CD environment has all the required variables:
-
-.. code-block:: python
-
-    env_vars: dict = {
-        "CI": "true",
-        "GITHUB_ACTIONS": "true"
-    }
-
-Outcome: Prevent errors caused by misconfigurations.
-
-✅ **Plugin-Based Systems**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Ensure each plugin properly implements the required classes:
-
-.. code-block:: python
-
-    classes: List[ClassModel] = [
-        ClassModel(name="PluginInterface", methods=["initialize", "execute"])
-    ]
-
-Outcome: Smooth and predictable integration.
-
-✅ **Modular Projects**
-^^^^^^^^^^^^^^^^^^^^^^^
-
-Avoid structural errors by defining rules for essential functions and attributes:
-
-.. code-block:: python
-
-    functions: List[str] = ["init_module", "shutdown"]
-
-Outcome: Improved project stability and code quality.
-
-How It Works
+🔧 How It Works
 ------------
 
-1. **Define Rules**: Use ``SpyModel`` to specify requirements.
-2. **Module Import**: When a module is imported, ImportSpy validates that the rules are met.
-3. **Validation Outcome**:
-   - Success: The import proceeds without issues.
-   - Failure: A descriptive error is raised.
+Step 1: Define Rules with `SpyModel`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Why Choose ImportSpy?
----------------------
+Using `SpyModel`, developers can specify the requirements for modules, including variables, functions, and classes. This creates a blueprint for how external modules should interact with the package.
 
-- **Enhances Security**: Blocks non-compliant imports, reducing the risk of bugs and vulnerabilities.
-- **Simplifies Debugging**: Easily trace incorrect imports.
-- **Supports Code Evolution**: Write code that defines rules for future integrations, preventing errors before they occur.
+Step 2: Validate During Import
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Support the Development of ImportSpy
--------------------------------------
+When a module imports the package, ImportSpy compares the module against the defined rules. Non-compliant modules are rejected, ensuring only compatible integrations proceed.
 
-**ImportSpy** is an open-source project passionately developed by a single developer from **Satriano di Lucania**, a small town in the beautiful region of Lucania, Italy. This project represents a unique solution for managing Python imports, but it requires **time**, **dedication**, and **resources** to grow and improve.
+Step 3: Monitor and Debug
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Why Your Support Matters
-------------------------
+ImportSpy provides detailed insights into how modules interact with the package, enabling developers to troubleshoot and maintain alignment with the expected module structure.
 
-By sponsoring **ImportSpy**, you can help:
+📚 Case Study: Pydantic for Tool Innovation
+----------------------------------------
 
-- **Accelerate development**: Your support allows me to dedicate more time to creating new features, fixing bugs, and improving compatibility.
-- **Keep the project up to date**: Ensure ImportSpy continues to support the latest Python versions and modern development needs.
-- **Provide community support**: Expand documentation, create advanced examples, and respond to user inquiries.
-- **Make the project sustainable**: Promote innovation in an open-source environment.
+Pydantic’s ability to perform dynamic data validation makes it a cornerstone for creating innovative tools like ImportSpy. Unlike static type checkers, Pydantic validates data structures at runtime, making it uniquely suited for Python’s dynamic ecosystem.
 
-Every contribution, big or small, makes a difference and helps keep the project free and accessible for everyone.
+By leveraging Pydantic models, ImportSpy enforces strict validation rules on module interactions. This ensures consistency without sacrificing Python’s flexibility. Such an approach is rare in other programming languages, showcasing how Python can lead in innovative tooling.
 
-How to Sponsor
---------------
+Example: Leveraging Pydantic for Dynamic Module Validation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-You can sponsor ImportSpy directly on GitHub. As a sponsor, you will:
+.. code-block:: python
 
-- **Be publicly recognized** (if desired) in the documentation and GitHub repository.
-- **Influence project development** by suggesting features that meet your needs.
-- **Receive priority support** for integrating ImportSpy into your projects.
+    from pydantic import BaseModel
+    from typing import List, Optional
 
-💡 Sponsor ImportSpy now: `GitHub Sponsors <https://github.com/sponsors/atellaluca>`_
+    class ClassModel(BaseModel):
+        name: str
+        class_attr: Optional[List[str]] = []
+        instance_attr: Optional[List[str]] = []
+        methods: Optional[List[str]] = []
+        superclasses: Optional[List[str]] = []
 
+    class SpyModel(BaseModel):
+        filename: Optional[str] = ""
+        version: Optional[str] = ""
+        variables: Optional[dict] = {}
+        functions: Optional[List[str]] = []
+        classes: Optional[List[ClassModel]] = []
+        env_vars: Optional[dict] = {}
 
-A Small Contribution, A Big Impact
------------------------------------
+This example shows how Pydantic allows ImportSpy to enforce structural requirements dynamically, enhancing the reliability of integrations.
 
-Your support is not just an investment in ImportSpy but also in the open-source philosophy, which fosters innovation and collaboration within the Python community. Even a small contribution can make a big difference!
+🤝 Sponsorship
+-----------
 
-Thank you for believing in this project and helping take ImportSpy to the next level. ❤️
+   💖 Support the development of ImportSpy and help make this project sustainable! Your sponsorship enables:
 
-Access the Full Documentation
-=============================
+   🚀 Accelerated development with more time dedicated to creating features and fixing bugs.
 
-For detailed guidance on using **ImportSpy**, including advanced usage, API references, and examples, visit `our official documentation <https://importspy.readthedocs.io>`_.
+   📘 Expanded documentation with detailed guides and comprehensive references.
 
-The documentation is continually updated to ensure you have access to the latest features, best practices, and integration tips. Whether you're a beginner or an experienced developer, the documentation will help you unlock the full potential of ImportSpy.
+   🌱 Continuous maintenance and improvement for evolving Python ecosystems.
 
+You can sponsor ImportSpy on `GitHub Sponsors <https://github.com/sponsors/atellaluca>`_
 
-Contribute to ImportSpy
------------------------
+Thank you for supporting ImportSpy and fostering innovation in the Python community! 🎉
 
-Want to contribute? Add new features, provide feedback, or report bugs.
+🌟 Contributing
+------------
 
-License
+ImportSpy is open-source and thrives on community contributions. Whether you want to report bugs, suggest features, or submit pull requests, your input is invaluable.
+
+📝 License
 -------
 
-This project is distributed under the MIT License. See the `LICENSE <https://github.com/atellaluca/ImportSpy/blob/main/LICENSE>`_ file for details.
+This project is licensed under the MIT License. See the `LICENSE <https://github.com/atellaluca/ImportSpy/blob/main/LICENSE>`_ file for details.
+
+📖 Documentation
+-------------
+
+Explore the full documentation at `ImportSpy Docs <https://importspy.readthedocs.io>`_.
+
+Stay up-to-date with the latest features, best practices, and examples to make the most of ImportSpy.
