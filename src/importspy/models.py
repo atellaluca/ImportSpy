@@ -1,10 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import (
     Optional, 
     List
 )
 from types import ModuleType
 from .utils import spy_module_utils
+from .constants import Constants
+from .errors import Errors
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -42,7 +44,7 @@ class ClassModel(BaseModel):
     methods: Optional[List[str]] = []
     superclasses: Optional[List[str]] = []
 
-class SpyModel(BaseModel):
+class SpyModule(BaseModel):
     """
     A model that defines the expected structure of a Python module, allowing developers to declare in advance 
     how external modules that import their code should be organized, promoting **proactive programming**.
@@ -100,6 +102,20 @@ class SpyModel(BaseModel):
     classes: Optional[List[ClassModel]] = []
     env_vars: Optional[dict] = {}
 
+class SpyArchModule(BaseModel):
+    
+    arch: str
+    module: SpyModule
+
+    @field_validator('arch')
+    def validate_arch(cls, value:str):
+        if value not in Constants.KNOWN_ARCHITECTURES:
+            raise ValueError(Errors.INVALID_ARCHITECTURE.format(value, Constants.KNOWN_ARCHITECTURES))
+        return value
+
+class SpyModel(SpyModule):
+    spies: Optional[List[SpyArchModule]] = []
+
     @classmethod
     def from_module(cls, info_module: ModuleType):
         """
@@ -146,11 +162,20 @@ class SpyModel(BaseModel):
             in spy_module_utils.extract_classes(info_module)
         ]
         env_vars = spy_module_utils.extract_env_vars()
+        arch = spy_module_utils.extract_arch()
         spy_module_utils.unload_module(info_module)
         logger.debug("Unload module")
         logger.debug(f"filename: {filename}, version: {version}, \
                      functions: {functions}, classes: {classes}")
         return cls(
+            spies = [
+                SpyArchModule(
+                    arch=arch,
+                    module=SpyModule(
+                        
+                    )
+                )
+            ],
             filename=filename,
             version=version,
             variables=variables,
@@ -158,4 +183,3 @@ class SpyModel(BaseModel):
             classes=classes,
             env_vars=env_vars
         )
-
