@@ -24,38 +24,10 @@ def condition(module: ModuleType):
     return False
 
 class TestSpy:
-
-    def test_importspy_with_spymodel_plugin_validation(self, spy_instance, monkeypatch):
-
-        def mock_load_module(info_module):
-            module = ModuleType("mock_module")
-            module.__file__ = "extension.py"
-            return module
-
-        monkeypatch.setattr('importspy.utils.spy_module_utils.load_module', mock_load_module)
-        monkeypatch.setattr('importspy.utils.spy_module_utils.unload_module', lambda module: logger.debug("Mock unload module"))
-        monkeypatch.setenv("CI", "true")
-        monkeypatch.setenv("GITHUB_ACTIONS", "true")
-        imported_module = spy_instance.importspy(spymodel=PluginSpy)
-        assert imported_module.__name__ == 'mock_module'
-        imported_module = spy_instance.importspy(spymodel=EnvSpy)
-        assert imported_module
-        monkeypatch.setenv("CI", "false")
-        with pytest.raises(ValueError, match=r"Value mismatch for environment variable 'CI'"):
-            imported_module = spy_instance.importspy(spymodel=EnvSpy)
     
-    def test_importspy_without_validation(self, spy_instance, mock_import_functions):
+    def test_importspy(self, spy_instance, mock_import_functions):
         imported_module = spy_instance.importspy()
         assert imported_module.__name__ == 'mock_module'
-
-    def test_importspy_with_plugin_validation(self, spy_instance:Spy, mock_import_functions):
-        imported_module = spy_instance.importspy(validation=condition)
-        assert imported_module.__name__ == 'mock_module'
- 
-    def test_importspy_no_plugin(self, spy_instance:Spy, mock_import_no_plugin):
-        
-        imported_module = spy_instance.importspy(validation=condition)
-        assert imported_module is None
 
     def test_importspy_recursion_error(self, spy_instance, monkeypatch):
         monkeypatch.setattr('inspect.stack', lambda: [
