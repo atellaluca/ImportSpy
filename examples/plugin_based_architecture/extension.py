@@ -3,6 +3,9 @@ from plugin_interface import Plugin
 
 plugin_name = "plugin name"
 plugin_description = "plugin description"
+
+engine = "docker"
+
 class Extension(Plugin):
 
     extension_name = "extension_name"

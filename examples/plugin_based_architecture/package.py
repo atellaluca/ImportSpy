@@ -1,9 +1,18 @@
 from importspy import Spy
-from importspy.models import SpyModel, ClassModel
-from importspy.utils import spy_model_utils
+from importspy.models import SpyModel, ClassModel, SpyArchModule
+from importspy.constants import Constants
 from typing import List
 
 class PluginSpy(SpyModel):
+    spies: List[SpyArchModule] = [
+        SpyArchModule(
+            arch=Constants.ARCH_x86_64,
+            module=SpyModel(
+                variables={
+                    "engine":"docker"
+                }
+            ))
+    ]
     variables: dict = {"plugin_name":"plugin name", "plugin_description":"plugin description"}
     classes: List[ClassModel] = [
         ClassModel(
