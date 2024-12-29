@@ -32,6 +32,14 @@ def is_subset(spy_model_1: SpyModel, spy_model_2: SpyModel) -> bool:
         print("Validation error:", ve)
     ```
     """
+    arch = spy_model_2.spies[0].arch
+    for spy in spy_model_1.spies:
+        if arch == spy.arch:
+            if not compare(spy.module, spy_model_2):
+                return False
+    return compare(spy_model_1, spy_model_2)
+
+def compare(spy_model_1:SpyModel, spy_model_2:SpyModel):
     if spy_model_1.filename and spy_model_1.filename != spy_model_2.filename:
         raise ValueError(Errors.FILENAME_MISMATCH.format(spy_model_1.filename, spy_model_2.filename))
     if spy_model_1.version and spy_model_1.version != spy_model_2.version:
