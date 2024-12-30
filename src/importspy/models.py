@@ -58,7 +58,7 @@ class SpyModule(BaseModel):
         variables (Optional[dict]): A dictionary of expected variables in the module. Defaults to an empty dictionary.
         functions (Optional[List[str]]): A list of function names expected in the module. Defaults to an empty list.
         classes (Optional[List[ClassModel]]): A list of expected class structures, represented by `ClassModel`. Defaults to an empty list.
-        env_vars (Optional[dict]): A dictionary of required environment variables. Defaults to an empty dictionary.
+        envs (Optional[dict]): A dictionary of required environment variables. Defaults to an empty dictionary.
 
     Example:
         ```python
@@ -69,7 +69,7 @@ class SpyModule(BaseModel):
             classes=[
                 ClassModel(name="MyClass", methods=["my_method"], superclasses=["BaseClass"])
             ],
-            env_vars={"CI": "true"}
+            envs={"CI": "true"}
         )
         ```
         This defines a `SpyModule` for a module named `MyModule.py`, version 1.0.0, expected to contain a function 
@@ -81,7 +81,7 @@ class SpyModule(BaseModel):
     variables: Optional[dict] = {}
     functions: Optional[List[str]] = []
     classes: Optional[List[ClassModel]] = []
-    env_vars: Optional[dict] = {}
+    envs: Optional[dict] = {}
 
 class SpyArchModule(BaseModel):
 
@@ -208,7 +208,7 @@ class SpyModel(SpyModule):
             superclasses 
             in spy_module_utils.extract_classes(info_module)
         ]
-        env_vars = spy_module_utils.extract_env_vars()
+        envs = spy_module_utils.extract_envs()
         arch = spy_module_utils.extract_arch()
         spy_module_utils.unload_module(info_module)
         logger.debug("Unload module")
@@ -228,5 +228,5 @@ class SpyModel(SpyModule):
             variables=variables,
             functions=functions,
             classes=classes,
-            env_vars=env_vars
+            envs=envs
         )
