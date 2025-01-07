@@ -55,7 +55,7 @@ class Errors:
         "errors, ensure that the analysis process does not recursively attempt to evaluate itself."
     )
 
-    # SpyModel validation
+    # Module validation
     FILENAME_MISMATCH  = "Filename mismatch: {0} != {1}"
     VERSION_MISMATCH = "Version mismatch: {0} != {1}"
     ENV_VAR_MISMATCH = "Value mismatch for environment variable '{0}': expected '{1}', found '{2}'."
@@ -68,6 +68,7 @@ class Errors:
     CLASS_INSTANCE_ATTRIBUTE_MISSING = "Missing class instance attribute: '{0}'. Ensure it is defined in class '{1}'."
     CLASS_METHOD_MISSING = "Missing class method: '{0}'. Ensure it is defined in class '{1}'."
     CLASS_SUPERCLASS_MISSING = "Missing class superclass: '{0}'. Make sure that '{1}' extends {0}."
+    INVALID_ATTRIBUTE_TYPE = "Invalid attribute type '{0}'. Known attributes are: {1}"
 
-    # SpyArchModule validation
+    # Runtime validation
     INVALID_ARCHITECTURE = "Invalid architecture '{0}'. Known architectures are: {1}"

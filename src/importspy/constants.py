@@ -28,3 +28,10 @@ class Constants:
     ARCH_PPC64 = "ppc64"
     ARCH_PPC64LE = "ppc64le"
     ARCH_S390X = "s390x"
+
+    SUPPORTED_OS = ["windows", "unix", "macOS"]
+    OS_WINDOWS = "windows"
+    OS_UNIX = "unix"
+    OS_MACOS = "macOS"
+
+    ATTRIBUTE_TYPES = ["class", "instance"]
