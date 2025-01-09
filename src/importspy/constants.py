@@ -29,9 +29,17 @@ class Constants:
     ARCH_PPC64LE = "ppc64le"
     ARCH_S390X = "s390x"
 
-    SUPPORTED_OS = ["windows", "unix", "macOS"]
+    SUPPORTED_OS = ["windows", "linux", "darwin"]
     OS_WINDOWS = "windows"
-    OS_UNIX = "unix"
-    OS_MACOS = "macOS"
+    OS_LINUX = "linux"
+    OS_MACOS = "darwin"
+
+    SUPPORTED_PYTHON_IMPLEMENTATION = ["CPython", "PyPy", "Jython", "IronPython"]
+    INTERPRETER_CPYTHON = "CPython"
+    INTERPRETER_PYPY = "PyPy"
+    INTERPRETER_JYTHON = "Jython"
+    INTERPRETER_IRON_PYTHON = "IronPython"
 
     ATTRIBUTE_TYPES = ["class", "instance"]
+
+    DIE_ENVIRONMENT = "DIE - Default ImportSpy Environment"
