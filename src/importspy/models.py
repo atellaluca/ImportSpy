@@ -1,8 +1,13 @@
-from pydantic import BaseModel, field_validator
+from pydantic import (
+    BaseModel,
+    field_validator,
+    Field
+)
 from typing import (
     Optional, 
     List,
-    Union
+    Union,
+    Literal
 )
 from types import ModuleType
 from .utils.die_utils import (
@@ -21,16 +26,18 @@ logger.addHandler(logging.NullHandler())
 class Python(BaseModel):
     version: Optional[str]
     interpreter: Optional[str]
-    modules: Optional[List['Module']]
+    modules: Optional[List['Module']] = None
 
 class System(BaseModel):
-    os: Optional[str]
-    envs: Optional[dict]
-    pythons: Optional[List[Python]]
+
+    os: Optional[str] = None
+    envs: Optional[dict] = None
+    pythons: Optional[List[Python]] = None
 
 class Runtime(BaseModel):
-    arch: Optional[str]
-    systems: List[System]
+
+    arch: Optional[str] = None
+    systems: Optional[List[System]] = None
 
     @field_validator('arch')
     def validate_arch(cls, value:str):
@@ -41,33 +48,34 @@ class Runtime(BaseModel):
 class Attribute(BaseModel):
     type: str
     name: str
-    value: Optional[Union[int, str, float, bool, None]]
+    value: Optional[Union[int, str, float, bool, None]] = None
 
     @field_validator('type')
     def validate_arch(cls, value:str):
         if value not in Constants.ATTRIBUTE_TYPES:
             raise ValueError(Errors.INVALID_ATTRIBUTE_TYPE.format(value, Constants.ATTRIBUTE_TYPES))
         return value
+    
 
 class Class(BaseModel):
     name: str
-    attributes: Optional[List[Attribute]]
-    methods: Optional[List[str]]
-    superclasses: Optional[List[str]]
+    attributes: Optional[List[Attribute]] = None
+    methods: Optional[List[str]] = None
+    superclasses: Optional[List[str]] = None
 
 class Module(BaseModel):
-    filename: Optional[str]
-    version: Optional[str]
-    variables: Optional[dict]
-    functions: Optional[List[str]]
-    classes: Optional[List[Class]]
+    filename: Optional[str] = None
+    version: Optional[str] = None
+    variables: Optional[dict] = None
+    functions: Optional[List[str]] = None
+    classes: Optional[List[Class]] = None
 
 class Deployment(BaseModel):
-    runtimes: Optional[List[Runtime]]
-    environment: Optional[str]
+    runtimes: Optional[List[Runtime]] = None
+    environment: Optional[str] = None
     
 class SpyModel(Module):
-    deployments: Optional[List[Deployment]]
+    deployments: Optional[List[Deployment]] = None
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
