@@ -1,7 +1,6 @@
 class Constants:
-    """
-    A central repository for static definitions used throughout the ImportSpy package.
 
+    """
     This class defines known architecture constants and provides a standardized reference
     for supported system architectures. These constants are utilized to identify and handle
     platform-specific module requirements in ImportSpy.
@@ -19,7 +18,7 @@ class Constants:
     """
     
     KNOWN_ARCHITECTURES = ['x86_64', 'aarch64', 'arm', 'arm64', 'i386', 'ppc64', 'ppc64le', 's390x']
-
+    
     ARCH_x86_64 = "x86_64"
     ARCH_AARCH64 = "aarch64"
     ARCH_ARM = "arm"
@@ -43,3 +42,6 @@ class Constants:
     ATTRIBUTE_TYPES = ["class", "instance"]
 
     DIE_ENVIRONMENT = "DIE - Default ImportSpy Environment"
+
+    NAME = "name"
+    VALUE = "value"
