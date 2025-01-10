@@ -292,7 +292,7 @@ class RuntimeUtils:
 class SystemUtils:
 
     def extract_os(self) -> str:
-        return platform.system.lower()
+        return platform.system().lower()
 
     def extract_envs(self) -> dict:
         """
@@ -335,4 +335,4 @@ class PythonUtils:
         return platform.python_version()
     
     def extract_python_implementation(self) -> str:
-        return platform.python_implementation(self)
+        return platform.python_implementation()
