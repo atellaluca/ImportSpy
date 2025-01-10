@@ -4,7 +4,7 @@ from .models import SpyModel
 from .utils.die_utils import (
     ModuleUtils
 )
-from .utils.validation_utils import SpyModelUtils
+from .utils.validators import SpyModelValidator
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -109,7 +109,7 @@ class Spy:
             logger.debug(f"SpyModel detected: {spymodel}")
             spy_module = SpyModel.from_module(info_module)
             logger.debug(f"Spy module: {spy_module}")
-            return module_util.load_module(info_module) if SpyModelUtils().is_subset(spymodel(), spy_module) else None
+            return module_util.load_module(info_module) if SpyModelValidator().is_subset(spymodel(), spy_module) else None
         return module_util.load_module(info_module)
 
     def _spy_module(self) -> ModuleType | None:
