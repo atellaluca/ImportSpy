@@ -55,6 +55,9 @@ class Errors:
         "errors, ensure that the analysis process does not recursively attempt to evaluate itself."
     )
 
+    # System validation
+    SYSTEM_MISSING = "Missing System '{0}'. Ensure it is defined"
+
     # Module validation
     FILENAME_MISMATCH  = "Filename mismatch: {0} != {1}"
     VERSION_MISMATCH = "Version mismatch: {0} != {1}"
@@ -64,8 +67,8 @@ class Errors:
     VAR_MISSING = "Missing variable: '{0}'. Ensure it is defined."
     FUNCTIONS_MISSING = "Missing function: '{0}'. Ensure it is defined."
     CLASS_MISSING = "Missing class: {0}. Ensure it is defined."
-    CLASS_ATTRIBUTE_MISSING = "Missing class attribute: '{0}'. Ensure it is defined in class '{1}'."
-    CLASS_INSTANCE_ATTRIBUTE_MISSING = "Missing class instance attribute: '{0}'. Ensure it is defined in class '{1}'."
+    CLASS_ATTRIBUTE_MISSING = "Missing {0} attribute: '{1}'. Ensure it is defined in class '{2}'."
+    CLASS_ATTRIBUTE_MISMATCH = "{0} mismatch for {1} attribute '{2}': expected '{3}', found '{4}'."
     CLASS_METHOD_MISSING = "Missing class method: '{0}'. Ensure it is defined in class '{1}'."
     CLASS_SUPERCLASS_MISSING = "Missing class superclass: '{0}'. Make sure that '{1}' extends {0}."
     INVALID_ATTRIBUTE_TYPE = "Invalid attribute type '{0}'. Known attributes are: {1}"
