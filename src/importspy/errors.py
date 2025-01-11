@@ -55,8 +55,16 @@ class Errors:
         "errors, ensure that the analysis process does not recursively attempt to evaluate itself."
     )
 
+    MISSING_TEMPLATE = "Ensure code is running in a supported {0}. Please update your configuration if necessary. Detected {0} is: {1}"
+
+    # Runtime validation
+    RUNTIME_MISSING = MISSING_TEMPLATE.format("Runtime", "{0}")
+
     # System validation
-    SYSTEM_MISSING = "Missing System '{0}'. Ensure it is defined"
+    SYSTEM_MISSING = MISSING_TEMPLATE.format("System", "{0}")
+
+    #Python validation
+    PYTHON_MISSING = MISSING_TEMPLATE.format("Python", "{0}")
 
     # Module validation
     FILENAME_MISMATCH  = "Filename mismatch: {0} != {1}"
