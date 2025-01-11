@@ -1,6 +1,6 @@
 from importspy import (
     Spy,
-    Constants
+    Config
 )
 from importspy.models import (
     SpyModel,
@@ -22,18 +22,18 @@ class PluginSpy(SpyModel):
         Deployment(
             runtimes=[
                 Runtime(
-                    arch=Constants.ARCH_x86_64,
+                    arch=Config.ARCH_x86_64,
                     systems=[
                         System(
-                            os=Constants.OS_LINUX
+                            os=Config.OS_LINUX
                         )
                     ]
                 ),
                 Runtime(
-                    arch=Constants.ARCH_ARM64,
+                    arch=Config.ARCH_ARM64,
                     systems=[
                         System(
-                            os=Constants.OS_MACOS
+                            os=Config.OS_MACOS
                         )
                     ]
                 )
@@ -46,12 +46,12 @@ class PluginSpy(SpyModel):
             name="Extension",
             attributes=[
                 Attribute(
-                    type=Constants.INSTANCE_TYPE,
+                    type=Config.INSTANCE_TYPE,
                     name="extension_instance_name",
                     value="extension_instance_value"
                 ),
                 Attribute(
-                    type=Constants.CLASS_TYPE,
+                    type=Config.CLASS_TYPE,
                     name="extension_name",
                     value="extension_value"
                 )
