@@ -109,7 +109,8 @@ class Spy:
             logger.debug(f"SpyModel detected: {spymodel}")
             spy_module = SpyModel.from_module(info_module)
             logger.debug(f"Spy module: {spy_module}")
-            return module_util.load_module(info_module) if SpyModelValidator().is_subset(spymodel(), spy_module) else None
+            SpyModelValidator().validate(spymodel(), spy_module)
+            return module_util.load_module(info_module)
         return module_util.load_module(info_module)
 
     def _spy_module(self) -> ModuleType | None:
