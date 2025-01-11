@@ -1,10 +1,8 @@
 from types import ModuleType
 from .errors import Errors
 from .models import SpyModel
-from .utils.die_utils import (
-    ModuleUtils
-)
-from .utils.validators import SpyModelValidator
+from .utilities.module_util import ModuleUtil
+from .validators.spymodel_validator import SpyModelValidator
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -103,7 +101,7 @@ class Spy:
         - It relies on `spy_module_utils` for loading and inspecting modules.
         """
         info_module = self._spy_module()
-        module_util = ModuleUtils()
+        module_util = ModuleUtil()
         logger.debug(f"info_module: {info_module}")
         if spymodel:
             logger.debug(f"SpyModel detected: {spymodel}")
@@ -149,7 +147,7 @@ class Spy:
         - Ensures safety during dynamic imports by detecting and preventing recursion.
         - Raises a `ValueError` with `Errors.ANALYSIS_RECURSION_WARNING` if recursion is detected.
     """
-        module_util = ModuleUtils()
+        module_util = ModuleUtil()
         current_frame, caller_frame = module_util.inspect_module()
         if current_frame.filename == caller_frame.filename:
             raise ValueError(Errors.ANALYSIS_RECURSION_WARNING)
