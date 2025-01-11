@@ -194,26 +194,11 @@ class ModuleUtils:
         ]
 
     def extract_classes(self, info_module: ModuleType) -> List[ClassInfo]:
-        """
-        Extract information about classes in a module, including their methods, class attributes, 
-        instance attributes, and superclasses, providing a clear picture of the module's class structure.
-
-        This function retrieves class information from the specified module, including class names, 
-        class attributes, instance attributes, methods they define, and their superclasses.
-
-        Parameters:
-        -----------
-        - **info_module** (`ModuleType`): The module from which to extract class information.
-
-        Returns:
-        --------
-        - **List[ClassInfo]**: A list of `ClassInfo` namedtuples containing class names, class_attr, instance_attr, methods, and superclasses.
-        """
         classes = []
         for class_name, cls_obj in inspect.getmembers(info_module, inspect.isclass):
             if cls_obj.__module__ == info_module.__name__:
                 class_attr = [
-                    attr_name for attr_name, attr_value in cls_obj.__dict__.items() 
+                    (attr_name, attr_value) for attr_name, attr_value in cls_obj.__dict__.items() 
                     if not callable(attr_value) and not attr_name.startswith('__')
                 ]
                 instance_attr = []
@@ -223,12 +208,14 @@ class ModuleUtils:
                     for line in source_lines:
                         line = line.strip()
                         if line.startswith('self.') and '=' in line:
-                            attr_name = line.split('=')[0].strip().split('.')[1]
-                            instance_attr.append(attr_name)
+                            parts = line.split('=')
+                            attr_name = parts[0].strip().split('.')[1]
+                            attr_value = parts[1].strip().strip('"')
+                            instance_attr.append((attr_name, attr_value))
                 methods = [
                     method_name for method_name, _ in inspect.getmembers(cls_obj, inspect.isfunction)
                 ]
-                superclasses = [base.__name__ for base in cls_obj.__bases__]
+                superclasses = [base.__name__ for base in cls_obj.__bases__ if base.__name__ != "object"]
                 current_class = ClassInfo(class_name, class_attr, instance_attr, methods, superclasses)
                 classes.append(current_class)
         return classes
