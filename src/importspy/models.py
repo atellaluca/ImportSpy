@@ -6,15 +6,15 @@ from pydantic import (
 from typing import (
     Optional, 
     List,
-    Union,
-    Literal
+    Union
 )
 from types import ModuleType
 from .utils.die_utils import (
     ModuleUtils,
     RuntimeUtils,
     SystemUtils,
-    PythonUtils
+    PythonUtils,
+    ClassInfo
 )
 from .constants import Constants
 from .errors import Errors
@@ -31,7 +31,7 @@ class Python(BaseModel):
 class System(BaseModel):
 
     os: Optional[str] = None
-    envs: Optional[dict] = None
+    envs: Optional[dict] = Field(default=None, repr=False)
     pythons: Optional[List[Python]] = None
 
 class Runtime(BaseModel):
@@ -89,20 +89,7 @@ class SpyModel(Module):
         version = module_utils.extract_version(info_module)
         variables = module_utils.extract_variables(info_module)
         functions = module_utils.extract_functions(info_module)
-        classes = [
-            Class(name=name,
-                       class_attr=class_attr,
-                       instance_attr=instance_attr,
-                       methods=methods,
-                       superclasses=superclasses)
-            for
-            name,
-            class_attr,
-            instance_attr,
-            methods,
-            superclasses
-            in module_utils.extract_classes(info_module)
-        ]
+        classes = cls._class_adaper(module_utils.extract_classes(info_module))
         arch = runtime_utils.extract_arch()
         os = sytem_utils.extract_os()
         python_version = python_utils.extract_python_version()
@@ -119,11 +106,11 @@ class SpyModel(Module):
                     runtimes=[
                         Runtime(
                             arch=arch,
-                            system=[
+                            systems=[
                                 System(
                                     os=os,
                                     envs=envs,
-                                    python=[
+                                    pythons=[
                                         Python(
                                             version=python_version,
                                             interpreter=interpreter,
@@ -145,5 +132,32 @@ class SpyModel(Module):
                         )
                     ]
                 )
-            ],
+            ]
         )
+    
+    def _class_adaper(extracted_classes:List[ClassInfo]):
+        classes = []
+        for name, class_attr, instance_attr, methods, superclasses in extracted_classes:
+            classes.append(Class(name=name,
+                  attributes=
+                    [
+                        Attribute(
+                            type=Constants.INSTANCE_TYPE,
+                            name=name,
+                            value=value
+                        )
+                        for name, value in instance_attr
+                      ]
+                      + [
+                        Attribute(
+                            type=Constants.CLASS_TYPE,
+                            name=name,
+                            value=value
+                        )
+                        for name, value in class_attr  
+                    ],
+                  methods=methods,
+                  superclasses=superclasses
+                )
+            )
+        return classes
