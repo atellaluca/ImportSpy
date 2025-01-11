@@ -41,6 +41,9 @@ class Constants:
 
     ATTRIBUTE_TYPES = ["class", "instance"]
 
+    CLASS_TYPE = "class"
+    INSTANCE_TYPE = "instance"
+
     DIE_ENVIRONMENT = "DIE - Default ImportSpy Environment"
 
     NAME = "name"
