@@ -8,10 +8,10 @@ engine = "docker"
 
 class Extension(Plugin):
 
-    extension_name = "extension_name"
+    extension_name = "extension_value"
 
     def __init__(self) -> None:
-        self.extension_instance_name = "extension_instance_name"
+        self.extension_instance_name = "extension_instance_value"
     
     def add_extension(self):
         print("Extension has added")
