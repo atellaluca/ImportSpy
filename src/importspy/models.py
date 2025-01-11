@@ -9,13 +9,13 @@ from typing import (
     Union
 )
 from types import ModuleType
-from .utils.die_utils import (
-    ModuleUtils,
-    RuntimeUtils,
-    SystemUtils,
-    PythonUtils,
+from .utilities.module_util import (
+    ModuleUtil, 
     ClassInfo
 )
+from .utilities.runtime_util import RuntimeUtil
+from .utilities.system_util import SystemUtil
+from .utilities.python_util import PythonUtil
 from .constants import Constants
 from .errors import Errors
 import logging
@@ -79,10 +79,10 @@ class SpyModel(Module):
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
-        module_utils = ModuleUtils()
-        runtime_utils = RuntimeUtils()
-        sytem_utils = SystemUtils()
-        python_utils = PythonUtils()
+        module_utils = ModuleUtil()
+        runtime_utils = RuntimeUtil()
+        sytem_utils = SystemUtil()
+        python_utils = PythonUtil()
         info_module = module_utils.load_module(info_module)
         logger.debug(f"Create SpyModel from info_module: {ModuleType}")
         filename = "/".join(info_module.__file__.split('/')[-1:])
