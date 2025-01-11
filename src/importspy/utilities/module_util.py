@@ -1,13 +1,11 @@
 import inspect
 import importlib.util
 import sys
-import os
+import importlib.metadata
+import logging
 from types import ModuleType
 from typing import List
 from collections import namedtuple
-import importlib.metadata
-import logging
-import platform
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -20,7 +18,8 @@ ClassInfo = namedtuple('ClassInfo', [
     'superclasses'
     ])
 
-class ModuleUtils:
+
+class ModuleUtil:
 
     def inspect_module(self) -> tuple:
         """
@@ -246,80 +245,3 @@ class ModuleUtils:
                     logger.debug(f"Added {base.__name__} to superclasses set")
         logger.debug(f"Superclasses: {superclasses}")
         return list(superclasses)
-
-class RuntimeUtils:
-    
-
-    def extract_arch(self) -> str:
-        """
-        Extract the current hardware architecture of the system.
-
-        This function retrieves the machine's hardware architecture using the `platform` module and returns it as a string. 
-        The architecture describes the hardware type, such as `x86_64` for 64-bit Intel/AMD processors or `arm64` for 64-bit ARM processors.
-
-        Returns:
-        --------
-        - **str**: A string representing the current hardware architecture of the system.
-
-        Example Usage:
-        --------------
-        ```python
-        arch = extract_arch()
-        print(arch)
-        # Output: 'x86_64', 'arm64', or similar based on the system
-        ```
-
-        Notes:
-        ------
-        - The output depends on the hardware of the machine and not the operating system.
-        - This function is useful for determining compatibility with specific binaries or packages.
-        """
-        return platform.machine()
-
-class SystemUtils:
-
-    def extract_os(self) -> str:
-        return platform.system().lower()
-
-    def extract_envs(self) -> dict:
-        """
-        Extract all current environment variables and their values as a dictionary.
-
-        This function retrieves all environment variables available in the system's current execution
-        context and returns them in a dictionary format. Each key in the dictionary represents the
-        name of an environment variable, and its corresponding value represents the value assigned 
-        to that variable.
-
-        Parameters:
-        -----------
-        None
-
-        Returns:
-        --------
-        - **dict**: A dictionary where:
-            - **Key** (`str`): The name of the environment variable.
-            - **Value** (`str`): The value assigned to the environment variable.
-
-        Example Usage:
-        --------------
-        ```python
-        env_vars = extract_envs()
-        print(env_vars)
-        # Output: {'PATH': '/usr/bin:/bin', 'CI': 'true', ...}
-        ```
-
-        Notes:
-        ------
-        - This function is useful for debugging or validating the runtime environment.
-        - It relies on `os.environ`, which reflects the environment at the time the function is called.
-        - Sensitive data (e.g., API keys) might be included in the output; handle with care.
-        """
-        return dict(os.environ)
-    
-class PythonUtils:
-
-    def extract_python_version(self) -> str:
-        return platform.python_version()
-    
-    def extract_python_implementation(self) -> str:
-        return platform.python_implementation()
