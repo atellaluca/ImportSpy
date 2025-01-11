@@ -1,2 +1,2 @@
 from .s import Spy
-from .constants import Constants
+from .config import Config
