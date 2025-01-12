@@ -3,8 +3,8 @@ import importlib.util
 import sys
 import importlib.metadata
 import logging
-from types import ModuleType
-from typing import List
+from types import ModuleType, FunctionType
+from typing import List, Tuple
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,19 @@ ClassInfo = namedtuple('ClassInfo', [
     'methods',
     'superclasses'
     ])
+
+FunctionInfo = namedtuple('FunctionInfo', [
+    "name",
+    "arguments",
+    "return_annotation"
+    ])
+
+ArgumentInfo = namedtuple('ArgumentInfo', [
+    "name",
+    "annotation",
+    "value"
+    ])
+
 
 
 class ModuleUtil:
@@ -168,28 +181,40 @@ class ModuleUtil:
             and not isinstance(obj, ModuleType)
             and not (var_name.startswith("__") and var_name.endswith("__"))
         }
-
-
-
-    def extract_functions(self, info_module: ModuleType) -> List[str]:
-        """
-        Extract a list of function names defined in a module.
-
-        This function retrieves all function names defined within the specified module, allowing
-        developers to verify the functions implemented in the module.
-
-        Parameters:
-        -----------
-        - **info_module** (`ModuleType`): The module from which to extract function names.
-
-        Returns:
-        --------
-        - **List[str]: A list of function names defined in the module.
-        """
+    
+    def extract_functions(self, 
+                          info_module:ModuleType) -> List[FunctionInfo]:
         return [
-            func_name
+            self._extract_function(func_name, obj)
             for func_name, obj in inspect.getmembers(info_module, inspect.isfunction)
             if obj.__module__ == info_module.__name__
+        ]
+    
+    def _extract_function(self, func_name:str, obj: Tuple[str, FunctionType]):
+        return FunctionInfo(
+            func_name,
+            self._extract_arguments(obj),
+            None if inspect.signature(obj).return_annotation is inspect.Signature.empty
+            else inspect.signature(obj).return_annotation
+        )
+    
+    def _extract_arguments(self, obj):
+        return [
+            ArgumentInfo(
+                name=arg_name,
+                annotation=param.annotation if param.annotation is not inspect.Signature.empty else None,
+                value=param.default if param.default is not inspect.Signature.empty else None
+            )
+            for arg_name, param in inspect.signature(obj).parameters.items()
+            ]
+
+    def extract_methods(self,
+                        cls_obj):
+        info_functions = inspect.getmembers(cls_obj, inspect.isfunction)
+        return [
+            self._extract_function(func_name, obj)
+            for func_name, obj in info_functions
+            if obj.__module__ == cls_obj.__module__
         ]
 
     def extract_classes(self, info_module: ModuleType) -> List[ClassInfo]:
@@ -212,14 +237,14 @@ class ModuleUtil:
                             attr_value = parts[1].strip().strip('"')
                             instance_attr.append((attr_name, attr_value))
                 methods = [
-                    method_name for method_name, _ in inspect.getmembers(cls_obj, inspect.isfunction)
+                    method_info for method_info in self.extract_methods(cls_obj)
                 ]
                 superclasses = [base.__name__ for base in cls_obj.__bases__ if base.__name__ != "object"]
                 current_class = ClassInfo(class_name, class_attr, instance_attr, methods, superclasses)
                 classes.append(current_class)
         return classes
 
-    def extract_superclassesself(self, module: ModuleType) -> List[str]:
+    def extract_superclasses(self, module: ModuleType) -> List[str]:
         """
         Extract all unique superclasses from a module, helping to understand the inheritance hierarchy 
         of the classes within the module.
