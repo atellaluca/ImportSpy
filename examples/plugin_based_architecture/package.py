@@ -10,7 +10,9 @@ from importspy.models import (
     Python,
     Module,
     Class,
-    Attribute
+    Attribute,
+    Function,
+    Argument
     )
 
 from typing import List
@@ -56,12 +58,54 @@ class PluginSpy(SpyModel):
                     value="extension_value"
                 )
             ],
-            methods=["__init__", "add_extension", "remove_extension", "http_get_request"],
+            methods=[
+                Function(
+                    name="__init__",
+                    arguments=[
+                        Argument(
+                             name="self"
+                        )
+                    ]
+                ),
+                Function(
+                    name="add_extension",
+                    arguments=[
+                        Argument(
+                            name="self"
+                        )
+                    ]
+                ),
+                Function(
+                    name="remove_extension",
+                    arguments=[
+                        Argument(
+                            name="self"
+                        )
+                    ]
+                ),
+                Function(
+                    name="http_get_request",
+                    arguments=[
+                        Argument(
+                            name="self"
+                        )
+                    ]
+                )
+            ],
             superclasses=["Plugin"]
         ),
         Class(
             name="Foo",
-            methods=["get_bar"],
+            methods=[
+                Function(
+                    name="get_bar",
+                    arguments=[
+                        Argument(
+                            name="self"
+                        )
+                    ]
+                    )
+            ],
         )]
     filename: str = "extension.py"
 
