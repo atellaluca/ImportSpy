@@ -14,7 +14,7 @@ class AttributeValidator:
             if attr_1 not in attrs_2:
                 raise ValueError(Errors.CLASS_ATTRIBUTE_MISSING.format(attr_1.type, f"{attr_1.name}={attr_1.value}", classname))
         for attr_1 in attrs_1:
-            attr_2 =  next((attr for attr in attrs_2 if attr == attr_1), None)
+            attr_2 =  next((attr for attr in attrs_2 if attr.name == attr_1.name), None)
             if attr_1.value != attr_2.value:
                 raise ValueError(Errors.CLASS_ATTRIBUTE_MISMATCH.format(Constants.VALUE, attr_1.type, attr_1.name, attr_1.value, attr_2.value))
                 

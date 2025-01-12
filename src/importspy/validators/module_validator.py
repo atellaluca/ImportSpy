@@ -2,6 +2,7 @@ from ..models import Module
 from typing import List
 from ..errors import Errors
 from .attribute_validator import AttributeValidator
+from .function_validator import FunctionValidator
 from .common_validator import CommonValidator
 
 class ModuleValidator:
@@ -26,6 +27,7 @@ class ModuleValidator:
                 # Class attributes validation
                 AttributeValidator().validate(class_1.attributes, class_2.attributes, class_1.name)
                 # Class methods validation
-                common_validator.list_validate(class_1.methods, class_2.methods, Errors.CLASS_METHOD_MISSING, class_2.name)
+                FunctionValidator().validate(class_1.methods, class_2.methods, classname=class_1.name)
+
                 # Superclasses validation
                 common_validator.list_validate(class_1.superclasses, class_2.superclasses, Errors.CLASS_SUPERCLASS_MISSING, class_2.name)
