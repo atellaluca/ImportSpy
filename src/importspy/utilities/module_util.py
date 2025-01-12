@@ -1,3 +1,26 @@
+"""
+Module: Module Utilities
+
+This module provides a comprehensive set of utility functions for dynamic module inspection, 
+loading, unloading, and metadata extraction. It is designed to support ImportSpy's runtime 
+validation processes by enabling detailed analysis of Python modules.
+
+Key Features:
+-------------
+- Inspect the calling stack and retrieve information about modules.
+- Dynamically load and unload modules for runtime modifications.
+- Extract metadata such as classes, functions, variables, and inheritance hierarchies from modules.
+
+Example Usage:
+--------------
+```python
+from importspy.utilities.module_util import ModuleUtil
+
+module_util = ModuleUtil()
+module_info = module_util.get_info_module(inspect.stack()[0])
+print(f"Module Name: {module_info.__name__}")
+"""
+
 import inspect
 import importlib.util
 import sys
@@ -34,25 +57,56 @@ ArgumentInfo = namedtuple('ArgumentInfo', [
 
 class ModuleUtil:
 
+    """
+    Utility class for dynamic module inspection and metadata extraction.
+
+    The `ModuleUtil` class provides methods to inspect, load, unload, and analyze Python 
+    modules at runtime. These utilities are essential for enabling ImportSpy's dynamic 
+    validation of runtime conditions.
+
+    Methods:
+    --------
+    - `inspect_module`: Retrieve the current and caller frames from the stack.
+    - `get_info_module`: Extract module information from a caller frame.
+    - `load_module`: Dynamically load or reload a module from its file location.
+    - `unload_module`: Unload a module from memory to allow re-importation.
+    - `extract_version`: Retrieve version information from a module.
+    - `extract_variables`: Extract global variables from a module.
+    - `extract_functions`: Extract function definitions and metadata from a module.
+    - `extract_classes`: Extract class definitions, attributes, methods, and inheritance information.
+    - `extract_superclasses`: Identify all unique superclasses from a module.
+
+    Example:
+    --------
+    ```python
+    from importspy.utilities.module_util import ModuleUtil
+
+    module_util = ModuleUtil()
+    module = module_util.load_module(some_info_module)
+    print(f"Loaded Module: {module.__name__}")
+    ```
+    """
+
     def inspect_module(self) -> tuple:
         """
-        Proactively inspect the current stack to identify the module that called this function and 
-        attempt to dynamically re-import it.
+        Retrieve the current and caller frames from the stack.
 
-        This function allows for proactive control over module execution, ensuring that you can
-        analyze the module calling your code and reload it if necessary. If recursion is detected 
-        (i.e., the caller module is the same as the current one), it raises a `ValueError` to prevent
-        unintended behavior.
-
-        Raises:
-        -------
-        - **ValueError**: If recursion within the same module is detected, meaning that the caller
-          and the current module are the same.
+        This method inspects the execution stack and returns the current frame and the caller frame. 
+        It is used to analyze the context in which a function is being executed.
 
         Returns:
         --------
-        - **tuple (inspect.FrameInfo, inspect.FrameInfo)**: A tuple containing information about the 
-          current frame and the caller frame.
+        - **tuple (inspect.FrameInfo, inspect.FrameInfo)**: A tuple containing the current frame and 
+          the caller frame.
+
+        Example Usage:
+        --------------
+        ```python
+        module_util = ModuleUtil()
+        current_frame, caller_frame = module_util.inspect_module()
+        print(f"Current Frame: {current_frame}")
+        print(f"Caller Frame: {caller_frame}")
+        ```
         """
         stack = inspect.stack()
         logger.debug(f"Stack detected: {stack}")
@@ -85,20 +139,26 @@ class ModuleUtil:
 
     def load_module(self, info_module: ModuleType) -> ModuleType | None:
         """
-        Dynamically load or reload a module from its file location, allowing modifications
-        to be applied without restarting the interpreter.
+        Dynamically load or reload a module from its file location.
 
-        This method attempts to dynamically re-import a module based on its file location, which 
-        can be particularly useful when the module has been modified and needs to be reloaded 
-        to reflect the changes.
+        This method facilitates dynamic reloading of a module, ensuring that any changes made to 
+        the module are immediately reflected without restarting the runtime.
 
         Parameters:
         -----------
-        - **info_module** (`ModuleType`): The module information used to locate and load the module.
+        - **info_module** (`ModuleType`): The module to be loaded or reloaded.
 
         Returns:
         --------
-        - **ModuleType | None**: The reloaded module if the loading is successful, or `None` if it fails.
+        - **ModuleType | None**: The loaded module, or `None` if loading fails.
+
+        Example Usage:
+        --------------
+        ```python
+        module_util = ModuleUtil()
+        module = module_util.load_module(some_info_module)
+        print(f"Module Name: {module.__name__}")
+        ```
         """
         logger.debug("Run load_module")
         spec = importlib.util.spec_from_file_location(info_module.__name__, info_module.__file__)
@@ -218,6 +278,30 @@ class ModuleUtil:
         ]
 
     def extract_classes(self, info_module: ModuleType) -> List[ClassInfo]:
+        """
+        Extract class metadata from a module.
+
+        This method retrieves all class definitions within the specified module, including their 
+        attributes, methods, and inheritance information.
+
+        Parameters:
+        -----------
+        - **info_module** (`ModuleType`): The module from which to extract class information.
+
+        Returns:
+        --------
+        - **List[ClassInfo]**: A list of `ClassInfo` named tuples representing the classes defined 
+          in the module.
+
+        Example Usage:
+        --------------
+        ```python
+        module_util = ModuleUtil()
+        classes = module_util.extract_classes(some_info_module)
+        for class_info in classes:
+            print(f"Class Name: {class_info.name}")
+        ```
+        """
         classes = []
         for class_name, cls_obj in inspect.getmembers(info_module, inspect.isclass):
             if cls_obj.__module__ == info_module.__name__:
