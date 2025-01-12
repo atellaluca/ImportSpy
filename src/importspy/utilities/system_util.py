@@ -1,3 +1,24 @@
+"""
+Module: System Utilities
+
+This module provides utility functions for interacting with the system environment and retrieving 
+information about the operating system and environment variables.
+
+Key Features:
+-------------
+- Extracts the operating system's name in a standardized format.
+- Retrieves all environment variables as a dictionary for debugging or validation purposes.
+
+Example Usage:
+--------------
+```python
+from importspy.utilities.system_util import SystemUtil
+
+system_util = SystemUtil()
+os_name = system_util.extract_os()
+env_vars = system_util.extract_envs()
+"""
+
 import os
 import logging
 import platform
@@ -7,17 +28,65 @@ logger.addHandler(logging.NullHandler())
 
 class SystemUtil:
 
+    """
+    Utility class for system-level operations and environment management.
+
+    The `SystemUtil` class provides methods for retrieving system information, such as the operating 
+    system name and current environment variables. These utilities are useful for validating runtime 
+    environments or diagnosing issues related to system configuration.
+
+    Methods:
+    --------
+    - `extract_os`: Returns the name of the operating system in lowercase.
+    - `extract_envs`: Retrieves all current environment variables as a dictionary.
+
+    Example:
+    --------
+    ```python
+    from importspy.utilities.system_util import SystemUtil
+
+    system_util = SystemUtil()
+    os_name = system_util.extract_os()
+    env_vars = system_util.extract_envs()
+    ```
+    """
+
     def extract_os(self) -> str:
+        """
+        Retrieve the name of the operating system in lowercase format.
+
+        This method uses the `platform.system()` function to get the name of the operating system 
+        and converts it to lowercase for consistency.
+
+        Parameters:
+        -----------
+        None
+
+        Returns:
+        --------
+        - **str**: The name of the operating system (e.g., 'windows', 'linux', 'darwin').
+
+        Example Usage:
+        --------------
+        ```python
+        system_util = SystemUtil()
+        os_name = system_util.extract_os()
+        print(os_name)
+        # Output: 'linux'
+        ```
+
+        Notes:
+        ------
+        - This method is helpful for normalizing OS-specific behavior in multi-platform applications.
+        """
         return platform.system().lower()
 
     def extract_envs(self) -> dict:
         """
         Extract all current environment variables and their values as a dictionary.
 
-        This function retrieves all environment variables available in the system's current execution
-        context and returns them in a dictionary format. Each key in the dictionary represents the
-        name of an environment variable, and its corresponding value represents the value assigned 
-        to that variable.
+        This method retrieves all environment variables from the current system's execution context 
+        and returns them in a key-value pair format.
 
         Parameters:
         -----------
@@ -26,21 +95,21 @@ class SystemUtil:
         Returns:
         --------
         - **dict**: A dictionary where:
-            - **Key** (`str`): The name of the environment variable.
-            - **Value** (`str`): The value assigned to the environment variable.
+            - **Key** (`str`): The name of an environment variable.
+            - **Value** (`str`): The value of the environment variable.
 
         Example Usage:
         --------------
         ```python
-        env_vars = extract_envs()
+        system_util = SystemUtil()
+        env_vars = system_util.extract_envs()
         print(env_vars)
-        # Output: {'PATH': '/usr/bin:/bin', 'CI': 'true', ...}
+        # Output: {'PATH': '/usr/bin:/bin', 'HOME': '/home/user', ...}
         ```
 
         Notes:
         ------
-        - This function is useful for debugging or validating the runtime environment.
-        - It relies on `os.environ`, which reflects the environment at the time the function is called.
-        - Sensitive data (e.g., API keys) might be included in the output; handle with care.
+        - Useful for debugging and validating runtime environments.
+        - Be cautious of sensitive data (e.g., API keys) in the environment variables.
         """
         return dict(os.environ)
