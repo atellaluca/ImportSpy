@@ -21,21 +21,97 @@ from .constants import Constants
 from .errors import Errors
 import logging
 
+"""
+This module defines the core models for ImportSpy, facilitating the inspection and validation 
+of runtime conditions and module structures in Python.
+
+It provides a hierarchy of classes to represent:
+- Python runtime environments.
+- System configurations.
+- Module metadata, including functions, classes, attributes, and their relationships.
+
+The `SpyModel` class extends these capabilities by enabling dynamic validation of modules 
+against predefined models.
+
+Key Features:
+-------------
+- Models runtime metadata (`Python`, `System`, `Runtime`).
+- Describes module elements like attributes, arguments, functions, and classes.
+- Supports validation and adaptation for dynamic module inspection.
+
+Examples:
+---------
+```python
+from importspy.models import SpyModel
+
+spy_model = SpyModel(
+    filename="example.py",
+    classes=[
+        Class(
+            name="ServiceHandler",
+            methods=[
+                Function(name="start_service", arguments=[Argument(name="config", annotation="dict")])
+            ]
+        )
+    ]
+)
+```
+"""
+
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
 logger.addHandler(logging.NullHandler())
 
 class Python(BaseModel):
+    """
+    Represents the Python runtime environment, including the version, interpreter, 
+    and loaded modules.
+
+    Attributes:
+    -----------
+    version : Optional[str]
+        The version of the Python runtime.
+    interpreter : Optional[str]
+        The name of the Python interpreter (e.g., CPython, PyPy).
+    modules : Optional[List['Module']]
+        A list of loaded modules in the runtime.
+    """
     version: Optional[str]
     interpreter: Optional[str]
     modules: Optional[List['Module']] = None
 
 class System(BaseModel):
+    """
+    Encapsulates details of the operating system and its associated Python runtimes.
 
+    Attributes:
+    -----------
+    os : Optional[str]
+        The name of the operating system (e.g., Linux, Windows).
+    envs : Optional[dict]
+        Environment variables for the system (hidden in repr).
+    pythons : Optional[List[Python]]
+        A list of Python runtimes available on the system.
+    """
     os: Optional[str] = None
     envs: Optional[dict] = Field(default=None, repr=False)
     pythons: Optional[List[Python]] = None
 
 class Runtime(BaseModel):
+    """
+    Defines the runtime environment, including architecture and systems.
+
+    Attributes:
+    -----------
+    arch : Optional[str]
+        The architecture of the runtime (e.g., x86_64, ARM64).
+    systems : Optional[List[System]]
+        A list of systems included in the runtime.
+
+    Methods:
+    --------
+    validate_arch(value: str) -> str
+        Validates that the given architecture is supported.
+    """
 
     arch: Optional[str] = None
     systems: Optional[List[System]] = None
@@ -47,6 +123,28 @@ class Runtime(BaseModel):
         return value
 
 class Attribute(AnnotationValidatorMixin, BaseModel):
+    """
+    Represents a class or instance attribute with optional type annotations and values.
+
+    Attributes:
+    -----------
+    type : str
+        The type of attribute (e.g., "class", "instance").
+    name : str
+        The name of the attribute.
+    annotation : Optional[str]
+        The annotation of the attribute (e.g., "int", "str").
+    value : Optional[Union[int, str, float, bool, None]]
+        The value assigned to the attribute.
+
+    Methods:
+    --------
+    validate_arch(value: str) -> str
+        Validates the type of the attribute against supported attribute types.
+
+    validate_annotation(value: str) -> str
+        Validates the annotation of the attribute.
+    """
     type: str
     name: str
     annotation: Optional[str] = None
@@ -63,6 +161,23 @@ class Attribute(AnnotationValidatorMixin, BaseModel):
         return cls.validate_annotation(value)
 
 class Argument(AnnotationValidatorMixin, BaseModel):
+    """
+    Encodes the properties of a function or method argument.
+
+    Attributes:
+    -----------
+    name : str
+        The name of the argument.
+    annotation : Optional[str]
+        The annotation of the argument (e.g., "int", "str").
+    value : Optional[Union[str, int, float, bool, list, dict]]
+        The default value of the argument, if any.
+
+    Methods:
+    --------
+    validate_annotation(value: str) -> str
+        Validates the annotation of the argument.
+    """
     name:str
     annotation: Optional[str] = None
     value: Optional[Union[str, int, float, bool, list, dict]] = None
@@ -72,6 +187,23 @@ class Argument(AnnotationValidatorMixin, BaseModel):
         return super().validate_annotation(value)
 
 class Function(AnnotationValidatorMixin, BaseModel):
+    """
+    Represents a function or method with its arguments and return type.
+
+    Attributes:
+    -----------
+    name : str
+        The name of the function or method.
+    arguments : Optional[List[Argument]]
+        A list of arguments for the function or method.
+    return_annotation : Optional[str]
+        The annotation of the function's return type.
+
+    Methods:
+    --------
+    validate_annotation(value: str) -> str
+        Validates the annotation of the return type.
+    """
     name: str
     arguments: Optional[List[Argument]] = None
     return_annotation: Optional[str] = None
@@ -81,12 +213,43 @@ class Function(AnnotationValidatorMixin, BaseModel):
         return super().validate_annotation(value)
     
 class Class(BaseModel):
+    """
+    Represents a Python class with its attributes, methods, and superclasses.
+
+    Attributes:
+    -----------
+    name : str
+        The name of the class.
+    attributes : Optional[List[Attribute]]
+        A list of attributes defined in the class.
+    methods : Optional[List[Function]]
+        A list of methods defined in the class.
+    superclasses : Optional[List[str]]
+        A list of names of the class's superclasses.
+    """
     name: str
     attributes: Optional[List[Attribute]] = None
     methods: Optional[List[Function]] = None
     superclasses: Optional[List[str]] = None
 
 class Module(BaseModel):
+    """
+    Encapsulates metadata about a Python module, including its filename, version, 
+    variables, functions, and classes.
+
+    Attributes:
+    -----------
+    filename : Optional[str]
+        The filename of the module.
+    version : Optional[str]
+        The version of the module.
+    variables : Optional[dict]
+        A dictionary of global variables in the module.
+    functions : Optional[List[Function]]
+        A list of functions defined in the module.
+    classes : Optional[List[Class]]
+        A list of classes defined in the module.
+    """
     filename: Optional[str] = None
     version: Optional[str] = None
     variables: Optional[dict] = None
@@ -94,10 +257,37 @@ class Module(BaseModel):
     classes: Optional[List[Class]] = None
 
 class Deployment(BaseModel):
+    """
+    Represents a deployment environment containing multiple runtimes.
+
+    Attributes:
+    -----------
+    runtimes : Optional[List[Runtime]]
+        A list of runtimes in the deployment environment.
+    environment : Optional[str]
+        The name or identifier of the deployment environment.
+    """
     runtimes: Optional[List[Runtime]] = None
     environment: Optional[str] = None
     
 class SpyModel(Module):
+    """
+    Extends the `Module` model to define the structure and conditions expected of 
+    a validated Python module.
+
+    Attributes:
+    -----------
+    deployments : Optional[List[Deployment]]
+        A list of deployment environments associated with the module.
+
+    Methods:
+    --------
+    from_module(info_module: ModuleType) -> SpyModel
+        Dynamically constructs a `SpyModel` from a loaded Python module.
+
+    _classes_adaper(extracted_classes: List[ClassInfo]) -> List[Class]
+        Adapts extracted class metadata into `Class` instances.
+    """
     deployments: Optional[List[Deployment]] = None
 
     @classmethod
