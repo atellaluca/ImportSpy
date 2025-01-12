@@ -27,7 +27,7 @@ class Constants:
                                        Config.INTERPRETER_NUITKA,
                                        Config.INTERPRETER_TRANSCRYPT]
     
-    ATTRIBUTE_TYPES = [Config.CLASS_TYPE,
+    SUPPORTED_CLASS_ATTRIBUTE_TYPES = [Config.CLASS_TYPE,
                        Config.INSTANCE_TYPE]
 
     DIE_ENVIRONMENT = "DIE - Default ImportSpy Environment"
@@ -37,3 +37,21 @@ class Constants:
 
     CLASS_TYPE = Config.CLASS_TYPE
     INSTANCE_TYPE = Config.INSTANCE_TYPE
+
+    SUPPORTED_ANNOTATIONS = [
+        Config.ANNOTATION_INT,
+        Config.ANNOTATION_FLOAT,
+        Config.ANNOTATION_STR,
+        Config.ANNOTATION_BOOL,
+        Config.ANNOTATION_LIST,
+        Config.ANNOTATION_DICT,
+        Config.ANNOTATION_TUPLE,
+        Config.ANNOTATION_SET,
+        Config.ANNOTATION_OPTIONAL,
+        Config.ANNOTATION_UNION,
+        Config.ANNOTATION_ANY,
+        Config.ANNOTATION_CALLABLE,
+        Config.ANNOTATION_LIST,
+        Config.ANNOTATION_DICT,
+        Config.ANNOTATION_TUPLE
+    ]
