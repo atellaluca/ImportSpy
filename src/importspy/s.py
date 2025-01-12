@@ -3,6 +3,7 @@ from .errors import Errors
 from .models import SpyModel
 from .utilities.module_util import ModuleUtil
 from .validators.spymodel_validator import SpyModelValidator
+from typing import Optional
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -10,96 +11,141 @@ logger.addHandler(logging.NullHandler())
 
 class Spy:
     """
-    The `Spy` class is the central component of ImportSpy, designed to allow package developers to proactively control 
-    and validate the conditions under which their package is executed when imported by an external module.
+    The `Spy` class serves as the core of ImportSpy, enabling developers to dynamically inspect and enforce 
+    runtime compliance for external modules importing their package.
 
-    This class provides functionality for:
-    - Dynamically importing the external module that invoked the package.
-    - Validating the external module against predefined rules or structures defined in a `SpyModel`.
-    - Enforcing compliance with execution conditions, ensuring that the importing module adheres to expected 
-      behaviors and structures.
-
-    Use Case:
-    ----------
-    `Spy` is particularly useful for developers creating libraries or packages that require specific runtime 
-    conditions to function correctly. For example, a library can use `Spy` to verify that the importing module 
-    defines necessary environment variables, classes, or functions.
+    By leveraging `SpyModel` validation, `Spy` ensures that importing modules adhere to defined structural 
+    and behavioral expectations, promoting robust and predictable runtime interactions.
 
     Key Features:
     --------------
-    - Dynamic runtime validation of external modules using `SpyModel`.
-    - Prevention of recursive validation to avoid unintended behavior.
-    - Integration with ImportSpy utilities for metadata extraction and comparison.
-
-    .. warning::
-
-        Be cautious when dynamically importing modules to avoid security risks. Ensure that proper validation 
-        is in place to prevent the execution of malicious code.
-
-    Attributes:
-        logger (logging.Logger): A logger instance for tracking operations and debugging.
+    - **Dynamic Module Inspection**: Identifies and retrieves metadata about the calling module.
+    - **Validation via SpyModel**: Verifies compliance with user-defined models that specify expected structures 
+      (functions, classes, attributes, etc.).
+    - **Recursion Prevention**: Ensures safe execution by avoiding self-referential validation loops.
+    - **Enhanced Multi-Architecture Support**: Integrates seamlessly into Python environments with diverse runtime 
+      and architecture requirements.
 
     Methods:
-        - `importspy`: Dynamically imports and validates the external module that invoked the package.
-        - `_spy_module`: Retrieves metadata about the calling module, ensuring no recursion occurs.
+    --------
+    - `importspy(spymodel)`: Dynamically imports and validates the calling module against a `SpyModel`.
+    - `_spy_module()`: Retrieves metadata about the module importing the current package.
+
+    Notes:
+    ------
+    This class is tailored for Python developers building libraries that require strict validation of runtime 
+    dependencies or operate in multi-architecture, multi-environment scenarios.
+
+    Example Usage:
+    --------------
+    ```python
+    from importspy import Spy, SpyModel
+
+    spy = Spy()
+    spy_model = SpyModel(filename="example.py", functions=["initialize"], classes=[])
+    imported_module = spy.importspy(spymodel=spy_model)
+    ```
     """
 
-    def importspy(self, spymodel: SpyModel | None = None) -> ModuleType:
+    def importspy(self, spymodel: Optional[SpyModel] = None) -> ModuleType:
         """
-        Dynamically imports the external module that invoked the current package and validates it against 
-        a `SpyModel`, ensuring adherence to predefined execution conditions.
+        Dynamically imports and validates the calling module against a `SpyModel`.
 
-        This method is specifically designed to allow package developers to enforce runtime constraints on external 
-        modules that import their package. By defining a `SpyModel`, developers can specify the required structure 
-        of the importing module, such as the presence of specific environment variables, functions, or classes.
-
-        How It Works:
-        -------------
-        1. Identifies the calling module using `_spy_module`.
-        2. If a `SpyModel` is provided:
-            - Extracts the actual structure of the calling module using `SpyModel.from_module`.
-            - Compares the extracted structure with the expected structure defined in the `SpyModel`.
-            - Only imports the module if it conforms to the validation rules.
-        3. If no `SpyModel` is provided, imports the module directly without validation.
+        This method is the primary interface for using ImportSpy. It identifies the external module that invoked 
+        the current package, validates its structure against the rules defined in a `SpyModel`, and ensures that 
+        all runtime expectations are met before importing the module.
 
         Parameters:
         -----------
         spymodel : SpyModel, optional
-            An instance of `SpyModel` that defines the rules for validation. If provided, the external module is 
-            validated against these rules before being imported.
+            The model that specifies the expected structure and properties of the importing module. If not provided, 
+            the module is imported without validation.
 
         Returns:
         --------
         ModuleType
-            The imported external module if it passes validation, or `None` if it does not comply with the `SpyModel`.
+            The validated and imported module.
 
         Raises:
         -------
         ValueError
-            If recursion is detected or the importing module fails validation.
+            If the module fails validation or recursion is detected during module inspection.
+
+        Key Steps:
+        ----------
+        1. **Identify the Calling Module**:
+            Uses `_spy_module` to locate the module invoking the current package.
+        2. **Validation**:
+            - Converts the calling module into a `SpyModel` representation.
+            - Compares this representation with the provided `SpyModel` to check compliance.
+        3. **Import**:
+            If validation passes, dynamically imports and returns the module.
 
         Example:
         --------
         ```python
         from importspy import Spy, SpyModel
+        from importspy.models import Class, Function, Argument
 
+        # Initialize the Spy instance
         spy = Spy()
-        my_spy_model = SpyModel(
-            filename="example.py",
-            functions=["function1"],
-            classes=[ClassModel(name="MyClass", methods=["method1"])]
-        )
-        module = spy.importspy(spymodel=my_spy_model)
-        ```
-        In this example, the `Spy` instance dynamically imports `example.py` and validates it against the `SpyModel`. 
-        The module is only imported if it contains `function1` and a class `MyClass` with the method `method1`.
 
-        Notes:
-        ------
-        - This method is a proactive programming tool for package developers, ensuring the correctness of runtime 
-          conditions for external modules interacting with their package.
-        - It relies on `spy_module_utils` for loading and inspecting modules.
-        """
+        # Define the validation model (SpyModel) for the external module
+        spy_model = SpyModel(
+            filename="example.py",  # Name of the file to validate
+            variables={
+                "MODULE_NAME": "string",  # Ensures the presence of a global variable
+                "VERSION": "string"  # Checks the version variable
+            },
+            functions=[
+                Function(
+                    name="start_service",
+                    arguments=[
+                        Argument(name="config", annotation="dict")  # Expected argument for the function
+                    ]
+                ),
+                Function(
+                    name="stop_service",
+                    arguments=[
+                        Argument(name="signal", annotation="str")  # Expected argument for the function
+                    ]
+                )
+            ],
+            classes=[
+                Class(
+                    name="ServiceHandler",
+                    methods=[
+                        Function(
+                            name="process_request",
+                            arguments=[
+                                Argument(name="request", annotation="dict"),  # Expected request argument
+                                Argument(name="response", annotation="dict")  # Expected response argument
+                            ]
+                        ),
+                        Function(
+                            name="log_error",
+                            arguments=[
+                                Argument(name="error", annotation="str")  # Expected error argument
+                            ]
+                        )
+                    ],
+                    superclasses=["BaseService"]  # Ensures the class inherits from BaseService
+                )
+            ]
+        )
+
+        # Import and validate the specified module
+        try:
+            imported_module = spy.importspy(spymodel=spy_model)
+            print(f"Module '{imported_module.__name__}' imported and validated successfully!")
+        except ValueError as e:
+            print(f"Module validation failed: {e}")
+                ```
+                Notes:
+                ------
+                - This method is designed for libraries with strict runtime requirements.
+                - By enforcing runtime compliance, `importspy` ensures the stability and predictability of dependent modules.
+                """
         info_module = self._spy_module()
         module_util = ModuleUtil()
         logger.debug(f"info_module: {info_module}")
@@ -113,40 +159,42 @@ class Spy:
 
     def _spy_module(self) -> ModuleType | None:
         """
-        Identifies and retrieves metadata about the external module that invoked the current package.
-    
-        This utility method inspects the execution context to determine the calling module. It ensures that the 
-        current package does not analyze itself recursively, preventing unintended behavior during validation.
-    
-        Use Case:
-        ----------
-        `_spy_module` is used internally by `importspy` to identify the external module that is importing the current 
-        package. This allows `Spy` to validate the external module's structure and adherence to predefined rules.
-    
+        Identifies and retrieves metadata about the external module importing the current package.
+
+        This method inspects the execution context to locate the calling module, providing the foundation for 
+        runtime validation and dynamic import functionality.
+
         Returns:
         --------
         ModuleType | None
-            The module object representing the external caller, or `None` if recursion or another issue is detected.
-    
+            The metadata of the calling module, or `None` if recursion or other issues are detected.
+
         Raises:
         -------
         ValueError
-            If recursion is detected (the current package is the same as the calling module).
-    
+            If recursion is detected, indicating that the package is analyzing itself.
+
+        Use Case:
+        ---------
+        `_spy_module` is an internal utility used by `importspy` to enforce runtime compliance.
+
         Example:
         --------
         ```python
         spy = Spy()
         calling_module = spy._spy_module()
         ```
-        This retrieves the metadata of the module that called the `Spy` instance, allowing further validation.
-    
+
+        Technical Details:
+        ------------------
+        - Relies on `ModuleUtil` for stack inspection and module extraction.
+        - Checks for recursion by comparing the filenames of the current and calling frames.
+
         Notes:
         ------
-        - Uses `spy_module_utils` to inspect and extract information about the calling module.
-        - Ensures safety during dynamic imports by detecting and preventing recursion.
-        - Raises a `ValueError` with `Errors.ANALYSIS_RECURSION_WARNING` if recursion is detected.
-    """
+        - This method ensures that dynamic imports do not lead to unintended behaviors or vulnerabilities.
+        - Logging captures detailed metadata about the calling module for debugging purposes.
+        """
         module_util = ModuleUtil()
         current_frame, caller_frame = module_util.inspect_module()
         if current_frame.filename == caller_frame.filename:
