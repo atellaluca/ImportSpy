@@ -1,52 +1,83 @@
+"""
+Centralized Error Messaging for ImportSpy
+
+This module defines the `Errors` class, which acts as a repository for all error and warning 
+messages used across the ImportSpy framework. By consolidating error messages into a single 
+location, this module ensures consistency, maintainability, and clarity in the communication 
+of issues encountered during runtime validation or model analysis.
+
+The error messages are formatted with placeholders to dynamically populate context-specific 
+details, allowing for precise and informative error reporting.
+"""
+
 class Errors:
     """
-    A centralized repository for error messages used throughout the ImportSpy package.
+    Centralized Repository for Error Messages in ImportSpy
 
-    This class defines a comprehensive set of error and warning messages with placeholders 
-    that can be dynamically populated at runtime. These messages are typically associated 
-    with constraints not being met by `SpyModel` instances or related validation processes 
-    within the ImportSpy framework. By centralizing error messages, this class ensures 
-    consistency in error reporting and improves maintainability.
+    The `Errors` class provides a comprehensive collection of error and warning messages 
+    used throughout the ImportSpy framework. These messages are designed to address common 
+    validation failures and runtime issues, promoting consistency and clarity in debugging 
+    and user feedback.
+
+    Key Features:
+    --------------
+    - **Centralized Storage**: All error messages are defined in one place, improving maintainability.
+    - **Dynamic Placeholders**: Most messages include placeholders to dynamically insert 
+      specific details (e.g., variable names, expected values, and actual values).
+    - **Comprehensive Coverage**: Addresses a wide range of validation scenarios, from module-level 
+      issues to runtime architecture compatibility.
+
+    Use Cases:
+    ----------
+    The `Errors` class is integral to ImportSpy's validation processes, ensuring clear and 
+    consistent communication when constraints are violated. It is utilized by validators, 
+    utilities, and the core SpyModel to report issues.
 
     Attributes:
-        ANALYSIS_RECURSION_WARNING (str): Warning message indicating that analyzing 
-            code handling its own analysis may lead to uncontrolled recursion. This typically 
-            occurs when the code containing the `SpyModel` definition is executed instead of 
-            the intended external module, leading to the analysis process inadvertently 
-            evaluating itself. To prevent performance issues or stack overflow errors, ensure 
-            that the analysis does not recursively process its own codebase.
+    -----------
+    **General Warnings:**
+    - `ANALYSIS_RECURSION_WARNING (str)`: Indicates potential recursion during analysis, 
+      which could lead to stack overflow or performance issues.
 
-        ### SpyModel validation errors
-        FILENAME_MISMATCH (str): Error message for a mismatch between expected and 
-            actual filenames. Includes placeholders for the filenames.
-        VERSION_MISMATCH (str): Error message for a mismatch between expected and 
-            actual versions. Includes placeholders for the versions.
-        ENV_VAR_MISMATCH (str): Error message for a mismatch between expected and 
-            actual environment variable values. Includes placeholders for the variable name, 
-            expected value, and found value.
-        ENV_VAR_MISSING (str): Error message for a missing environment variable. Includes a 
-            placeholder for the variable name.
-        VAR_MISMATCH (str): Error message for a mismatch between expected and 
-            actual variable values. Includes placeholders for the variable name, expected value, 
-            and found value.
-        VAR_MISSING (str): Error message for a missing variable. Includes a placeholder 
-            for the variable name.
-        FUNCTIONS_MISSING (str): Error message for a missing function. Includes a placeholder 
-            for the function name.
-        CLASS_MISSING (str): Error message for a missing class. Includes a placeholder 
-            for the class name.
-        CLASS_ATTRIBUTE_MISSING (str): Error message for a missing class attribute. Includes 
-            placeholders for the attribute name and class name.
-        CLASS_INSTANCE_ATTRIBUTE_MISSING (str): Error message for a missing instance 
-            attribute in a class. Includes placeholders for the attribute name and class name.
-        CLASS_METHOD_MISSING (str): Error message for a missing method in a class. Includes 
-            placeholders for the method name and class name.
-        CLASS_SUPERCLASS_MISSING (str): Error message for a missing superclass in a class 
-            hierarchy. Includes placeholders for the missing superclass and the current class.
+    **Runtime Validation Errors:**
+    - `RUNTIME_MISSING (str)`: Indicates a missing or unsupported runtime environment.
+    - `INVALID_ARCHITECTURE (str)`: Highlights an invalid or unsupported architecture.
 
-        ### SpyArchModule validation errors
-        INVALID_ARCHITECTURE (str): Error message for an invalid architecture. Includes placeholders 
-            for the invalid architecture and the list of Support architectures.
+    **System Validation Errors:**
+    - `SYSTEM_MISSING (str)`: Indicates a missing or unsupported system.
+
+    **Python Validation Errors:**
+    - `PYTHON_MISSING (str)`: Reports a missing or unsupported Python environment.
+
+    **Module Validation Errors:**
+    - `FILENAME_MISMATCH (str)`: Reports a mismatch between the expected and actual filenames.
+    - `VERSION_MISMATCH (str)`: Reports a version mismatch for a module.
+    - `ENV_VAR_MISMATCH (str)`: Reports a mismatch in environment variable values.
+    - `ENV_VAR_MISSING (str)`: Indicates a missing environment variable.
+    - `VAR_MISMATCH (str)`: Indicates a mismatch between expected and actual variable values.
+    - `VAR_MISSING (str)`: Indicates a missing variable in the module.
+
+    **SpyModel Validation Errors:**
+    - `FUNCTIONS_MISSING (str)`: Reports a missing function in the module.
+    - `ANNOTATION_MISMATCH (str)`: Indicates a mismatch in function argument annotations.
+    - `CLASS_MISSING (str)`: Indicates a missing class in the module.
+    - `CLASS_ATTRIBUTE_MISSING (str)`: Indicates a missing attribute in a class.
+    - `CLASS_ATTRIBUTE_MISMATCH (str)`: Indicates a mismatch in class attribute values.
+    - `CLASS_SUPERCLASS_MISSING (str)`: Indicates a missing superclass in the class hierarchy.
+
+    **Attribute and Argument Validation Errors:**
+    - `INVALID_ATTRIBUTE_TYPE (str)`: Reports an invalid attribute type.
+    - `INVALID_ANNOTATION (str)`: Reports an invalid annotation for a function argument or return type.
+
+    Example Usage:
+    --------------
+    ```python
+    if some_condition_fails:
+        raise ValueError(Errors.FILENAME_MISMATCH.format(expected_filename, actual_filename))
+
+    if invalid_architecture:
+        raise ValueError(Errors.INVALID_ARCHITECTURE.format(detected_arch, Errors.KNOWN_ARCHITECTURES))
+    ```
     """
 
     ANALYSIS_RECURSION_WARNING = (
