@@ -3,6 +3,7 @@ from pydantic import (
     field_validator,
     Field
 )
+from .mixins.annotations_validator_mixin import AnnotationValidatorMixin
 from typing import (
     Optional, 
     List,
@@ -45,29 +46,51 @@ class Runtime(BaseModel):
             raise ValueError(Errors.INVALID_ARCHITECTURE.format(value, Constants.KNOWN_ARCHITECTURES))
         return value
 
-class Attribute(BaseModel):
+class Attribute(AnnotationValidatorMixin, BaseModel):
     type: str
     name: str
+    annotation: Optional[str] = None
     value: Optional[Union[int, str, float, bool, None]] = None
 
     @field_validator('type')
     def validate_arch(cls, value:str):
-        if value not in Constants.ATTRIBUTE_TYPES:
-            raise ValueError(Errors.INVALID_ATTRIBUTE_TYPE.format(value, Constants.ATTRIBUTE_TYPES))
+        if value not in Constants.SUPPORTED_CLASS_ATTRIBUTE_TYPES:
+            raise ValueError(Errors.INVALID_ATTRIBUTE_TYPE.format(value, Constants.SUPPORTED_CLASS_ATTRIBUTE_TYPES))
         return value
     
+    @field_validator("annotation")
+    def validate_annotation(cls, value):
+        return cls.validate_annotation(value)
 
+class Argument(AnnotationValidatorMixin, BaseModel):
+    name:str
+    annotation: Optional[str] = None
+    value: Optional[Union[str, int, float, bool, list, dict]] = None
+
+    @field_validator("annotation")
+    def validate_annotation(cls, value):
+        return super().validate_annotation(value)
+
+class Function(AnnotationValidatorMixin, BaseModel):
+    name: str
+    arguments: Optional[List[Argument]] = None
+    return_annotation: Optional[str] = None
+
+    @field_validator("return_annotation")
+    def validate_annotation(cls, value):
+        return super().validate_annotation(value)
+    
 class Class(BaseModel):
     name: str
     attributes: Optional[List[Attribute]] = None
-    methods: Optional[List[str]] = None
+    methods: Optional[List[Function]] = None
     superclasses: Optional[List[str]] = None
 
 class Module(BaseModel):
     filename: Optional[str] = None
     version: Optional[str] = None
     variables: Optional[dict] = None
-    functions: Optional[List[str]] = None
+    functions: Optional[List[Function]] = None
     classes: Optional[List[Class]] = None
 
 class Deployment(BaseModel):
@@ -89,7 +112,7 @@ class SpyModel(Module):
         version = module_utils.extract_version(info_module)
         variables = module_utils.extract_variables(info_module)
         functions = module_utils.extract_functions(info_module)
-        classes = cls._class_adaper(module_utils.extract_classes(info_module))
+        classes = cls._classes_adaper(module_utils.extract_classes(info_module))
         arch = runtime_utils.extract_arch()
         os = sytem_utils.extract_os()
         python_version = python_utils.extract_python_version()
@@ -135,19 +158,19 @@ class SpyModel(Module):
             ]
         )
     
-    def _class_adaper(extracted_classes:List[ClassInfo]):
+    @classmethod
+    def _classes_adaper(cls, extracted_classes:List[ClassInfo]):
         classes = []
         for name, class_attr, instance_attr, methods, superclasses in extracted_classes:
             classes.append(Class(name=name,
-                  attributes=
-                    [
+                  attributes=[
                         Attribute(
                             type=Constants.INSTANCE_TYPE,
                             name=name,
                             value=value
                         )
                         for name, value in instance_attr
-                      ]
+                        ]
                       + [
                         Attribute(
                             type=Constants.CLASS_TYPE,
@@ -156,7 +179,21 @@ class SpyModel(Module):
                         )
                         for name, value in class_attr  
                     ],
-                  methods=methods,
+                  methods=[
+                      Function(
+                          name=method.name,
+                          arguments=[
+                              Argument(
+                                  name=arg.name,
+                                  annotation=arg.annotation,
+                                  value=arg.value
+                              )
+                              for arg in method.arguments
+                          ],
+                          return_annotation=None
+                      ) 
+                      for method in methods
+                  ],
                   superclasses=superclasses
                 )
             )
