@@ -1,6 +1,6 @@
 import pytest
-from importspy.utils.die_utils import (
-    ModuleUtils
+from importspy.utilities.module_util import (
+    ModuleUtil
 )
 from importspy import Spy
 import logging
@@ -10,7 +10,7 @@ logger.addHandler(logging.NullHandler())
 
 class TestModuleUtils:
 
-    module_util = ModuleUtils()
+    module_util = ModuleUtil()
 
     def test_extract_version(self, spy_instance:Spy, mock_import_functions):
         module = spy_instance.importspy()
