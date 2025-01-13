@@ -84,24 +84,6 @@ Key Features 🚀
        - **Structural Safeguards**: Enforce strict module structures to prevent misuse or misconfiguration.
        - **Error Messaging**: Provide actionable warnings and errors that help developers address potential vulnerabilities.
 
-Theoretical Underpinnings
-==========================
-
-.. list-table::
-   :widths: 25 75
-   :header-rows: 1
-
-   * - **Principle**
-     - **Description**
-   * - **Reflection and Introspection**
-     - ImportSpy utilizes Python's dynamic capabilities to analyze the current runtime environment in real time. It extracts details such as the operating system, processor architecture, Python version, and implementation, providing a complete snapshot of the execution context.
-   * - **Declarative Validation**
-     - Using the `SpyModel`, developers can define the exact structure and behavior they expect from external modules and runtime environments. This approach shifts the focus from reactive debugging to proactive validation.
-   * - **Granular Abstraction**
-     - ImportSpy models the entire execution stack—from deployments and runtimes to individual class attributes and function arguments. This level of detail enables fine-grained control over validation processes.
-   * - **Modern Software Practices**
-     - By incorporating Python's type annotations, ImportSpy promotes robust and adaptable validation for all components. This aligns with modern software development trends and improves code maintainability and readability.
-
 Detailed Example: IoT Plugin Validation 🌐
 ==========================================
 
@@ -278,6 +260,24 @@ Technical Overview 🔬
 =====================
 
 Delve into the inner workings of ImportSpy and uncover the technical foundations that make it a powerful tool for runtime validation and module compliance.
+
+Theoretical Underpinnings
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
+
+   * - **Principle**
+     - **Description**
+   * - **Reflection and Introspection**
+     - ImportSpy utilizes Python's dynamic capabilities to analyze the current runtime environment in real time. It extracts details such as the operating system, processor architecture, Python version, and implementation, providing a complete snapshot of the execution context.
+   * - **Declarative Validation**
+     - Using the `SpyModel`, developers can define the exact structure and behavior they expect from external modules and runtime environments. This approach shifts the focus from reactive debugging to proactive validation.
+   * - **Granular Abstraction**
+     - ImportSpy models the entire execution stack—from deployments and runtimes to individual class attributes and function arguments. This level of detail enables fine-grained control over validation processes.
+   * - **Modern Software Practices**
+     - By incorporating Python's type annotations, ImportSpy promotes robust and adaptable validation for all components. This aligns with modern software development trends and improves code maintainability and readability.
 
 Core Mechanism 🔬
 =================
