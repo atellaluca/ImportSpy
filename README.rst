@@ -261,9 +261,6 @@ Technical Overview 🔬
 
 Delve into the inner workings of ImportSpy and uncover the technical foundations that make it a powerful tool for runtime validation and module compliance.
 
-Theoretical Underpinnings
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
 .. list-table::
    :widths: 25 75
    :header-rows: 1
