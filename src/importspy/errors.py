@@ -89,10 +89,13 @@ class Errors:
     CLASS_ATTRIBUTE_MISSING = "Missing {0} attribute: '{1}'. Ensure it is defined in class '{2}'."
     CLASS_ATTRIBUTE_MISMATCH = "{0} mismatch for {1} attribute '{2}': expected '{3}', found '{4}'."
     CLASS_SUPERCLASS_MISSING = "Missing class superclass: '{0}'. Make sure that '{1}' extends {0}."
-    INVALID_ATTRIBUTE_TYPE = "Invalid attribute type '{0}'. Support attributes are: {1}"
+    INVALID_ATTRIBUTE_TYPE = "Invalid attribute type '{0}'. Supported attributes are: {1}"
 
     # Runtime validation
-    INVALID_ARCHITECTURE = "Invalid architecture '{0}'. Support architectures are: {1}"
+    INVALID_ARCHITECTURE = "Invalid architecture '{0}'. Supported architectures are: {1}"
+
+    #System validation
+    INVALID_OS = "Invalid Operating System: {0}. Supported Operating Systems are {1}"
 
     # Attribute and Argument validation
-    INVALID_ANNOTATION = "Invalid annotation '{0}'. Support annotations are: {1}"
+    INVALID_ANNOTATION = "Invalid annotation '{0}'. Supported annotations are: {1}"

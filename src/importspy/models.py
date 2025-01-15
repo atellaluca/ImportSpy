@@ -125,6 +125,12 @@ class System(BaseModel):
     envs: dict = Field(default=False, repr=False)
     pythons: List[Python]
 
+    @field_validator('os')
+    def validate_os(cls, value:str):
+        if value not in Constants.SUPPORTED_OS:
+            raise ValueError(Errors.INVALID_OS.format(value, Constants.SUPPORTED_OS))
+        return value
+
 class Runtime(BaseModel):
     """
     Represents the runtime configuration for Python modules, focusing on CPU architecture and associated systems.
