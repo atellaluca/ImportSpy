@@ -122,7 +122,7 @@ class System(BaseModel):
     """
     
     os: str
-    envs: dict = Field(default=False, repr=False)
+    envs: dict = Field(default=None, repr=False)
     pythons: List[Python]
 
     @field_validator('os')
