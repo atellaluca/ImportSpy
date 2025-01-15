@@ -137,9 +137,12 @@ class CommonValidator:
         """
         if not dict1:
             return
+        if not dict2:
+            return False
         for expected_key, expected_value in dict1.items():
             if expected_key in dict2:
                 if expected_value != dict2[expected_key]:
                     raise ValueError(mismatch_error.format(expected_key, expected_value, dict2[expected_key]))
             else:
                 raise ValueError(missing_error.format(expected_key))
+        return True
