@@ -83,8 +83,6 @@ class Constants:
     SUPPORTED_CLASS_ATTRIBUTE_TYPES = [Config.CLASS_TYPE,
                        Config.INSTANCE_TYPE]
 
-    DIE_ENVIRONMENT = "DIE - Default ImportSpy Environment"
-
     NAME = "name"
     VALUE = "value"
 
