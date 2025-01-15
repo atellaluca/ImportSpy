@@ -9,8 +9,7 @@ class SystemValidator:
                  system_2:System):
         cv = CommonValidator()
         if system_1.os == system_2.os:
-            cv.dict_validate(system_1.envs, system_2.envs, Errors.ENV_VAR_MISSING, Errors.ENV_VAR_MISMATCH)
-            return True
+            return cv.dict_validate(system_1.envs, system_2.envs, Errors.ENV_VAR_MISSING, Errors.ENV_VAR_MISMATCH)
         return False
         
         
