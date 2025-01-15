@@ -121,7 +121,7 @@ class System(BaseModel):
     ensuring that system-specific constraints are respected during execution.
     """
     
-    os: str = Optional(False)
+    os: str
     envs: dict = Field(default=False, repr=False)
     pythons: List[Python]
 
@@ -488,7 +488,7 @@ class SpyModel(Module):
         Constructs a `SpyModel` instance from a given Python module.
     """
 
-    deployments = List[Runtime]
+    deployments: List[Runtime]
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
