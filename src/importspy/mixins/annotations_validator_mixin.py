@@ -8,6 +8,7 @@ set of supported types, enhancing compatibility and validation consistency.
 
 from ..constants import Constants
 from ..errors import Errors
+from typing import Union
 
 class AnnotationValidatorMixin:
 
@@ -40,39 +41,28 @@ class AnnotationValidatorMixin:
     """
 
     @staticmethod
-    def validate_annotation(value: str) -> str:
+    def validate_annotation(value: Union[str, None]) -> Union[str, None]:
         """
         Validate a type annotation against a list of supported annotations.
 
-        This method checks whether the provided annotation is included in the list of supported 
-        annotations defined in the `Constants` module. If the annotation is invalid, a 
-        `ValueError` is raised.
-
         Parameters:
         -----------
-        value : str
-            The type annotation to validate.
+        value : Union[str, None]
+            The type annotation to validate. Can be a string or None.
 
         Returns:
         --------
-        - **str**: The validated annotation if it is supported.
+        - **Union[str, None]**: The validated annotation if it is supported, or None if the input is None.
 
         Raises:
         -------
         - **ValueError**: If the annotation is not in the list of supported annotations.
-
-        Example Usage:
-        --------------
-        ```python
-        from importspy.mixins.annotations_validator_mixin import AnnotationValidatorMixin
-
-        valid_annotation = AnnotationValidatorMixin.validate_annotation("Dict[str, int]")
-        print(valid_annotation)  # Output: "Dict[str, int]"
-
-        # Raises a ValueError
-        invalid_annotation = AnnotationValidatorMixin.validate_annotation("UnsupportedType")
-        ```
         """
+        if not value:
+            return None
         if value and value.split("[")[0] not in Constants.SUPPORTED_ANNOTATIONS:
-            raise ValueError(Errors.INVALID_ANNOTATION.format(Constants.SUPPORTED_ANNOTATIONS))
+            raise ValueError(
+                Errors.INVALID_ANNOTATION.format(value, Constants.SUPPORTED_ANNOTATIONS)
+            )
         return value
+
