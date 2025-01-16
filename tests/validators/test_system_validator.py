@@ -8,7 +8,7 @@ from importspy.validators.system_validator import SystemValidator
 from importspy.errors import Errors
 import re
 
-class TestRuntimeValidator:
+class TestSystemValidator:
 
     validator = SystemValidator()
 
@@ -38,6 +38,9 @@ class TestRuntimeValidator:
     @pytest.mark.usefixtures("envs_setter")
     def test_system_os_match(self, data_1:System, data_2:System):
         assert self.validator.validate(data_1, data_2)
+    
+    def test_system_os_match_2(self, data_1:System, data_2:System):
+        assert self.validator.validate(data_2, data_1)
 
     def test_system_os_invalid(self):
         with pytest.raises(ValueError,
@@ -48,8 +51,20 @@ class TestRuntimeValidator:
             )
     
     def test_system_os_mismatch(self, data_1:System, data_2:System):
-        assert self.validator.validate(data_1, data_2) is False
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                Errors.ENV_VAR_MISSING.format(data_1.envs)
+            )
+        ):
+            self.validator.validate(data_1, data_2)
 
     @pytest.mark.usefixtures("os_windows_setter")
     def test_system_os_mismatch_1(self, data_1:System, data_2:System):
         assert self.validator.validate(data_1, data_2) is False
+    
+    def test_system_mismatch(self, data_2:System):
+        assert self.validator.validate(None, data_2) is None
+    
+    def test_system_mismatch_1(self, data_2:System):
+        assert self.validator.validate(data_2, None) is True
