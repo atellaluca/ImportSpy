@@ -11,6 +11,10 @@ class FunctionValidator:
                  *args):
         if not functions_1:
             return
+        if functions_1 and not functions_2:
+            return True
+        if not functions_2:
+            return False
         for function_1 in functions_1:
             if function_1 not in functions_2:
                 raise ValueError(Errors.FUNCTIONS_MISSING.format(
