@@ -19,6 +19,7 @@ from typing import List
 __version__ = None
 
 class PluginSpy(SpyModel):
+    filename: str = "extension.py"
     variables: dict = {"engine": "docker", "plugin_name":"plugin name", "plugin_description":"plugin description"}
     classes: List[Class] = [
         Class(
@@ -49,8 +50,13 @@ class PluginSpy(SpyModel):
                     arguments=[
                         Argument(
                             name="self"
-                        )
-                    ]
+                        ),
+                        Argument(
+                            name="msg",
+                            annotation="str",
+                        ),
+                    ],
+                    return_annotation="str"
                 ),
                 Function(
                     name="remove_extension",
