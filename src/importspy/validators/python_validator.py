@@ -9,6 +9,10 @@ class PythonValidator:
                  python_1:Python,
                  python_2:Python):
         if not python_1:
+            return
+        if python_1 and not python_2:
+            return True
+        if not python_2:
             return False
         if python_1.version == python_2.version \
             and python_1.interpreter == python_2.interpreter:
