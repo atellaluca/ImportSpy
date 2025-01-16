@@ -6,7 +6,7 @@ from importspy import (
 from importspy.validators.python_validator import PythonValidator
 
 
-class TestRuntimeValidator:
+class TestPythonValidator:
 
     validator = PythonValidator()
 
@@ -52,9 +52,29 @@ class TestRuntimeValidator:
     def test_python_match_1(self, data_3:Python, data_4:Python):
         assert self.validator.validate(data_3, data_4)
     
+    def test_python_match_2(self, data_3:Python):
+        assert self.validator.validate(data_3, None)
+    
     def test_python_mismatch(self, data_2:Python):
-        assert self.validator.validate(None, data_2) is False
+        assert self.validator.validate(None, data_2) is None
 
     @pytest.mark.usefixtures("python_interpreter_setter")
     def test_python_mismatch_1(self, data_3, data_4):
-        assert self.validator.validate(data_3, data_4) is False
+        print(data_3, data_4)
+        assert self.validator.validate(data_4, data_3) is False
+    
+    def test_python_mismatch_2(self):
+        assert self.validator.validate(None, None) is None
+    
+    def test_python_mismatch_3(self):
+        assert self.validator.validate(None, None) is None
+    
+    def test_python_mismatch_4(self, data_2:Python):
+        assert self.validator.validate(None, data_2) is None
+    
+    def test_python_mismatch_5(self, data_1:Python):
+        assert self.validator.validate(data_1, None) is True
+    
+    @pytest.mark.usefixtures("python_interpreter_setter")
+    def test_python_mismatch_6(self, data_3, data_4):
+        assert self.validator.validate(data_4, data_3) is False
