@@ -27,18 +27,19 @@ import sys
 import importlib.metadata
 import logging
 from types import ModuleType, FunctionType
-from typing import List, Tuple
+from typing import (
+    List, Optional
+)
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 ClassInfo = namedtuple('ClassInfo', [
-    'name',
-    'class_attr',
-    'instance_attr',
-    'methods',
-    'superclasses'
+    "name",
+    "attributes",
+    "methods",
+    "superclasses"
     ])
 
 FunctionInfo = namedtuple('FunctionInfo', [
@@ -52,6 +53,13 @@ ArgumentInfo = namedtuple('ArgumentInfo', [
     "annotation",
     "value"
     ])
+
+AttributeInfo = namedtuple('AttributeInfo', [
+    "type",
+    "name",
+    "annotation",
+    "value"
+])
 
 
 
@@ -217,23 +225,14 @@ class ModuleUtil:
         except importlib.metadata.PackageNotFoundError:
             return None
 
+    def extract_annotation(self, annotation) -> Optional[str]:
+        if annotation == inspect._empty or not annotation:
+            return None
+        if isinstance(annotation, type):
+            return annotation.__name__
+        return str(annotation)
+
     def extract_variables(self, info_module: ModuleType) -> dict:
-        """
-        Extract a dictionary of variable names and their values defined in a module.
-
-        This function retrieves all variable names and their corresponding values defined within 
-        the specified module, allowing developers to verify the variables and their values.
-
-        Parameters:
-        -----------
-        - **info_module** (`ModuleType`): The module from which to extract variable names and values.
-
-        Returns:
-        --------
-        - **dict**: A dictionary where:
-            - **Key** (`str`): The name of the variable.
-            - **Value** (`Any`): The value assigned to the variable in the module.
-        """
         return {
             var_name: obj
             for var_name, obj in inspect.getmembers(info_module)
@@ -241,42 +240,69 @@ class ModuleUtil:
             and not isinstance(obj, ModuleType)
             and not (var_name.startswith("__") and var_name.endswith("__"))
         }
-    
-    def extract_functions(self, 
-                          info_module:ModuleType) -> List[FunctionInfo]:
-        return [
-            self._extract_function(func_name, obj)
-            for func_name, obj in inspect.getmembers(info_module, inspect.isfunction)
-            if obj.__module__ == info_module.__name__
-        ]
-    
-    def _extract_function(self, func_name:str, obj: Tuple[str, FunctionType]):
-        return FunctionInfo(
+
+    def extract_functions(self, info_module: ModuleType) -> List["FunctionInfo"]:
+        functions_info:List[FunctionInfo] = []
+        for func_name, obj in inspect.getmembers(info_module, inspect.isfunction):
+            if obj.__module__ == info_module.__name__:
+                function_info = self._extract_function(func_name, obj)
+                functions_info.append(function_info)
+        return functions_info
+
+    def _extract_function(self, func_name: str, obj: FunctionType) -> "FunctionInfo":
+        function_info = FunctionInfo(
             func_name,
             self._extract_arguments(obj),
-            None if inspect.signature(obj).return_annotation is inspect.Signature.empty
-            else inspect.signature(obj).return_annotation
+            self.extract_annotation(inspect.signature(obj).return_annotation)
         )
-    
-    def _extract_arguments(self, obj):
-        return [
-            ArgumentInfo(
-                name=arg_name,
-                annotation=param.annotation if param.annotation is not inspect.Signature.empty else None,
-                value=param.default if param.default is not inspect.Signature.empty else None
+        return function_info
+
+    def _extract_arguments(self, obj: FunctionType) -> List["ArgumentInfo"]:
+        arguments = []
+        for arg_name, param in inspect.signature(obj).parameters.items():
+            value = param.default if param.default is not inspect.Signature.empty else None
+            arguments.append(ArgumentInfo(name=arg_name, annotation=self.extract_annotation(param.annotation), value=value))
+        return arguments
+
+    def extract_methods(self, cls_obj) -> List["FunctionInfo"]:
+        methods_info: List[FunctionInfo] = []
+        for func_name, obj in inspect.getmembers(cls_obj, inspect.isfunction):
+            if obj.__module__ == cls_obj.__module__:
+                method_info = self._extract_function(func_name, obj)
+                methods_info.append(method_info)
+        return methods_info
+
+    def extract_attributes(self, cls_obj, info_module: ModuleType) -> List["AttributeInfo"]:
+        attributes: List["AttributeInfo"] = []
+        annotations = getattr(cls_obj, '__annotations__', {})
+        for attr_name, attr_value in cls_obj.__dict__.items():
+            if not callable(attr_value) and not attr_name.startswith('__'):
+                attributes.append(AttributeInfo(
+                    name=attr_name,
+                    value=attr_value,
+                    type="class",
+                    annotation=self.extract_annotation(annotations.get(attr_name))
+                )
             )
-            for arg_name, param in inspect.signature(obj).parameters.items()
-            ]
 
-    def extract_methods(self,
-                        cls_obj):
-        info_functions = inspect.getmembers(cls_obj, inspect.isfunction)
-        return [
-            self._extract_function(func_name, obj)
-            for func_name, obj in info_functions
-            if obj.__module__ == cls_obj.__module__
-        ]
-
+        if cls_obj.__module__ == info_module.__name__:
+            init_method = cls_obj.__dict__.get('__init__')
+            if init_method:
+                source_lines = inspect.getsourcelines(init_method)[0]
+                for line in source_lines:
+                    line = line.strip()
+                    if line.startswith('self.') and '=' in line:
+                        parts = line.split('=')
+                        attr_name = parts[0].strip().split('.')[1]
+                        attr_value = parts[1].strip().strip('"')
+                        attributes.append(AttributeInfo(
+                            name=attr_name,
+                            value=attr_value,
+                            type="instance",
+                            annotation=self.extract_annotation(annotations.get(attr_name))
+                        ))
+        return attributes
+    
     def extract_classes(self, info_module: ModuleType) -> List[ClassInfo]:
         """
         Extract class metadata from a module.
@@ -304,27 +330,10 @@ class ModuleUtil:
         """
         classes = []
         for class_name, cls_obj in inspect.getmembers(info_module, inspect.isclass):
-            if cls_obj.__module__ == info_module.__name__:
-                class_attr = [
-                    (attr_name, attr_value) for attr_name, attr_value in cls_obj.__dict__.items() 
-                    if not callable(attr_value) and not attr_name.startswith('__')
-                ]
-                instance_attr = []
-                init_method = cls_obj.__dict__.get('__init__')
-                if init_method:
-                    source_lines = inspect.getsourcelines(init_method)[0]
-                    for line in source_lines:
-                        line = line.strip()
-                        if line.startswith('self.') and '=' in line:
-                            parts = line.split('=')
-                            attr_name = parts[0].strip().split('.')[1]
-                            attr_value = parts[1].strip().strip('"')
-                            instance_attr.append((attr_name, attr_value))
-                methods = [
-                    method_info for method_info in self.extract_methods(cls_obj)
-                ]
+                attributes = self.extract_attributes(cls_obj, info_module)
+                methods = self.extract_methods(cls_obj)
                 superclasses = [base.__name__ for base in cls_obj.__bases__ if base.__name__ != "object"]
-                current_class = ClassInfo(class_name, class_attr, instance_attr, methods, superclasses)
+                current_class = ClassInfo(class_name, attributes, methods, superclasses)
                 classes.append(current_class)
         return classes
 
