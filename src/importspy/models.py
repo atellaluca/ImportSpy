@@ -12,7 +12,10 @@ from typing import (
 from types import ModuleType
 from .utilities.module_util import (
     ModuleUtil, 
-    ClassInfo
+    ClassInfo,
+    ArgumentInfo,
+    FunctionInfo,
+    AttributeInfo
 )
 from .utilities.runtime_util import RuntimeUtil
 from .utilities.system_util import SystemUtil
@@ -253,7 +256,20 @@ class Attribute(AnnotationValidatorMixin, BaseModel):
     
     @field_validator("annotation")
     def validate_annotation(cls, value):
-        return cls.validate_annotation(value)
+        return super().validate_annotation(value)
+    
+    @classmethod
+    def from_attributes_info(cls, attributes_info:List[AttributeInfo]):
+        attributes: List[AttributeInfo] = []
+        for attribute_info in attributes_info:
+            attribute = Attribute(
+                type=attribute_info.type,
+                name=attribute_info.name,
+                value=attribute_info.value,
+                annotation=attribute_info.annotation
+            )
+            attributes.append(attribute)
+        return attributes
 
 class Argument(AnnotationValidatorMixin, BaseModel):
     """
@@ -300,6 +316,18 @@ class Argument(AnnotationValidatorMixin, BaseModel):
     @field_validator("annotation")
     def validate_annotation(cls, value):
         return super().validate_annotation(value)
+    
+    @classmethod
+    def from_arguments_info(cls, arguments_info:List[ArgumentInfo]):
+        arguments:List[Argument] = []
+        for argument_info in arguments_info:
+            argument = Argument(
+                name=argument_info.name,
+                annotation=argument_info.annotation,
+                value=argument_info.value
+            )
+            arguments.append(argument)
+        return arguments
 
 class Function(AnnotationValidatorMixin, BaseModel):
     """
@@ -346,6 +374,18 @@ class Function(AnnotationValidatorMixin, BaseModel):
     @field_validator("return_annotation")
     def validate_annotation(cls, value):
         return super().validate_annotation(value)
+    
+    @classmethod
+    def from_functions_info(cls, functions_info: List[FunctionInfo]):
+        functions: List[Function] = []
+        for function_info in functions_info:
+            function = Function(
+                name=function_info.name,
+                arguments=Argument.from_arguments_info(function_info.arguments),
+                return_annotation=function_info.return_annotation
+            )
+            functions.append(function)
+        return functions
     
 class Class(BaseModel):
     """
@@ -395,42 +435,14 @@ class Class(BaseModel):
     @classmethod
     def _from_class_info(cls, extracted_classes:List[ClassInfo]):
         classes = []
-        for name, class_attr, instance_attr, methods, superclasses in extracted_classes:
-            classes.append(Class(name=name,
-                  attributes=[
-                        Attribute(
-                            type=Constants.INSTANCE_TYPE,
-                            name=name,
-                            value=value
-                        )
-                        for name, value in instance_attr
-                        ]
-                      + [
-                        Attribute(
-                            type=Constants.CLASS_TYPE,
-                            name=name,
-                            value=value
-                        )
-                        for name, value in class_attr  
-                    ],
-                  methods=[
-                      Function(
-                          name=method.name,
-                          arguments=[
-                              Argument(
-                                  name=arg.name,
-                                  annotation=arg.annotation,
-                                  value=arg.value
-                              )
-                              for arg in method.arguments
-                          ],
-                          return_annotation=None
-                      ) 
-                      for method in methods
-                  ],
-                  superclasses=superclasses
-                )
+        for name, attributes, methods, superclasses in extracted_classes:
+            current_class = Class(
+                name=name,
+                attributes=Attribute.from_attributes_info(attributes),
+                methods=Function.from_functions_info(methods),
+                superclasses=superclasses
             )
+            classes.append(current_class)
         return classes
 
 class Module(BaseModel):
@@ -494,7 +506,7 @@ class SpyModel(Module):
         Constructs a `SpyModel` instance from a given Python module.
     """
 
-    deployments: List[Runtime]
+    deployments: Optional[List[Runtime]] = None
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
@@ -558,7 +570,8 @@ class SpyModel(Module):
         logger.debug(f"filename: {filename}, version: {version}, \
                      functions: {functions}, classes: {classes}")
         return cls(
-            deployments = [
+            filename=filename,
+            deployments=[
                 Runtime(
                     arch=arch,
                     systems=[
@@ -578,7 +591,6 @@ class SpyModel(Module):
                                             classes=classes
                                         )
                                     ]
-                                    
                                 )
                             ]
                             
