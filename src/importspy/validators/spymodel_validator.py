@@ -30,6 +30,8 @@ class SpyModelValidator:
                                         .modules[0])
     
     def _runtimes_validate(self, runtimes_1:List[Runtime], runtime_2:Runtime):
+        if not runtimes_1:
+            return
         system_2 = runtime_2.systems[0]
         for runtime_1 in runtimes_1:
             self.runtime_validator.validate(runtime_1, runtime_2)
