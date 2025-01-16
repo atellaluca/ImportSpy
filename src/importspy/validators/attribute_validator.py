@@ -10,6 +10,10 @@ class AttributeValidator:
                  attrs_2: List[Attribute], classname:str):
         if not attrs_1:
             return
+        if attrs_1 and not attrs_2:
+            return True
+        if not attrs_2:
+            return False
         for attr_1 in attrs_1:
             if attr_1 not in attrs_2:
                 raise ValueError(Errors.CLASS_ATTRIBUTE_MISSING.format(attr_1.type, f"{attr_1.name}={attr_1.value}", classname))
