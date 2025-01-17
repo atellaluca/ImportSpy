@@ -83,8 +83,9 @@ class Constants:
     SUPPORTED_CLASS_ATTRIBUTE_TYPES = [Config.CLASS_TYPE,
                        Config.INSTANCE_TYPE]
 
-    NAME = "name"
-    VALUE = "value"
+    NAME = "Name"
+    VALUE = "Value"
+    ANNOTATION = "Annotation"
 
     CLASS_TYPE = Config.CLASS_TYPE
     INSTANCE_TYPE = Config.INSTANCE_TYPE
@@ -106,3 +107,8 @@ class Constants:
         Config.ANNOTATION_DICT,
         Config.ANNOTATION_TUPLE
     ]
+
+    LOG_MESSAGE_TEMPLATE = (
+    "[Operation: {operation}] [Status: {status}] "
+    "[Details: {details}]"
+    )
