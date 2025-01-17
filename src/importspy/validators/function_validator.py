@@ -6,11 +6,13 @@ from typing import (
     Optional
 )
 from ..log_manager import LogManager
+from .argument_validator import ArgumentValidator
 
 class FunctionValidator:
 
     def __init__(self):
         self.logger = LogManager().get_logger(self.__class__.__name__)
+        self._argument_validator = ArgumentValidator()
 
     def validate(self,
                  functions_1:List[Function],
@@ -31,19 +33,10 @@ class FunctionValidator:
                 Constants.LOG_MESSAGE_TEMPLATE.format(
                     operation="Check if functions_1 is not none",
                     status="Finished",
-                    details=f"There aren't any attributes; current functions_1: {functions_1}"
+                    details=f"There aren't any functions; current functions_1: {functions_1}"
                 )
             )
             return
-        if functions_1 and not functions_2:
-            self.logger.debug(
-                Constants.LOG_MESSAGE_TEMPLATE.format(
-                    operation="Checking functions_1 and functions_2",
-                    status="Finished",
-                    details=f"There aren't any functions_2; current functions_2: {functions_2}"
-                )
-            )
-            return True
         if not functions_2:
             self.logger.debug(
                 Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -52,7 +45,7 @@ class FunctionValidator:
                     details=f"There aren't any functions_2; current functions_2: {functions_2}"
                 )
             )
-            return False
+            raise(ValueError(Errors.ELEMENT_MISSING.format(functions_1)))
         for function_1 in functions_1:
             self.logger.debug(
                 Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -74,8 +67,9 @@ class FunctionValidator:
                 )
         for function_1 in functions_1:
             function_2 =  next((func for func in functions_2 if func.name == function_1.name), None)
+            self._argument_validator.validate(function_1.arguments, function_2.arguments, function_1.name, classname)
             if function_1.return_annotation and \
                 function_1.return_annotation != function_2.return_annotation:
-                raise ValueError(Errors.FUNCTION_RETURN_ANNONATION_MISMATCH.format(context_name, function_1.name, function_1.return_annotation))
+                raise ValueError(Errors.FUNCTION_RETURN_ANNOTATION_MISMATCH.format(context_name, function_1.name, function_1.return_annotation, function_2.return_annotation))
         return True
 
