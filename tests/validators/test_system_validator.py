@@ -67,4 +67,8 @@ class TestSystemValidator:
         assert self.validator.validate(None, data_2) is None
     
     def test_system_mismatch_1(self, data_2:System):
-        assert self.validator.validate(data_2, None) is True
+        with pytest.raises(
+            ValueError,
+            match=re.escape(Errors.ELEMENT_MISSING.format(data_2))
+        ):
+            self.validator.validate(data_2, None)
