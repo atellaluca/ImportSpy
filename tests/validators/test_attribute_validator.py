@@ -56,9 +56,6 @@ class TestAttributeValidator:
     def test_attribute_match_1(self, data_2:List[Attribute], data_3:List[Attribute]):
         assert self.validator.validate(data_2, data_3, "classname")
     
-    def test_attribute_match_2(self, data_3:List[Attribute]):
-        assert self.validator.validate(data_3, None, "classname")
-    
     def test_attribute_mismatch(self, data_2:List[Attribute]):
         assert self.validator.validate(None, data_2, "classname") is None
 
@@ -79,9 +76,6 @@ class TestAttributeValidator:
     def test_attribute_mismatch_3(self, data_2:List[Attribute]):
         assert self.validator.validate(None, data_2, "classname") is None
     
-    def test_attribute_mismatch_4(self, data_1:List[Attribute]):
-        assert self.validator.validate(data_1, None, "classname") is True
-    
     @pytest.fixture
     def attribute_annotation_setter(self, data_3:Attribute):
         data_3[0].annotation = "str"
@@ -101,3 +95,10 @@ class TestAttributeValidator:
             match=re.escape(Errors.CLASS_ATTRIBUTE_MISMATCH.format(Constants.ANNOTATION, attr_1.type, attr_1.name, attr_1.annotation, attr_2.annotation))
         ):
             self.validator.validate(data_3, data_2, "classname")
+    
+    def test_attribute_mismatch_6(self, data_3:List[Attribute]):
+        with pytest.raises(
+            ValueError,
+            match=re.escape(Errors.ELEMENT_MISSING.format(data_3))
+        ):
+            self.validator.validate(data_3, None, "classname")
