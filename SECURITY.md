@@ -6,8 +6,8 @@ We support the following versions of ImportSpy with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.6+  | ✅ Supported        |
-| < 0.1.6 | ❌ Not supported    |
+| 1.0.0+  | ✅ Supported        |
+| < 1.0.0 | ❌ Not supported    |
 
 ## Reporting a Vulnerability
 
