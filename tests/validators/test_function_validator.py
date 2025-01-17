@@ -1,7 +1,6 @@
 import pytest
 from importspy import (
-    Function,
-    Config
+    Function
 )
 from typing import List
 from importspy.validators.function_validator import FunctionValidator
