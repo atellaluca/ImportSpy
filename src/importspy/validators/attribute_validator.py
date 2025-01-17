@@ -31,15 +31,6 @@ class AttributeValidator:
                 )
             )
             return
-        if attrs_1 and not attrs_2:
-            self.logger.debug(
-                Constants.LOG_MESSAGE_TEMPLATE.format(
-                    operation="Checking attrs_1 and attrs_2",
-                    status="Finished",
-                    details=f"There aren't any attrs_2; current attrs_2: {attrs_2}"
-                )
-            )
-            return True
         if not attrs_2:
             self.logger.debug(
                 Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -48,7 +39,7 @@ class AttributeValidator:
                     details=f"There aren't any attrs_2; current attrs_2: {attrs_2}"
                 )
             )
-            return False
+            raise(ValueError(Errors.ELEMENT_MISSING.format(attrs_1)))
         for attr_1 in attrs_1:
             self.logger.debug(f"Type of attr_1: {type(attr_1)}")
             self.logger.debug(
@@ -59,14 +50,16 @@ class AttributeValidator:
                 )
             )
             if attr_1.name not in set(map(lambda attr: attr.name, attrs_2)):
-                Constants.LOG_MESSAGE_TEMPLATE.format(
+                self.logger.debug(Constants.LOG_MESSAGE_TEMPLATE.format(
                     operation="Checking if attr_1 is in attrs_2",
                     status="Finished",
                     details=Errors.CLASS_ATTRIBUTE_MISSING.format(attr_1.type, f"{attr_1.name}={attr_1.value}", classname)
-                )
+                ))
                 raise ValueError(Errors.CLASS_ATTRIBUTE_MISSING.format(attr_1.type, f"{attr_1.name}={attr_1.value}", classname))
         for attr_1 in attrs_1:
             attr_2 =  next((attr for attr in attrs_2 if attr.name == attr_1.name), None)
+            if not attr_2:
+                raise(ValueError(Errors.ELEMENT_MISSING.format(attrs_1)))
             if attr_1.annotation and attr_1.annotation != attr_2.annotation:
                 raise ValueError(Errors.CLASS_ATTRIBUTE_MISMATCH.format(Constants.ANNOTATION, attr_1.type, attr_1.name, attr_1.annotation, attr_2.annotation))
             if attr_1.value != attr_2.value:
