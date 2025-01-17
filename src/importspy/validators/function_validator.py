@@ -8,7 +8,7 @@ class FunctionValidator:
                  functions_1:List[Function],
                  functions_2:List[Function],
                  classname:str="",
-                 *args):
+                 ):
         if not functions_1:
             return
         if functions_1 and not functions_2:
@@ -32,6 +32,6 @@ class FunctionValidator:
             function_2 =  next((func for func in functions_2 if func.name == function_1.name), None)
             if function_1.return_annotation and \
                 function_1.return_annotation != function_2.return_annotation:
-                raise ValueError(Errors.ANNONATION_MISMATCH.format(*args, function_1.name))
+                raise ValueError(Errors.FUNCTION_RETURN_ANNONATION_MISMATCH.format(function_1.name))
             
 
