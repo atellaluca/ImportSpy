@@ -45,9 +45,6 @@ class TestFunctionValidator:
     def test_function_match(self, data_1:List[Function], data_4:List[Function]):
         assert self.validator.validate(data_1, data_4, "classname")
     
-    def test_function_match_1(self, data_3:List[Function]):
-        assert self.validator.validate(data_3, None, "classname")
-    
     def test_function_mismatch(self, data_2:List[Function]):
         assert self.validator.validate(None, data_2, "classname") is None
     
@@ -65,10 +62,11 @@ class TestFunctionValidator:
         with pytest.raises(
             ValueError,
             match=re.escape(
-                Errors.FUNCTION_RETURN_ANNONATION_MISMATCH.format(
+                Errors.FUNCTION_RETURN_ANNOTATION_MISMATCH.format(
                     "method in class classname",
                     data_4[0].name,
-                    data_4[0].return_annotation
+                    data_4[0].return_annotation,
+                    data_3[0].return_annotation
                 )
             )
         ):
@@ -80,5 +78,9 @@ class TestFunctionValidator:
     def test_function_mismatch_3(self, data_2:List[Function]):
         assert self.validator.validate(None, data_2, "classname") is None
     
-    def test_function_mismatch_4(self, data_1:List[Function]):
-        assert self.validator.validate(data_1, None, "classname") is True
+    def test_function_mismatch_5(self, data_3:List[Function]):
+        with pytest.raises(
+            ValueError,
+            match=re.escape(Errors.ELEMENT_MISSING.format(data_3))
+        ):
+            self.validator.validate(data_3, None, "classname")
