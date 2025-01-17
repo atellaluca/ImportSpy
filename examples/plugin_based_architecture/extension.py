@@ -1,6 +1,8 @@
 import package
 from plugin_interface import Plugin
 
+author = "Luca Atella"
+
 plugin_name = "plugin name"
 plugin_description = "plugin description"
 
