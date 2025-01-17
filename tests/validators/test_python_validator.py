@@ -60,7 +60,6 @@ class TestPythonValidator:
 
     @pytest.mark.usefixtures("python_interpreter_setter")
     def test_python_mismatch_1(self, data_3, data_4):
-        print(data_3, data_4)
         assert self.validator.validate(data_4, data_3) is False
     
     def test_python_mismatch_2(self):
