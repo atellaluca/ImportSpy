@@ -9,7 +9,7 @@ from importspy.errors import Errors
 import re
 from importspy.constants import Constants
 
-class TestPythonValidator:
+class TestAttributeValidator:
 
     validator = AttributeValidator()
 
