@@ -83,13 +83,12 @@ class Errors:
     ENV_VAR_MISSING = "Missing environment variable: '{0}'. Ensure it is defined in the system."
     VAR_MISMATCH = "Value mismatch for variable '{0}': expected '{1}', found '{2}'"
     VAR_MISSING = "Missing variable: '{0}'. Ensure it is defined."
-    FUNCTIONS_MISSING = "Missing {0}: '{1}'. Ensure it is defined in {2} {3}"
-    FUNCTION_RETURN_ANNONATION_MISMATCH = "Return annotation mismatch for function {0}. Ensure it is defined as {1}"
+    FUNCTIONS_MISSING = "Missing {0}: '{1}'. Ensure it is defined"
+    FUNCTION_RETURN_ANNONATION_MISMATCH = "Return annotation mismatch for {0} {1}. Ensure it is defined as {2}"
     CLASS_MISSING = "Missing class: {0}. Ensure it is defined."
     CLASS_ATTRIBUTE_MISSING = "Missing {0} attribute: '{1}'. Ensure it is defined in class '{2}'."
     CLASS_ATTRIBUTE_MISMATCH = "{0} mismatch for {1} attribute '{2}': expected '{3}', found '{4}'."
     CLASS_SUPERCLASS_MISSING = "Missing class superclass: '{0}'. Make sure that '{1}' extends {0}."
-    METHOD_RETURN_ANNONATION_MISMATCH = "Return annotation mismatch for method {0} in class {2}. Ensure it is defined as {1}"
     INVALID_ATTRIBUTE_TYPE = "Invalid attribute type '{0}'. Supported attributes are: {1}"
 
     # Runtime validation
@@ -100,4 +99,3 @@ class Errors:
 
     # Attribute and Argument validation
     INVALID_ANNOTATION = "Invalid annotation '{0}'. Supported annotations are: {1}"
-    CLASS_ATTRIBUTE_ANNONATION_MISMATCH = "Annotation mismatch for attribute {0} in class {2}. Ensure it is defined as {1}"
