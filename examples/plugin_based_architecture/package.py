@@ -19,6 +19,28 @@ from typing import List
 __version__ = None
 
 class PluginSpy(SpyModel):
+    deployments:List[Runtime] =[
+        Runtime(
+            arch=Config.ARCH_x86_64,
+            systems=[
+                System(
+                os=Config.OS_LINUX,
+                pythons=[
+                    Python(
+                        modules=[
+                            Module(
+                                filename="extension.py",
+                                variables={
+                                    "author":"Luca Atella"
+                                }
+                            )
+                        ]
+                    )
+                ]
+            )
+            ]
+        )
+    ]
     filename: str = "extension.py"
     variables: dict = {"engine": "docker", "plugin_name":"plugin name", "plugin_description":"plugin description"}
     classes: List[Class] = [
