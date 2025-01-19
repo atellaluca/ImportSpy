@@ -25,6 +25,8 @@ class SystemValidator:
                 cv.dict_validate(system_1.envs, system_2.envs, Errors.ENV_VAR_MISSING, Errors.ENV_VAR_MISMATCH)
             if system_1.pythons:
                 self._pythons_validate(system_1.pythons, system_2.pythons[0])
+            return True
+        return False
     
     def _pythons_validate(self, pythons_1:List[Python], python_2:Python):
         for python_1 in pythons_1:
