@@ -13,7 +13,7 @@ from importspy.models import (
     Function,
     Argument
     )
-
+import logging
 from typing import List
 
 __version__ = None
@@ -24,9 +24,40 @@ class PluginSpy(SpyModel):
             arch=Config.ARCH_x86_64,
             systems=[
                 System(
+                os=Config.OS_WINDOWS,
+                pythons=[
+                    Python(
+                        interpreter=Config.INTERPRETER_CPYTHON,
+                        version="3.12.8",
+                        modules=[
+                            Module(
+                                filename="extension.py",
+                                variables={
+                                    "author":"Luca Atella"
+                                }
+                            )
+                        ]
+                    ),
+                    Python(
+                        version="3.12.4",
+                        modules=[
+                            Module(filename="addons.py")
+                        ]
+                    ),
+                    Python(
+                        interpreter=Config.INTERPRETER_IRON_PYTHON,
+                        modules=[
+                            Module(filename="addons.py")
+                        ]
+                    )
+                ]
+            ),
+            System(
                 os=Config.OS_LINUX,
                 pythons=[
                     Python(
+                        interpreter=Config.INTERPRETER_CPYTHON,
+                        version="3.12.8",
                         modules=[
                             Module(
                                 filename="extension.py",
@@ -114,6 +145,6 @@ class PluginSpy(SpyModel):
         )]
     filename: str = "extension.py"
 
-caller_module = Spy().importspy(spymodel=PluginSpy)
+caller_module = Spy().importspy(spymodel=PluginSpy, log_level=logging.DEBUG)
 
 caller_module.Foo().get_bar()
