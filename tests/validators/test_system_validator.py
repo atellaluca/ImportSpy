@@ -7,6 +7,7 @@ from importspy.constants import Constants
 from importspy.validators.system_validator import SystemValidator
 from importspy.errors import Errors
 import re
+from typing import List
 
 class TestSystemValidator:
 
@@ -14,33 +15,33 @@ class TestSystemValidator:
 
     @pytest.fixture
     def data_1(self):
-        return System(
+        return [System(
             os=Config.OS_LINUX,
             envs={"CI": "true"},
             pythons=[]
-        )
+        )]
     
     @pytest.fixture
     def data_2(self):
-        return System(
+        return [System(
             os=Config.OS_LINUX,
             pythons=[]
-        )
+        )]
     
     @pytest.fixture
-    def os_windows_setter(self, data_1:System):
-        data_1.os = Config.OS_WINDOWS
+    def os_windows_setter(self, data_1:List[System]):
+        data_1[0].os = Config.OS_WINDOWS
     
     @pytest.fixture
     def envs_setter(self, data_2):
-        data_2.envs = {"CI": "true"}
+        data_2[0].envs = {"CI": "true"}
 
     @pytest.mark.usefixtures("envs_setter")
-    def test_system_os_match(self, data_1:System, data_2:System):
-        assert self.validator.validate(data_1, data_2)
+    def test_system_os_match(self, data_1:List[System], data_2:List[System]):
+        assert self.validator.validate(data_1, data_2) is None
     
-    def test_system_os_match_2(self, data_1:System, data_2:System):
-        assert self.validator.validate(data_2, data_1)
+    def test_system_os_match_2(self, data_1:List[System], data_2:List[System]):
+        assert self.validator.validate(data_2, data_1) is None
 
     def test_system_os_invalid(self):
         with pytest.raises(ValueError,
@@ -50,23 +51,23 @@ class TestSystemValidator:
                 pythons=[]
             )
     
-    def test_system_os_mismatch(self, data_1:System, data_2:System):
+    def test_system_os_mismatch(self, data_1:List[System], data_2:List[System]):
         with pytest.raises(
             ValueError,
             match=re.escape(
-                Errors.ENV_VAR_MISSING.format(data_1.envs)
+                Errors.ENV_VAR_MISSING.format(data_1[0].envs)
             )
         ):
             self.validator.validate(data_1, data_2)
 
     @pytest.mark.usefixtures("os_windows_setter")
-    def test_system_os_mismatch_1(self, data_1:System, data_2:System):
-        assert self.validator.validate(data_1, data_2) is False
+    def test_system_os_mismatch_1(self, data_1:List[System], data_2:List[System]):
+        assert self.validator.validate(data_1, data_2) is None
     
-    def test_system_mismatch(self, data_2:System):
+    def test_system_mismatch(self, data_2:List[System]):
         assert self.validator.validate(None, data_2) is None
     
-    def test_system_mismatch_1(self, data_2:System):
+    def test_system_mismatch_1(self, data_2:List[System]):
         with pytest.raises(
             ValueError,
             match=re.escape(Errors.ELEMENT_MISSING.format(data_2))
