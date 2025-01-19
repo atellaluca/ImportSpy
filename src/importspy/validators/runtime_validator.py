@@ -17,8 +17,9 @@ class RuntimeValidator:
         if not runtime_2:
             raise(ValueError(Errors.ELEMENT_MISSING.format(runtime_1)))
         if runtime_1.arch == runtime_2.arch:
-            self._systems_validate(runtime_1.systems, runtime_2.systems[0])
-            return
+            if runtime_2.systems:
+                self._systems_validate(runtime_1.systems, runtime_2.systems[0])
+            return True
         return False
     
     def _systems_validate(self, systems_1:List[System], system_2:System):
