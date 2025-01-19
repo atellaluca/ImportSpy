@@ -3,7 +3,9 @@ from importspy import (
     Python,
     Config
 )
+from importspy.errors import Errors
 from importspy.validators.python_validator import PythonValidator
+import re
 
 
 class TestPythonValidator:
@@ -52,9 +54,6 @@ class TestPythonValidator:
     def test_python_match_1(self, data_3:Python, data_4:Python):
         assert self.validator.validate(data_3, data_4)
     
-    def test_python_match_2(self, data_3:Python):
-        assert self.validator.validate(data_3, None)
-    
     def test_python_mismatch(self, data_2:Python):
         assert self.validator.validate(None, data_2) is None
 
@@ -71,9 +70,15 @@ class TestPythonValidator:
     def test_python_mismatch_4(self, data_2:Python):
         assert self.validator.validate(None, data_2) is None
     
-    def test_python_mismatch_5(self, data_1:Python):
-        assert self.validator.validate(data_1, None) is True
-    
     @pytest.mark.usefixtures("python_interpreter_setter")
-    def test_python_mismatch_6(self, data_3, data_4):
+    def test_python_mismatch_5(self, data_3, data_4):
         assert self.validator.validate(data_4, data_3) is False
+    
+    def test_python_mismatch_6(self, data_3:Python):
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                    Errors.ELEMENT_MISSING.format(data_3)
+                )
+        ):
+            self.validator.validate(data_3, None)
