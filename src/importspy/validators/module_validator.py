@@ -39,4 +39,3 @@ class ModuleValidator:
                     self._function_validator.validate(class_1.methods, class_2.methods, classname=class_1.name)
                     # Superclasses validation
                     common_validator.list_validate(class_1.superclasses, class_2.superclasses, Errors.CLASS_SUPERCLASS_MISSING, class_2.name)
-            return True
