@@ -58,16 +58,16 @@ class TestModuleValidator:
     @pytest.mark.usefixtures("filename_setter")
     @pytest.mark.usefixtures("version_unsetter")
     def test_module_match(self, data_1:List[Module], data_2:List[Module]):
-        assert self.validator.validate(data_1, data_2[0])
+        assert self.validator.validate(data_1, data_2[0]) is None
 
     @pytest.mark.usefixtures("filename_setter")
     @pytest.mark.usefixtures("variables_setter")
     @pytest.mark.usefixtures("variables_msg_setter")
     def test_module_match_1(self, data_2:List[Module], data_3:List[Module]):
-        assert self.validator.validate(data_2, data_3[0])
+        assert self.validator.validate(data_2, data_3[0]) is None
     
     def test_module_match_2(self, data_2:List[Module], data_3:List[Module]):
-        assert self.validator.validate(data_2, data_3[0])
+        assert self.validator.validate(data_2, data_3[0]) is None
     
     def test_module_mismatch(self, data_2:List[Module]):
         assert self.validator.validate(None, data_2[0]) is None
