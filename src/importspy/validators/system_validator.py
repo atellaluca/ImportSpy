@@ -13,21 +13,18 @@ class SystemValidator:
         self._python_validator = PythonValidator()
 
     def validate(self,
-                 system_1:System,
-                 system_2:System):
-        if not system_1:
+                 systems_1:List[System],
+                 systems_2:List[System]):
+        if not systems_1:
             return
-        if not system_2:
-            raise(ValueError(Errors.ELEMENT_MISSING.format(system_1)))
+        if not systems_2:
+            raise(ValueError(Errors.ELEMENT_MISSING.format(systems_1)))
         cv = CommonValidator()
-        if system_1.os == system_2.os:
-            if system_1.envs:
-                cv.dict_validate(system_1.envs, system_2.envs, Errors.ENV_VAR_MISSING, Errors.ENV_VAR_MISMATCH)
-            if system_1.pythons:
-                self._pythons_validate(system_1.pythons, system_2.pythons[0])
-            return True
-        return False
-    
-    def _pythons_validate(self, pythons_1:List[Python], python_2:Python):
-        for python_1 in pythons_1:
-            self._python_validator.validate(python_1, python_2)
+        system_2 = systems_2[0]
+        for system_1 in systems_1:
+            if system_1.os == system_2.os:
+                if system_1.envs:
+                    cv.dict_validate(system_1.envs, system_2.envs, Errors.ENV_VAR_MISSING, Errors.ENV_VAR_MISMATCH)
+                if system_1.pythons:
+                    self._python_validator.validate(system_1.pythons, system_2.pythons)
+                return
