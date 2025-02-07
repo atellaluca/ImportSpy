@@ -9,7 +9,7 @@
 project = 'ImportSpy'
 copyright = '2024, Luca Atella'
 author = 'Luca Atella'
-release = '0.1.7'
+release = '0.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
