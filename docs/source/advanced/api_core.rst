@@ -6,7 +6,7 @@ These are the core classes and constants that make up the foundation of ImportSp
 
 Spy Class
 ---------
-.. autoclass:: importspy.spy.Spy
+.. autoclass:: importspy.s.Spy
    :members:
    :undoc-members:
    :show-inheritance:

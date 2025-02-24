@@ -11,4 +11,3 @@ It is divided into multiple parts to help users find relevant information easily
    api_core
    api_models
    api_utilities
-   api_examples
