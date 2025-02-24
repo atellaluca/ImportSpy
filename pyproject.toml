@@ -15,7 +15,10 @@ pydantic = "^2.9.2"
 [tool.poetry.group.dev.dependencies]
 sphinx = ">=5,<9"
 pytest = "^8.3.3"
-sphinx-rtd-theme = ">=2,<4"
+
+
+[tool.poetry.group.docs.dependencies]
+furo = "^2024.8.6"
 
 [tool.poetry.urls]
 repository = "https://github.com/atellaluca/importspy"
