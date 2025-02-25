@@ -14,7 +14,6 @@ The **Overview** section is structured into multiple pages to help you explore I
    overview/story
    overview/use_cases_index
    overview/understanding_importspy
-   overview/handling_errors
 
 - **The Story Behind ImportSpy** → Discover the personal journey that led to the creation of ImportSpy.
 - **Use Cases** → Explore real-world applications where ImportSpy ensures validation, security, and compliance.
