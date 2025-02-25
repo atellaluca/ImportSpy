@@ -33,11 +33,11 @@ Steps to Run the Example
 
       cd importspy/examples/plugin_based_architecture
 
-2. **Run the validation script** (`package.py`), which initializes ImportSpy and validates the plugin structure:
+2. **Run the validation script** (`extension.py`), which initializes ImportSpy and validates the plugin structure:
 
    .. code-block:: bash
 
-      python package.py
+      python extension.py
 
 Expected Output
 ---------------
@@ -45,11 +45,7 @@ Expected Output
 If the plugin (`extension.py`) follows the expected structure, you will see an output similar to:
 
    .. code-block:: text
-
-      INFO: Validating plugin structure...
-      DEBUG: Loading module: extension.py
-      INFO: Module 'extension.py' successfully validated.
-      DEBUG: Calling Foo().get_bar()
+      
       Foobar
 
 If there are validation errors (e.g., missing attributes, incorrect types, or unsupported Python versions),  

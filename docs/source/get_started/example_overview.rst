@@ -8,6 +8,7 @@ It demonstrates how to enforce structural and runtime compliance for dynamically
 Why This Example?
 -----------------
 This example is useful for:
+
 - **Modular Systems** → Ensuring plugins conform to expected structures.
 - **Microservices** → Validating dependencies across distributed components.
 - **Extensible Applications** → Providing safety mechanisms when integrating external modules.
