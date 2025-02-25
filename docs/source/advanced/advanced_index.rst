@@ -12,4 +12,6 @@ What You’ll Find Here:
 .. toctree::
    :maxdepth: 2
 
+   architecture
+   case_studies
    api_reference
