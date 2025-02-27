@@ -1,6 +1,5 @@
 from ..models import (
-    System,
-    Python
+    System
 )
 from ..errors import Errors
 from .common_validator import CommonValidator

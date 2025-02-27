@@ -1,5 +1,4 @@
 from types import ModuleType
-from .errors import Errors
 from .models import SpyModel
 from .utilities.module_util import ModuleUtil
 from .validators.spymodel_validator import SpyModelValidator
