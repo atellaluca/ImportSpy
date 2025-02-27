@@ -28,8 +28,8 @@ Let’s dive in and unlock the full potential of ImportSpy!
    :caption: Core Documentation
 
    vision
-   get_started
    overview
+   get_started
 
 .. toctree::
    :maxdepth: 2
