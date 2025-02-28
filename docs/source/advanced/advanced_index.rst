@@ -14,4 +14,4 @@ What You’ll Find Here:
 
    architecture
    case_studies
-   api_reference
+   api_reference_index

@@ -1,8 +1,3 @@
-Error Table
-===========
-
-The following table lists all validation errors that ImportSpy may raise.
-
 .. list-table:: ImportSpy Validation Errors
    :widths: 30 70
    :header-rows: 1

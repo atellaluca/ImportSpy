@@ -30,6 +30,7 @@ Let’s dive in and unlock the full potential of ImportSpy!
    vision
    overview
    get_started
+   sponsorship
 
 .. toctree::
    :maxdepth: 2
