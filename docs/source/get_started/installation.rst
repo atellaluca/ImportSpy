@@ -24,14 +24,14 @@ Follow these steps to install and configure **ImportSpy**:
 
    .. tabs::
 
-      .. tab:: 🐧 macOS / Linux
+      .. tab:: macOS / Linux
 
          .. code-block:: bash
 
             python3 -m venv venv
             source venv/bin/activate
 
-      .. tab:: 🖥️ Windows
+      .. tab:: Windows
 
          .. code-block:: bash
 
