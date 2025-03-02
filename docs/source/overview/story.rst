@@ -85,6 +85,4 @@ that software should be **precise, reliable, and thoughtfully designed**.
 This project is a **tribute to all developers** who strive to build **better, more predictable software**  
 and who believe that even the smallest ideas can create **meaningful impact**.  
 
-🔹 **Reclaim your passion.**  
-🔹 **Build with confidence.**  
-🔹 **Join the movement.**  
+🔹 **Reclaim your passion, build with confidence, join the movement.**  
