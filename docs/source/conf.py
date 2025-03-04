@@ -33,6 +33,10 @@ html_theme = "furo"
 html_static_path = ['_static']
 html_css_files = ['custom.css']
 
+html_theme_options = {
+
+}
+
 html_theme_options["footer_icons"] = [
     {
         "name": "GitHub",
