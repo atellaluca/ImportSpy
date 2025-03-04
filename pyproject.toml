@@ -10,16 +10,12 @@ packages = [{include = "importspy", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 pydantic = "^2.9.2"
-sphinx-tabs = "^3.4.7"
 
 
 [tool.poetry.group.dev.dependencies]
+furo = "^2024.8.6"
 sphinx = ">=5,<9"
 pytest = "^8.3.3"
-
-
-[tool.poetry.group.docs.dependencies]
-furo = "^2024.8.6"
 
 [tool.poetry.urls]
 repository = "https://github.com/atellaluca/importspy"
