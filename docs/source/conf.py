@@ -33,12 +33,6 @@ html_theme = "furo"
 html_static_path = ['_static']
 html_css_files = ['custom.css']
 
-html_theme_options = {
-    "source_repository": "https://github.com/atellaluca/ImportSpy/",
-    "source_branch": "main",
-    "source_directory": "docs/",
-}
-
 html_theme_options["footer_icons"] = [
     {
         "name": "GitHub",
