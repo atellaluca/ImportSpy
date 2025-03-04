@@ -1,107 +1,165 @@
-from typing import Callable
 from types import ModuleType
-from .errors import Errors
 from .models import SpyModel
-from .utils import spy_model_utils, spy_module_utils
+from .utilities.module_util import ModuleUtil
+from .validators.spymodel_validator import SpyModelValidator
+from .log_manager import LogManager
+from typing import Optional
 import logging
-import warnings
-
-logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
-logger.addHandler(logging.NullHandler())
 
 class Spy:
     """
-    The `Spy` class is responsible for dynamic module importation and validation. It enables developers to ensure
-    that imported modules adhere to predefined rules or structures as specified by a `SpyModel`, or alternatively,
-    custom validation logic.
+    Provides functionality for dynamic introspection, validation, and management of Python modules.
 
-    This class allows for flexible, runtime import of Python modules with optional validation, enhancing security 
-    and promoting adherence to standards across projects.
+    The `Spy` class integrates with `LogManager` for centralized logging and supports 
+    the validation of module structures against a provided `SpyModel`. It enables the 
+    dynamic loading and inspection of modules while ensuring compliance with predefined 
+    structures.
 
-    .. warning::
+    Attributes:
+    -----------
+    logger : logging.Logger
+        Logger instance for the `Spy` class, managed by `LogManager`.
 
-        Use caution when dynamically importing code, particularly from untrusted sources, to avoid executing malicious code.
+    Methods:
+    --------
+    - `__init__()`: Initializes the `Spy` instance and sets up the logger.
+    - `importspy(spymodel, log_level)`: Imports and validates a module dynamically.
+    - `_spy_module()`: Retrieves module metadata and detects recursion.
+
+    Example:
+    --------
+    .. code-block:: python
+
+        from importspy.spy import Spy
+
+        spy = Spy()
+        module = spy.importspy(log_level=logging.DEBUG)
     """
 
-    def importspy(self, spymodel: SpyModel | None = None, validation: Callable[[ModuleType], bool] | None = None) -> ModuleType:
+    def __init__(self):
         """
-        Dynamically imports the module that called this function, with optional validation against a `SpyModel` 
-        or a custom validation function.
+        Initializes the `Spy` instance.
 
-        This method imports a module at runtime and verifies that it complies with predefined rules. The rules 
-        can be specified using a `SpyModel` or (for backward compatibility) a custom validation function.
+        This method sets up the logger instance for the `Spy` class using `LogManager`. 
+
+        Attributes:
+        -----------
+        logger : logging.Logger
+            The logger instance for the class.
+
+        Example:
+        --------
+        .. code-block:: python
+
+            spy = Spy()
+        """
+        self.logger = LogManager().get_logger(self.__class__.__name__)
+
+    def importspy(self, 
+                  spymodel: Optional[SpyModel] = None, 
+                  log_level: Optional[int] = None) -> ModuleType:
+        """
+        Dynamically imports and validates a Python module.
+
+        If a `SpyModel` is provided, this method ensures that the loaded module 
+        adheres to its predefined structure. It also configures logging if it 
+        hasn't already been set.
 
         Parameters:
         -----------
-        spymodel : SpyModel, optional
-            An instance of `SpyModel` that defines the rules the imported module should follow. If provided, 
-            the module is only loaded if it adheres to the model.
-        validation : Callable[[ModuleType], bool], optional
-            A deprecated validation function that returns `True` if the module passes validation. 
-            It will be removed in future versions.
+        spymodel : Optional[SpyModel]
+            An optional instance of `SpyModel` that defines the expected structure 
+            of the module to be imported.
+
+        log_level : Optional[int]
+            The logging level to configure for the logger. If not provided, the 
+            system's current logging level is used as the default.
 
         Returns:
         --------
         ModuleType
-            The imported module if it passes the validation, or `None` if it does not comply or no validation 
-            is applied.
+            The dynamically loaded module.
 
         Raises:
         -------
-        DeprecationWarning
-            If the `validation` parameter is used, a warning is raised as this parameter will be removed in 
-            future versions.
+        RuntimeError
+            If an attempt is made to reconfigure the `LogManager` after it has 
+            already been configured.
 
-        .. warning::
+        ValueError
+            If recursion is detected during module analysis, raising a warning 
+            to avoid infinite loops.
 
-            The `validation` parameter is deprecated as of version 0.1.6 due to security concerns. Use the 
-            `SpyModel` for validation instead.
+        Notes:
+        ------
+        - If logging is not configured explicitly, it sets up the logger using
+          either the provided `log_level` or the system's default logging level.
+        - This method leverages `ModuleUtil` to inspect and load the target module.
 
         Example:
         --------
-        ```python
-        spy = Spy()
-        module = spy.importspy(spymodel=my_spy_model)
-        ```
+        .. code-block:: python
+
+            spy = Spy()
+            module = spy.importspy(log_level=logging.DEBUG)
         """
-        info_module = self._spy_module()
-        logger.debug(f"info_module: {info_module}")
-        if spymodel:
-            logger.debug(f"SpyModel detected: {spymodel}")
-            spy_module = SpyModel.from_module(info_module)
-            logger.debug(f"Spy module: {spy_module}")
-            return spy_module_utils.load_module(info_module) if spy_model_utils.is_subset(spymodel(), spy_module) else None
-        elif validation:
-            warnings.warn(
-                "The `validation` parameter is deprecated as of version 0.1.6 due to security vulnerabilities. "
-                "It will be removed in future versions. Please use the `importspy` method with `SpyModel` instead.",
-                DeprecationWarning
-            )
-            module = spy_module_utils.load_module(info_module)
-            return module if validation(module) else None
-        return spy_module_utils.load_module(info_module)
 
-    def _spy_module(self) -> ModuleType | None:
-        """
-        Retrieves information about the calling module that invoked this method.
+        def _configure_logging():
+            """Ensures `LogManager` is configured properly before module import."""
+            log_manager = LogManager()
+            if not log_manager.configured:
+                system_log_level = logging.getLogger().getEffectiveLevel()
+                log_manager.configure(level=log_level or system_log_level)
 
-        This method inspects the current execution context to identify the module that called `importspy`. 
-        It prevents recursion by ensuring the current module is not the same as the caller, avoiding unintended 
-        behavior.
+        def _load_and_validate_module() -> ModuleType:
+            """
+            Loads the module and validates it against the `SpyModel`, if provided.
 
-        Returns:
-        --------
-        ModuleType | None
-            The module object of the caller, or `None` if recursion or another issue is detected.
+            Returns:
+            --------
+            ModuleType
+                The dynamically loaded module.
 
-        Raises:
-        -------
-        ValueError
-            Raised if recursion is detected, meaning the current module is the same as the calling module.
-        """
-        current_frame, caller_frame = spy_module_utils.inspect_module()
-        if current_frame.filename == caller_frame.filename:
-            raise ValueError(Errors.ANALYSIS_RECURSION_WARNING)
-        info_module = spy_module_utils.get_info_module(caller_frame)
-        logger.debug(f"Spy info_module: {info_module}")
-        return info_module
+            Raises:
+            -------
+            ValueError
+                If recursion is detected in the module being analyzed.
+            """
+            module_util = ModuleUtil()
+            info_module = _inspect_module()
+            self.logger.debug(f"info_module: {info_module}")
+
+            if spymodel:
+                self.logger.debug(f"SpyModel detected: {spymodel}")
+                spy_module = SpyModel.from_module(info_module)
+                self.logger.debug(f"Spy module: {spy_module}")
+                SpyModelValidator().validate(spymodel(), spy_module)
+
+            return module_util.load_module(info_module)
+
+        def _inspect_module() -> ModuleType:
+            """
+            Inspects the caller module and retrieves metadata.
+
+            Returns:
+            --------
+            ModuleType
+                The caller's module metadata.
+
+            Raises:
+            -------
+            ValueError
+                If recursion is detected during module analysis.
+            """
+            module_util = ModuleUtil()
+            current_frame, caller_frame = module_util.inspect_module()
+            if current_frame.filename == caller_frame.filename:
+                raise ValueError("Recursion detected during module analysis.")
+
+            info_module = module_util.get_info_module(caller_frame)
+            self.logger.debug(f"Spy info_module: {info_module}")
+            return info_module
+
+        # Main logic
+        _configure_logging()
+        return _load_and_validate_module()

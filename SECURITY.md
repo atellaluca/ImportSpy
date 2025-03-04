@@ -1,35 +1,30 @@
 # Security Policy
 
-## Supported Versions
+## 📢 Reporting a Vulnerability
 
-We support the following versions of ImportSpy with security updates:
+ImportSpy is committed to maintaining a **secure** and **trusted** environment for all developers.  
+If you discover a security vulnerability, we strongly encourage **responsible disclosure**.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.1.6+  | ✅ Supported        |
-| < 0.1.6 | ❌ Not supported    |
+- **Report vulnerabilities via**: [GitHub Issues](https://github.com/atellaluca/ImportSpy/issues)
+- **Contact for security concerns**: [atellaluca@outlook.it](mailto:atellaluca@outlook.it)
+- **Disclosure period**: We follow a **90-day responsible disclosure policy**.  
+  - Issues reported privately will be reviewed and fixed before public disclosure.  
 
-## Reporting a Vulnerability
+## 🛠️ Handling Security Patches
 
-If you find a security vulnerability in **ImportSpy**, please help us protect our users by following these steps:
+We take security seriously and address vulnerabilities as follows:
 
-1. **Do not open a public issue**. To avoid exploitation of the vulnerability before it is resolved, please refrain from posting details publicly.
-   
-2. **Contact the maintainer** by emailing [dev.atellaluca@gmail.com](mailto:dev.atellaluca@gmail.com). Provide detailed information about the vulnerability and steps to reproduce it.
+1. **Review & Triage**: Reported vulnerabilities are assessed within **48 hours**.
+2. **Fix & Release**:
+   - Minor security patches are applied in **patch releases (`x.x.x`)**.
+   - Major security fixes may result in a **new minor version (`x.x.0`)**.
+3. **Communication**:
+   - **GitHub Releases**: Security updates are tagged and documented.
+   - **Upcoming**: Changelog updates and mailing list notifications.
 
-3. **Response time**: You can expect a response within 48 hours. We will acknowledge your report and provide a timeline for the investigation and any necessary fixes.
+## 📦 Security Considerations
 
-4. **Responsible disclosure**: After the issue has been fixed, we will notify you prior to publicly releasing the solution. We appreciate your cooperation in maintaining the security of the project.
+ImportSpy depends on **Pydantic (`^2.9.2`)**, and we actively monitor its security updates.  
+If a dependency vulnerability is identified, it will be patched and communicated accordingly.
 
-## Security Updates
-
-All security-related updates are managed through Dependabot and manual reviews. Please keep your project updated by following the latest releases.
-
-## Security Best Practices
-
-To ensure the security of your project:
-- Keep your dependencies up to date.
-- Regularly audit your code and dependencies for vulnerabilities.
-- Carefully review changes to pyproject.toml before merging.
-
-Thank you for contributing to the security of **ImportSpy**!
+Thank you for contributing to the security of **ImportSpy**! 🛡️

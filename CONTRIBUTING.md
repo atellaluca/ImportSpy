@@ -1,50 +1,33 @@
 # Contributing to ImportSpy
 
-We welcome contributions! If you'd like to help improve ImportSpy, please follow these guidelines:
+🎉 Thank you for considering a contribution to **ImportSpy**! We value your efforts and welcome **issues, features, and documentation improvements**.
 
-## Issues and Bug Reports
+## 📢 How to Contribute
 
-- Before submitting an issue, check the [issue tracker](https://github.com/atellaluca/ImportSpy/issues) to see if someone else has already reported the same problem.
-- If it's a new issue, provide a clear and detailed description of the problem.
-- Include steps to reproduce the bug, if applicable.
+### 🔍 1. Issue Reporting  
+If you find a **bug** or have a **feature request**, please open an issue:  
+🔗 [GitHub Issues](https://github.com/atellaluca/ImportSpy/issues)  
 
-## Feature Requests
+### 🔄 2. Fork & Branching Strategy  
+- **Create a fork** and work on a separate branch before submitting a pull request.
+- Use the following **branch naming conventions**:
+  - **For features:** `feature/nome-feature-in-breve`
+  - **For bug fixes:** `fix/bugfix-description`
+  - **For documentation:** `docs/update-section`
 
-- We welcome suggestions for new features! You can open a feature request by creating a new issue and labeling it with `enhancement`.
-- Clearly explain the feature you'd like to see, why it would be useful, and any potential implementation ideas.
+### ✅ 3. Code Style & Commit Rules  
+- **Follow Conventional Commits**:  
+  - `feat:` → For new features  
+  - `fix:` → For bug fixes  
+  - `docs:` → For documentation changes  
+  - `test:` → For tests  
+  - `refactor:` → Code improvements without changing functionality  
 
-## Pull Requests
+Example:
+```bash
+git commit -m "feat: add validation for OS compatibility"
+```
 
-To contribute code, please follow these steps:
+💡 **We Appreciate Every Contribution!**
 
-1. **Fork the repository**: Create your own copy of the project.
-2. **Clone the repository**: 
-    ```bash
-    git clone https://github.com/your-username/ImportSpy.git
-    ```
-3. **Create a new branch** for your feature or bugfix:
-    ```bash
-    git checkout -b feature-name
-    ```
-4. **Make your changes**: Ensure your code adheres to the coding style of the project and is well-documented.
-5. **Test your changes**: Run tests to make sure your modifications work as expected.
-6. **Commit your changes**:
-    ```bash
-    git commit -m "Brief description of changes"
-    ```
-7. **Push to your branch**:
-    ```bash
-    git push origin feature-name
-    ```
-8. **Submit a Pull Request**: Go to the repository on GitHub and open a pull request. Clearly describe the changes and link to any related issues.
-
-## Code Style and Standards
-
-- Please ensure your code follows the project’s style guide. We prefer consistent naming conventions and readable code.
-- If you're submitting a large change, consider discussing it in an issue first.
-
-## Questions
-
-If you have any questions, feel free to open an issue or contact us directly.
-
-Thank you for contributing!
+ImportSpy is an open-source project, and every contribution—big or small—helps make it better. 🚀
