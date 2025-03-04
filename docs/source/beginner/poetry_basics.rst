@@ -27,7 +27,7 @@ Poetry provides a **modern approach** with:
 ✅ **Explicit Dependency Management** → Organizes dependencies into **core**, **development**, and **documentation** groups.  
 
 Installing Poetry 💾
--------------------
+--------------------
 
 Install Poetry with:
 
@@ -71,7 +71,7 @@ If needed (e.g., inside an IDE), manually activate it:
 Use `exit` to leave the environment when done.
 
 Dependency Management 🔄
------------------------
+------------------------
 
 **Adding a New Dependency**  
 To install a package and update `pyproject.toml`:
@@ -129,7 +129,7 @@ Now, **Alice and Bob are running different versions of dependencies**, which may
 If working in a team, **always commit `poetry.lock`** after updates and **sync with `poetry install`** instead of updating individually.
 
 Versioning and Releases 🚀
--------------------------
+--------------------------
 
 ImportSpy follows **Semantic Versioning (SemVer)**:
 
@@ -186,7 +186,7 @@ This is useful **when dependencies change upstream**, but you want to **recreate
 Example: The `pyproject.toml` has changed (e.g., a new dependency was added), but you want to retain the existing dependency tree.
 
 Exporting Dependencies for External Environments 📜
---------------------------------------------------
+---------------------------------------------------
 
 To install dependencies **without Poetry**, export them as a `requirements.txt` file:
 
@@ -201,7 +201,7 @@ Then install them in a non-Poetry environment:
    pip install -r requirements.txt
 
 Understanding `pyproject.toml` 📝
---------------------------------
+---------------------------------
 
 The `pyproject.toml` file defines ImportSpy’s package configuration.
 
@@ -250,4 +250,3 @@ Now that you understand **Poetry’s role in ImportSpy**, explore:
 
 - **How Python Reflection Works** → :doc:`python_reflection`
 - **How ImportSpy Uses Pydantic** → :doc:`pydantic_in_importspy`
-- **How to Contribute** → :doc:`contribution_guide`

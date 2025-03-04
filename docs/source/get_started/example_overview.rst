@@ -75,8 +75,8 @@ Next Steps 🎯
 Now that you understand the core structure, it's time to **test ImportSpy in action!**
 
 - **Run the example** following the guide in :doc:`run_example`.  
-- **Explore how validation works** in :doc:`package.py`.  
-- **Modify the plugin** in :doc:`extension` and test ImportSpy's validation mechanism.  
+- **Explore how validation works** in :doc:`../overview/understanding_importspy/validation_and_compliance`.  
+- **Modify the plugin** in :doc:`example_overview` and test ImportSpy's validation mechanism.  
 
 By experimenting with these files, you’ll see **firsthand how ImportSpy enforces compliance**  
 and ensures that dynamically loaded plugins interact with your system **safely and predictably**. 🚀

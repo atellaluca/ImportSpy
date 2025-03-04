@@ -173,7 +173,7 @@ making Python’s dynamic import system **more robust, predictable, and secure**
 Want to learn more about Pydantic? Check out these resources:
 
 - **Official Pydantic Documentation** → 🔗 `https://docs.pydantic.dev/latest/`
-- **ImportSpy’s Validation System** → :doc:`validation_and_compliance`
+- **ImportSpy’s Validation System** → :doc:`../overview/understanding_importspy/validation_and_compliance`
 - **Best Practices for Structuring Python Modules** → 🔗 `https://docs.python.org/3/tutorial/modules.html`
 
 **Final Thoughts** 🎯 
@@ -187,4 +187,3 @@ ImportSpy ensures that imported modules remain **predictable, secure, and compli
 
 🚀 **Next Steps:**
 - **Explore ImportSpy’s Reflection System** → :doc:`python_reflection`
-- **Understand How ImportSpy Ensures Compliance** → :doc:`validation_and_compliance`

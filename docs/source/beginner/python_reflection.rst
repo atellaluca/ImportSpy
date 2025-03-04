@@ -142,7 +142,7 @@ Instead of blindly calling `getattr()`, ensure the function exists and is safe t
 
    method = getattr(module, "run", None)
    if method and callable(method):
-       method()  # ✅ Safe execution
+      method()  # ✅ Safe execution
 
 **6. Further Resources** 📚 
 ---------------------------
@@ -150,7 +150,7 @@ Instead of blindly calling `getattr()`, ensure the function exists and is safe t
 Want to go deeper? Here are some great resources:
 
 - **Python’s Official Reflection Docs** → 🔗 `https://docs.python.org/3/library/inspect.html`
-- **ImportSpy’s Validation Model** → :doc:`spymodel_validation`
+- **ImportSpy’s Validation Model** → :doc:`../overview/understanding_importspy/validation_and_compliance`
 - **Dynamic Module Loading in Python** → 🔗 `https://docs.python.org/3/library/importlib.html`
 
 **Final Thoughts** 🎯 
