@@ -13,11 +13,11 @@
 
 ImportSpy - Intelligent Import Validation 🛡️
 =============================================
-
 **Ensure compliance, prevent unexpected failures, and enforce execution rules dynamically.**  
-🔍 **Monitor the runtime context** before allowing imports.  
-⚡ **Eliminate environment inconsistencies** before they break production.  
-🛡️ **Enforce strict execution policies** for imported modules.  
+
+- 🔍 **Monitor the runtime context** before allowing imports.  
+- ⚡ **Eliminate environment inconsistencies** before they break production.  
+- 🛡️ **Enforce strict execution policies** for imported modules.  
 
 .. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
    :width: 830
@@ -30,6 +30,7 @@ ImportSpy is a **powerful runtime validation framework** that ensures that exter
 **only import your code in a compliant execution environment**.
 
 Why is this important?
+
 - ✅ **Prevents unexpected failures** caused by incorrect dependencies.  
 - ✅ **Ensures security** by blocking unauthorized imports.  
 - ✅ **Eliminates debugging headaches** by validating environments dynamically.  
@@ -42,12 +43,14 @@ ImportSpy **solves real-world problems** for **Python developers, software archi
 that need to **enforce execution constraints** on external modules.
 
 🔴 **Without ImportSpy**  
+
 - ❌ Modules may break when imported into the wrong Python version.  
 - ❌ Unexpected OS configurations may introduce **silent failures**.  
 - ❌ Dependencies may change, leading to **unpredictable execution issues**.  
 - ❌ No **protection** against external modules misusing your code.  
 
 🟢 **With ImportSpy**  
+
 - ✅ **Prevent misconfigured environments from executing your code.**  
 - ✅ **Block unauthorized imports and enforce runtime policies.**  
 - ✅ **Ensure every imported module meets strict execution requirements.**  
@@ -60,6 +63,7 @@ ImportSpy **intercepts module imports** and ensures they match **predefined exec
 before allowing execution.
 
 The process is simple:
+
 1. **Define execution constraints** (e.g., OS, Python version, environment variables).  
 2. **ImportSpy validates runtime conditions dynamically.**  
 3. **If the environment is compliant, execution proceeds.**  
