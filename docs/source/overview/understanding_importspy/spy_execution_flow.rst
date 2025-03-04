@@ -1,123 +1,105 @@
 Spy Execution Flow
 ==================
 
-ImportSpy operates as a **validation layer** that ensures external modules comply with a **well-defined structural  
-and runtime model** before they interact with the core framework. The validation process follows a structured  
-execution flow that dynamically **reconstructs and evaluates imported modules**, verifying their consistency  
-with predefined expectations. This **prevents uncontrolled modifications**, enforces compliance,  
-and ensures that software maintains **predictable behavior across different environments**.
+ImportSpy operates as an **execution validation layer**, ensuring that **the environment in which a module is imported**  
+complies with the constraints defined by the module itself. Instead of validating the imported module,  
+ImportSpy verifies **whether the importing environment meets the conditions established by the protected module**.  
+
+The validation process follows a structured **execution flow**, which dynamically inspects the import context,  
+analyzes the environment, and enforces predefined execution constraints before the module is allowed to run.  
+This **prevents uncontrolled modifications**, ensures **execution consistency**, and enforces strict **Zero-Trust policies**  
+on external dependencies.
 
 Identifying the Import Context 🔍
 ---------------------------------
 
-The execution flow begins with identifying **the context in which an external module is being imported**.  
-Unlike traditional validation systems that examine only the imported module itself, ImportSpy traces **the source  
-of the import** to determine **which external component is introducing the dependency**. This process ensures  
-that validation is applied **precisely where the interaction occurs**, preventing unauthorized modules  
-from bypassing structural checks.
+The execution flow begins by identifying **where and how a protected module is being imported**.  
+Unlike traditional validation systems that inspect only the module being imported, ImportSpy  
+**traces the origin of the import request** to determine **which external component is attempting the import**.  
+This is a critical step, as it allows ImportSpy to enforce compliance **at the exact point of interaction**,  
+ensuring that unauthorized modules **cannot bypass structural and runtime checks**.
 
-Using **reflection mechanisms**, ImportSpy inspects the execution stack to determine **which module initiated the import process**.  
-This information is critical in establishing a **validation boundary**, as it allows ImportSpy to distinguish  
-between core components and external dependencies. By defining the **scope of validation at the moment of import**,  
-ImportSpy ensures that compliance checks are **only enforced on relevant modules**, preserving the integrity  
-of the framework’s internal components.
+Using **Python's reflection mechanisms**, ImportSpy inspects the execution stack to determine **which module initiated the import process**.  
+This information is essential in establishing a **validation boundary**, distinguishing between **authorized environments**  
+and **potentially incompatible or insecure importers**.  
 
-Extracting the Module Structure 🏗️
------------------------------------
+Extracting Execution Environment & Context 🏗️
+----------------------------------------------
 
-Once the **import context** is established, ImportSpy proceeds with **analyzing the module’s structure**.  
-This process involves extracting all relevant elements, including **function definitions, class hierarchies,  
-global variables, and metadata associated with the module**. Unlike **static validation methods**,  
-ImportSpy performs this analysis **dynamically**, reconstructing a **representation of the module as it exists at runtime**.
+Once the **importing module** is identified, ImportSpy proceeds with **analyzing the execution environment**.  
+This includes extracting:
 
-This **runtime analysis** allows ImportSpy to capture both **explicit and implicit dependencies** within the module.  
-For example, in cases where the module **dynamically defines attributes or classes** based on execution conditions,  
-ImportSpy ensures that these elements are recognized and validated accordingly. This **prevents discrepancies**  
-between expected and actual module structures, reducing the risk of **runtime errors due to unforeseen modifications**.
+- **Operating System & Hardware Architecture** → Ensures compatibility with the expected execution environment.  
+- **Python Version & Interpreter** → Validates whether the correct runtime is being used.  
+- **Required Environment Variables** → Ensures all necessary system configurations are properly set.  
+- **Dependency & Package Validation** → Verifies the availability and correctness of required libraries.  
+
+Unlike **static validation methods**, ImportSpy **performs these checks dynamically**, reconstructing  
+a **representation of the importer's execution state** and validating it **before allowing execution**.
 
 Building the SpyModel Representation 📊
 ---------------------------------------
 
-After extracting the module’s structure, ImportSpy constructs a **corresponding SpyModel representation**.  
-This **dynamically generated model** serves as a **reference for comparison**, encapsulating all relevant aspects  
-of the module’s expected behavior. The **SpyModel is designed to be comprehensive**, capturing details  
-such as **function signatures, inheritance structures, variable assignments, and execution constraints**.
+After extracting the execution context, ImportSpy builds a **SpyModel representation**.  
+This **model is not a contract for the imported module itself**, but a **contract for the importing environment**  
+that defines **where and how the module can be used**.
 
-Unlike a **static configuration file**, the SpyModel **adapts to different execution environments**,  
-ensuring that **validation rules remain relevant across multiple deployment scenarios**.  
-This adaptability allows ImportSpy to **enforce compliance in heterogeneous environments**  
-where variations in **Python versions, operating systems, and hardware architectures**  
-could otherwise introduce inconsistencies. The SpyModel is **not a simple contract**;  
-it is a **runtime-enforced specification** that ensures modules conform to predefined structures  
-while allowing for **controlled flexibility** when required.
+- **SpyModel is dynamically generated** to match the expected execution conditions.  
+- **It contains rules about system properties**, dependencies, Python version, OS, and required configurations.  
+- **It adapts to different runtime environments** to ensure that execution remains compliant  
+  across **multiple platforms, deployment scenarios, and configurations**.  
 
-Comparing the Module with the Expected Structure ⚖️
----------------------------------------------------
+Comparing the Importing Environment with Expected Constraints ⚖️
+----------------------------------------------------------------
 
-With the **SpyModel constructed**, ImportSpy performs a **validation check** by comparing the **dynamically generated  
-module representation** against the **expected model**. This comparison includes a **structural analysis**  
-of functions, classes, and attributes, ensuring that **all expected components are present and correctly defined**.  
-If any deviations are detected, ImportSpy **logs the discrepancies** and prevents execution  
-if critical compliance violations are found.
+With the **SpyModel constructed**, ImportSpy performs a **validation check** by comparing the **actual importing environment**  
+against the constraints defined by the protected module.  
 
-The **validation process** does not merely check for **missing elements**; it also enforces **consistency**  
-in function signatures, return types, **class inheritance relationships**, and **global variable states**.  
-If an **external module modifies an attribute**, introduces an **unexpected change in function parameters**,  
-or alters the expected behavior of a **class**, ImportSpy **flags the inconsistency and raises an exception**.  
-This strict enforcement mechanism **prevents silent failures** by ensuring that all modifications  
-are **explicitly accounted for within the validation model**.
+This **execution validation** includes:
+- Ensuring that **the OS and architecture match the allowed specifications**.  
+- Checking that **all required environment variables are present**.  
+- Verifying **that the Python runtime is compatible**.  
+- Ensuring that **all required dependencies are available and correctly structured**.  
 
-Handling Compliance Failures ❌
+If any violations are detected, **ImportSpy immediately blocks execution** and raises a **ValueError**,  
+ensuring that **non-compliant environments cannot proceed**.
+
+Strict Compliance Enforcement ❌
 -------------------------------
 
-When a module **fails validation**, ImportSpy provides **detailed feedback** on the nature of the discrepancy.  
-Rather than issuing **generic error messages**, ImportSpy generates **structured reports** that indicate:  
+If the importing environment **fails validation**, ImportSpy **stops execution immediately**,  
+providing **detailed feedback** on the reason for failure.  
 
-- **Which elements are non-compliant**.  
-- **What modifications led to the failure**.  
-- **How the detected issues deviate from the expected model**.  
+Rather than issuing **soft warnings**, ImportSpy follows a **Zero-Trust approach**  
+where **any non-compliant execution is considered a critical design flaw**.  
 
-These reports help developers **quickly identify and resolve inconsistencies**, reducing debugging time  
-and ensuring that **external dependencies remain predictable and stable**.
+Key aspects of compliance enforcement:
+- **Execution is blocked if violations occur** → There is no fallback mode.  
+- **Errors indicate fundamental issues in system configuration**, ensuring they are addressed before runtime failures occur.  
+- **Debugging insights are provided** to help developers quickly resolve non-compliance.  
 
-In cases where **minor deviations** are detected but do not **critically impact execution**,  
-ImportSpy can be configured to **issue warnings instead of blocking execution**.  
-This **flexibility** allows development teams to assess **non-critical modifications**  
-while still enforcing **strict compliance on essential module elements**.  
-The ability to differentiate between **major and minor violations** ensures  
-that ImportSpy remains an **adaptable validation tool** without unnecessarily obstructing development workflows.
+Approving and Executing Validated Imports ✅
+-------------------------------------------
 
-Approving and Executing Validated Modules ✅
---------------------------------------------
+If the **importing module passes validation**, ImportSpy **allows the execution to proceed**.  
+This means that the module is being imported **in a fully compliant execution environment**,  
+ensuring **stability, predictability, and correctness**.
 
-If a module **passes validation**, ImportSpy allows it to proceed with execution.  
-At this stage, the module is treated as **compliant**, meaning that it meets  
-all predefined structural and runtime expectations. This **validation approval**  
-ensures that **only authorized and properly structured modules** interact with  
-the core framework, preventing **unexpected behavior due to uncontrolled dependencies**.
+ImportSpy also employs **runtime caching** to optimize repeated import validations,  
+ensuring that compliance checks **do not introduce unnecessary overhead** while maintaining strict execution policies.
 
-Once a module is validated, its structure is **cached** to optimize performance  
-in subsequent imports. By leveraging a **validation cache**, ImportSpy **minimizes overhead**  
-in environments where the **same modules are repeatedly loaded**, ensuring that  
-compliance checks **do not introduce unnecessary execution delays**.  
-This optimization maintains the **efficiency of module validation**  
-while preserving the **integrity of structural enforcement**.
+Ensuring Long-Term Stability 🔄
+-------------------------------
 
-Ensuring Long-Term Consistency 🔄
----------------------------------
+Beyond **immediate validation**, ImportSpy provides a **long-term compliance framework**  
+by ensuring that execution constraints remain **consistent across software versions and deployment environments**.
 
-Beyond **immediate validation at the point of import**, ImportSpy enables **long-term consistency**  
-by enforcing compliance **across multiple software versions and deployment environments**.  
-By maintaining a **standardized validation process**, ImportSpy ensures that **module integrity**  
-remains intact even as dependencies **evolve over time**. This approach **reduces the likelihood**  
-of compatibility issues, ensuring that applications remain **stable and reliable**  
-as external modules **undergo updates and modifications**.
+- **Standardized execution policies** → Reduces the risk of unintentional modifications.  
+- **Cross-environment consistency** → Ensures that software behaves **identically across different deployments**.  
+- **Protection against silent breaking changes** → Prevents failures caused by unnoticed alterations in execution environments.  
 
-By integrating ImportSpy into the **software development lifecycle**, teams can establish  
-a **systematic approach to dependency validation**, reducing the risks associated  
-with **uncontrolled changes in third-party libraries**. ImportSpy acts as a **safeguard**  
-against unexpected modifications, ensuring that **all imported modules**  
-adhere to **clearly defined structural and runtime constraints**.  
+By integrating ImportSpy into the **software development lifecycle**, teams can enforce **predictable execution environments**,  
+reducing the risks associated with **dependency drift, OS mismatches, and misconfigured environments**.
 
-This **validation framework enhances software predictability**, mitigates **runtime failures**,  
-and ensures that **applications operate in a controlled and secure manner**.
+This approach ensures that **all imported modules adhere to clearly defined execution constraints**,  
+providing **secure, controlled, and compliant Python imports**. 🚀

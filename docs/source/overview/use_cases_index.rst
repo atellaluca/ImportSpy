@@ -41,4 +41,4 @@ such as **cloud-native applications, microservices, IoT networks, and enterprise
    use_cases/use_case_iot_integration
    use_cases/use_case_validation
    use_cases/use_case_security
-   use_cases/use_case_compliance
+   use_cases/use_case_compilance
