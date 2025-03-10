@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "importspy"
-version = "0.2.0"
+version = "0.2.1"
 description = "ImportSpy ensures structural integrity, runtime compliance, and security for external modules, preventing inconsistencies and enforcing controlled execution."  
 license = "MIT"
 authors = ["Luca Atella <atellaluca@outlook.it>"]
