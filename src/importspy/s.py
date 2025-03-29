@@ -55,6 +55,12 @@ class Spy:
         """
         self.logger = LogManager().get_logger(self.__class__.__name__)
 
+    def importspy(self,
+                  filename: Optional[str] = None,
+                  log_level: Optional[int] = None) -> ModuleType:
+        pass
+
+
     def importspy(self, 
                   spymodel: Optional[SpyModel] = None, 
                   log_level: Optional[int] = None) -> ModuleType:
