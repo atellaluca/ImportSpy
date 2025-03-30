@@ -1,0 +1,101 @@
+filename: extension.py
+version:
+variables:
+  engine: docker
+  plugin_name: plugin name
+  plugin_description: plugin description
+functions:
+classes:
+  - name: Extension
+    attributes:
+      - type: instance
+        name: extension_instance_name
+        annotation:
+        value: extension_instance_value
+      - type: class
+        name: extension_name
+        annotation:
+        value: extension_value
+    methods:
+      - name: __init__
+        arguments:
+          - name: self
+            annotation:
+            value:
+        return_annotation:
+      - name: add_extension
+        arguments:
+          - name: self
+            annotation:
+            value:
+          - name: msg
+            annotation: str
+            value:
+        return_annotation: str
+      - name: remove_extension
+        arguments:
+          - name: self
+            annotation:
+            value:
+        return_annotation:
+      - name: http_get_request
+        arguments:
+          - name: self
+            annotation:
+            value:
+        return_annotation:
+    superclasses:
+      - Plugin
+  - name: Foo
+    attributes:
+    methods:
+      - name: get_bar
+        arguments:
+          - name: self
+            annotation:
+            value:
+        return_annotation:
+    superclasses:
+deployments:
+  - arch: x86_64
+    systems:
+      - os: windows
+        envs:
+        pythons:
+          - version: 3.12.8
+            interpreter: CPython
+            modules:
+              - filename: extension.py
+                version:
+                variables:
+                  author: Luca Atella
+                functions:
+                classes:
+          - version: 3.12.4
+            interpreter:
+            modules:
+              - filename: addons.py
+                version:
+                variables:
+                functions:
+                classes:
+          - version:
+            interpreter: IronPython
+            modules:
+              - filename: addons.py
+                version:
+                variables:
+                functions:
+                classes:
+      - os: linux
+        envs:
+        pythons:
+          - version: 3.12.8
+            interpreter: CPython
+            modules:
+              - filename: extension.py
+                version:
+                variables:
+                  author: Luca Atella
+                functions:
+                classes:

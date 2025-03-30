@@ -80,7 +80,7 @@ class System(BaseModel):
     .. seealso:: `Python`, `Runtime`
     """
     os: str
-    envs: dict = Field(default=None, repr=False)
+    envs: Optional[dict] = Field(default=None, repr=False)
     pythons: List[Python]
 
     @field_validator('os')
