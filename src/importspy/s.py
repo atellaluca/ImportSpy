@@ -3,6 +3,9 @@ from .models import SpyModel
 from .utilities.module_util import ModuleUtil
 from .validators.spymodel_validator import SpyModelValidator
 from .log_manager import LogManager
+from .persistences import (
+    Parser, YamlParser
+)
 from typing import Optional
 import logging
 
@@ -54,14 +57,15 @@ class Spy:
             spy = Spy()
         """
         self.logger = LogManager().get_logger(self.__class__.__name__)
+        self.parser:Parser = YamlParser()
 
     def importspy(self,
-                  filename: Optional[str] = None,
+                  filepath: Optional[str] = None,
                   log_level: Optional[int] = None) -> ModuleType:
-        pass
+        spy_model:SpyModel = SpyModel(**self.parser.load(filepath=filepath))
+        return self._importspy(spymodel=spy_model, log_level=log_level)
 
-
-    def importspy(self, 
+    def _importspy(self, 
                   spymodel: Optional[SpyModel] = None, 
                   log_level: Optional[int] = None) -> ModuleType:
         """
@@ -110,13 +114,6 @@ class Spy:
             module = spy.importspy(log_level=logging.DEBUG)
         """
 
-        def _configure_logging():
-            """Ensures `LogManager` is configured properly before module import."""
-            log_manager = LogManager()
-            if not log_manager.configured:
-                system_log_level = logging.getLogger().getEffectiveLevel()
-                log_manager.configure(level=log_level or system_log_level)
-
         def _load_and_validate_module() -> ModuleType:
             """
             Loads the module and validates it against the `SpyModel`, if provided.
@@ -139,8 +136,9 @@ class Spy:
                 self.logger.debug(f"SpyModel detected: {spymodel}")
                 spy_module = SpyModel.from_module(info_module)
                 self.logger.debug(f"Spy module: {spy_module}")
-                SpyModelValidator().validate(spymodel(), spy_module)
+                SpyModelValidator().validate(spymodel, spy_module)
 
+            self._configure_logging(log_level)
             return module_util.load_module(info_module)
 
         def _inspect_module() -> ModuleType:
@@ -165,7 +163,11 @@ class Spy:
             info_module = module_util.get_info_module(caller_frame)
             self.logger.debug(f"Spy info_module: {info_module}")
             return info_module
-
-        # Main logic
-        _configure_logging()
+        
         return _load_and_validate_module()
+    
+    def _configure_logging(self, log_level: Optional[int] = None):
+        log_manager = LogManager()
+        if not log_manager.configured:
+            system_log_level = logging.getLogger().getEffectiveLevel()
+            log_manager.configure(level=log_level or system_log_level)

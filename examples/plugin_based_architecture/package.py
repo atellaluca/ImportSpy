@@ -18,6 +18,7 @@ from typing import List
 
 __version__ = None
 
+"""
 class PluginSpy(SpyModel):
     deployments:List[Runtime] =[
         Runtime(
@@ -143,8 +144,10 @@ class PluginSpy(SpyModel):
                     )
             ],
         )]
-    filename: str = "extension.py"
+    filename: str = "extension.py""
+"""
 
-caller_module = Spy().importspy(spymodel=PluginSpy, log_level=logging.DEBUG)
+#caller_module = Spy().importspy(spymodel=PluginSpy, log_level=logging.DEBUG)
 
+caller_module = Spy().importspy(filepath="./spymodel.yml", log_level=logging.DEBUG)
 caller_module.Foo().get_bar()
