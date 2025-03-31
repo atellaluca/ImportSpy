@@ -1,8 +1,8 @@
 import pytest
-from importspy import (
-    Runtime,
-    Config
+from importspy.models import (
+    Runtime
 )
+from importspy.config import Config
 from importspy.constants import Constants
 from importspy.validators.runtime_validator import RuntimeValidator
 from importspy.errors import Errors

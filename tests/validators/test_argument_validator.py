@@ -1,7 +1,6 @@
 import pytest
-from importspy import (
-    Argument,
-    Config
+from importspy.models import (
+    Argument
 )
 from typing import List
 from importspy.validators.argument_validator import ArgumentValidator

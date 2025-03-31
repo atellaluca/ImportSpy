@@ -1,22 +1,20 @@
 """
-Module: Runtime Utilities
+Runtime Environment Utilities
+=============================
 
-This module provides utility functions for extracting runtime-related information about the system. 
-It includes methods for retrieving the system's hardware architecture.
+Provides a lightweight interface to query the system's hardware architecture.
 
-Key Features:
--------------
-- Extracts hardware architecture for compatibility checks.
-- Facilitates runtime validation in multi-platform environments.
+This module supports ImportSpy in enforcing architecture-specific constraints
+declared in import contracts.
 
-Example Usage:
---------------
-```python
-from importspy.utilities.runtime_util import RuntimeUtil
+Example
+-------
+.. code-block:: python
 
-runtime_util = RuntimeUtil()
-architecture = runtime_util.extract_arch()
-print(f"System Architecture: {architecture}")
+    from importspy.utilities.runtime_util import RuntimeUtil
+
+    runtime = RuntimeUtil()
+    print(runtime.extract_arch())
 """
 
 import logging
@@ -27,51 +25,28 @@ logger.addHandler(logging.NullHandler())
 
 class RuntimeUtil:
     """
-    Utility class for runtime-related operations and system information retrieval.
+    Utility class to retrieve system architecture details.
 
-    The `RuntimeUtil` class offers methods to extract key details about the system's runtime 
-    environment, such as the hardware architecture. These utilities are particularly valuable 
-    for validating runtime requirements in multi-platform software.
+    Methods
+    -------
+    extract_arch() -> str
+        Returns the machine’s hardware architecture.
 
-    Methods:
-    --------
-    - `extract_arch`: Retrieves the current hardware architecture of the system.
-
-    Example:
-    --------
-    ```python
-    from importspy.utilities.runtime_util import RuntimeUtil
-
-    runtime_util = RuntimeUtil()
-    architecture = runtime_util.extract_arch()
-    print(f"Architecture: {architecture}")
-    ```
+    Example
+    -------
+    >>> RuntimeUtil().extract_arch()
+    'x86_64'
     """
 
     def extract_arch(self) -> str:
         """
-        Retrieve the current hardware architecture of the system.
+        Return the system architecture (e.g., 'x86_64', 'arm64').
 
-        This method determines the machine's architecture using the `platform` module, returning 
-        it as a string. The architecture reflects the type of hardware (e.g., `x86_64` for 64-bit 
-        Intel/AMD processors, `arm64` for 64-bit ARM processors).
+        Uses the `platform.machine()` method to query the current hardware.
 
-        Returns:
-        --------
-        - **str**: A string representing the current hardware architecture (e.g., 'x86_64', 'arm64').
-
-        Example Usage:
-        --------------
-        ```python
-        runtime_util = RuntimeUtil()
-        architecture = runtime_util.extract_arch()
-        print(f"Architecture: {architecture}")
-        # Output: 'x86_64', 'arm64', etc., depending on the machine
-        ```
-
-        Notes:
-        ------
-        - The architecture is derived from the machine's hardware and is independent of the operating system.
-        - Useful for verifying compatibility with specific binaries, dependencies, or configurations.
+        Returns
+        -------
+        str
+            Architecture name (e.g., 'x86_64', 'arm64').
         """
         return platform.machine()

@@ -1,22 +1,26 @@
 """
-Module: System Utilities
+System Utilities for ImportSpy
+==============================
 
-This module provides utility functions for interacting with the system environment and retrieving 
-information about the operating system and environment variables.
+Provides tools to interact with the host system and environment variables.
 
-Key Features:
--------------
-- Extracts the operating system's name in a standardized format.
-- Retrieves all environment variables as a dictionary for debugging or validation purposes.
+This utility module helps ImportSpy detect and normalize runtime conditions, such as
+the operating system or environment setup, ensuring compatibility checks work reliably.
 
-Example Usage:
---------------
-```python
-from importspy.utilities.system_util import SystemUtil
+Features:
+---------
+- Identifies the current operating system in a standardized lowercase format.
+- Retrieves environment variables as a key-value dictionary.
 
-system_util = SystemUtil()
-os_name = system_util.extract_os()
-env_vars = system_util.extract_envs()
+Example:
+--------
+.. code-block:: python
+
+    from importspy.utilities.system_util import SystemUtil
+
+    util = SystemUtil()
+    os_name = util.extract_os()
+    env = util.extract_envs()
 """
 
 import os
@@ -27,89 +31,50 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 class SystemUtil:
-
     """
-    Utility class for system-level operations and environment management.
+    System-level utility class for environment inspection.
 
-    The `SystemUtil` class provides methods for retrieving system information, such as the operating 
-    system name and current environment variables. These utilities are useful for validating runtime 
-    environments or diagnosing issues related to system configuration.
+    Offers support for OS detection and retrieval of environment variables.
 
-    Methods:
-    --------
-    - `extract_os`: Returns the name of the operating system in lowercase.
-    - `extract_envs`: Retrieves all current environment variables as a dictionary.
+    Methods
+    -------
+    extract_os() -> str
+        Returns the lowercase name of the operating system (e.g., 'windows', 'linux').
 
-    Example:
-    --------
-    ```python
-    from importspy.utilities.system_util import SystemUtil
-
-    system_util = SystemUtil()
-    os_name = system_util.extract_os()
-    env_vars = system_util.extract_envs()
-    ```
+    extract_envs() -> dict
+        Returns a dictionary of all active environment variables.
     """
 
     def extract_os(self) -> str:
         """
-        Retrieve the name of the operating system in lowercase format.
+        Return the operating system name in lowercase.
 
-        This method uses the `platform.system()` function to get the name of the operating system 
-        and converts it to lowercase for consistency.
+        Uses `platform.system()` for OS detection.
 
-        Parameters:
-        -----------
-        None
+        Returns
+        -------
+        str
+            'windows', 'linux', or 'darwin', depending on the system.
 
-        Returns:
-        --------
-        - **str**: The name of the operating system (e.g., 'windows', 'linux', 'darwin').
-
-        Example Usage:
-        --------------
-        ```python
-        system_util = SystemUtil()
-        os_name = system_util.extract_os()
-        print(os_name)
-        # Output: 'linux'
-        ```
-
-        Notes:
-        ------
-        - This method is helpful for normalizing OS-specific behavior in multi-platform applications.
+        Example
+        -------
+        >>> SystemUtil().extract_os()
+        'linux'
         """
         return platform.system().lower()
 
     def extract_envs(self) -> dict:
         """
-        Extract all current environment variables and their values as a dictionary.
+        Retrieve all current environment variables.
 
-        This method retrieves all environment variables from the current system's execution context 
-        and returns them in a key-value pair format.
+        Returns
+        -------
+        dict
+            Dictionary of key-value environment variables.
 
-        Parameters:
-        -----------
-        None
-
-        Returns:
-        --------
-        - **dict**: A dictionary where:
-            - **Key** (`str`): The name of an environment variable.
-            - **Value** (`str`): The value of the environment variable.
-
-        Example Usage:
-        --------------
-        ```python
-        system_util = SystemUtil()
-        env_vars = system_util.extract_envs()
-        print(env_vars)
-        # Output: {'PATH': '/usr/bin:/bin', 'HOME': '/home/user', ...}
-        ```
-
-        Notes:
-        ------
-        - Useful for debugging and validating runtime environments.
-        - Be cautious of sensitive data (e.g., API keys) in the environment variables.
+        Example
+        -------
+        >>> SystemUtil().extract_envs()
+        {'PATH': '/usr/bin:/bin', 'HOME': '/home/user', ...}
         """
         return dict(os.environ)

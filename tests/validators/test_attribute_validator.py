@@ -1,8 +1,8 @@
 import pytest
-from importspy import (
-    Attribute,
-    Config
+from importspy.models import (
+    Attribute
 )
+from importspy.config import Config
 from typing import List
 from importspy.validators.attribute_validator import AttributeValidator
 from importspy.errors import Errors

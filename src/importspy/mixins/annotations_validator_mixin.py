@@ -1,9 +1,22 @@
 """
-Module: Annotation Validation Mixin
+Annotation Validation Mixin
+===========================
 
-This module provides a mixin class `AnnotationValidatorMixin` for validating type annotations 
-used within the ImportSpy framework. It ensures that annotations conform to a predefined 
-set of supported types, enhancing compatibility and validation consistency.
+Provides a mixin to enforce that type annotations used in contracts are valid 
+and compatible with ImportSpy’s supported annotation types.
+
+This mixin is typically used inside models or validation layers where annotations 
+play a key role in describing expected structures.
+
+Example
+-------
+.. code-block:: python
+
+    from importspy.mixins.annotations_validator_mixin import AnnotationValidatorMixin
+
+    class Custom(AnnotationValidatorMixin):
+        def process(self, value: str):
+            return self.validate_annotation(value)
 """
 
 from ..constants import Constants
@@ -11,58 +24,51 @@ from ..errors import Errors
 from typing import Union
 
 class AnnotationValidatorMixin:
-
     """
-    A mixin for validating type annotations in ImportSpy models.
+    Mixin for validating type annotations in contract definitions.
 
-    The `AnnotationValidatorMixin` class provides a static method for validating type annotations 
-    against a list of supported annotations defined in the `Constants` module. This mixin ensures 
-    that annotations used in models and validation processes conform to expected standards.
+    This class helps enforce consistency across all annotation fields used
+    within ImportSpy, ensuring that only supported types are allowed.
 
-    Key Features:
-    --------------
-    - Validates annotations to prevent unsupported or incorrect types.
-    - Raises informative errors when an annotation is invalid.
+    Methods
+    -------
+    validate_annotation(value: Union[str, None]) -> Union[str, None]
+        Checks whether a given annotation is recognized and allowed.
 
-    Example Usage:
-    --------------
-    ```python
-    from importspy.mixins.annotations_validator_mixin import AnnotationValidatorMixin
+    Example
+    -------
+    >>> AnnotationValidatorMixin.validate_annotation("List[int]")
+    'List[int]'
 
-    class SomeModel(AnnotationValidatorMixin):
-        @staticmethod
-        def validate_field(value: str):
-            return AnnotationValidatorMixin.validate_annotation(value)
-
-    model = SomeModel()
-    valid_annotation = model.validate_field("List[int]")
-    print(valid_annotation)  # Output: "List[int]"
-    ```
+    >>> AnnotationValidatorMixin.validate_annotation("CustomType")
+    ValueError: Invalid annotation: expected one of [...]
     """
 
     @staticmethod
     def validate_annotation(value: Union[str, None]) -> Union[str, None]:
         """
-        Validate a type annotation against a list of supported annotations.
+        Validate a type annotation against supported annotations.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         value : Union[str, None]
-            The type annotation to validate. Can be a string or None.
+            The annotation string to validate (e.g., "int", "List[str]").
 
-        Returns:
-        --------
-        - **Union[str, None]**: The validated annotation if it is supported, or None if the input is None.
-
-        Raises:
+        Returns
         -------
-        - **ValueError**: If the annotation is not in the list of supported annotations.
+        Union[str, None]
+            The same value if it's valid or None if no annotation provided.
+
+        Raises
+        ------
+        ValueError
+            If the annotation type is not supported by ImportSpy.
         """
         if not value:
             return None
-        if value and value.split("[")[0] not in Constants.SUPPORTED_ANNOTATIONS:
+        base = value.split("[")[0]
+        if base not in Constants.SUPPORTED_ANNOTATIONS:
             raise ValueError(
                 Errors.INVALID_ANNOTATION.format(value, Constants.SUPPORTED_ANNOTATIONS)
             )
         return value
-
