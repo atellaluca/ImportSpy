@@ -1,5 +1,5 @@
 import pytest
-from importspy import (
+from importspy.models import (
     Module
 )
 from importspy.validators.module_validator import ModuleValidator

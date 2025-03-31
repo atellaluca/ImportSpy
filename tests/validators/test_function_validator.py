@@ -1,5 +1,5 @@
 import pytest
-from importspy import (
+from importspy.models import (
     Function
 )
 from typing import List

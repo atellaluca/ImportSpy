@@ -1,8 +1,8 @@
 import pytest
-from importspy import (
-    System,
-    Config
+from importspy.models import (
+    System
 )
+from importspy.config import Config
 from importspy.constants import Constants
 from importspy.validators.system_validator import SystemValidator
 from importspy.errors import Errors
