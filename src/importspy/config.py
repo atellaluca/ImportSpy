@@ -1,59 +1,57 @@
 """
-Configuration Constants for External Usage in ImportSpy
+importspy.config
+=================
 
-This module defines the `Config` class, which encapsulates constants intended for external 
-configuration by developers integrating ImportSpy into their projects. It separates externally 
-modifiable settings from internal constants to provide a clear distinction and enhance usability.
+Static constants used internally by ImportSpy during validation and testing.
 
-The `Config` class includes constants for:
-- Supported system architectures.
-- Compatible operating systems.
-- Supported Python interpreters.
-- Valid annotation types for function arguments and return values.
+The `Config` class provides a curated set of reference values for use within the framework,
+including supported operating systems, architectures, Python interpreters, and annotation types.
 
-These constants ensure compatibility and flexibility across different environments.
+These values are used to:
+- Populate and validate import contracts during development.
+- Run test suites across multiple architectures and environments.
+- Provide default references for validators and compatibility checks.
+
+This module was previously exposed to users, but is now intended for internal use only.
 """
 
 class Config:
     """
-    Developer Configuration for ImportSpy.
+    Internal reference constants for validation, testing, and contract generation.
 
-    The `Config` class provides a structured collection of constants designed to be configurable 
-    by developers integrating ImportSpy. These constants define supported architectures, operating 
-    systems, Python interpreters, and annotation types, allowing users to adapt ImportSpy to their 
-    specific runtime and validation requirements.
-
-    Features:
-    ---------
-    - **Architecture Support**: Defines constants for commonly used system architectures.
-    - **Operating System Compatibility**: Lists supported operating systems.
-    - **Python Interpreter Support**: Includes major Python interpreters, from CPython to Nuitka.
-    - **Annotation Types**: Enumerates valid annotation types for arguments, variables, and return values.
+    This class is used by validators, test cases, and tools that need to assert compatibility
+    with specific operating systems, Python interpreters, annotation types, or deployment targets.
 
     Attributes:
     -----------
     KNOWN_ARCHITECTURES : list[str]
-        List of supported system architectures.
-    SUPPORTED_OS : list[str]
-        List of supported operating systems.
-    SUPPORTED_PYTHON_INTERPRETERS : list[str]
-        List of supported Python interpreter types.
-    SUPPORTED_CLASS_ATTRIBUTE_TYPES : list[str]
-        Recognized types for class attributes.
-    SUPPORTED_ANNOTATIONS : list[str]
-        Valid annotation types for functions, arguments, and return values.
+        Standard architectures supported by ImportSpy (e.g., x86_64, arm64).
 
-    Example Usage:
-    --------------
+    SUPPORTED_OS : list[str]
+        Operating systems supported in import contracts (e.g., Windows, Linux, macOS).
+
+    SUPPORTED_PYTHON_INTERPRETERS : list[str]
+        Interpreter identifiers validated during runtime checks (e.g., CPython, PyPy).
+
+    SUPPORTED_CLASS_ATTRIBUTE_TYPES : list[str]
+        Valid types for class attributes: 'class' or 'instance'.
+
+    SUPPORTED_ANNOTATIONS : list[str]
+        Allowed annotation types for variables, arguments, and return values.
+
+    Example:
+    --------
+    These constants are used when creating test contracts or performing type assertions:
+
     .. code-block:: python
 
         from importspy.config import Config
 
-        if runtime.arch not in Config.KNOWN_ARCHITECTURES:
-            raise ValueError("Unsupported architecture detected.")
+        if architecture not in Config.KNOWN_ARCHITECTURES:
+            raise ValueError("Unsupported architecture")
 
-        if runtime.os not in Config.SUPPORTED_OS:
-            raise ValueError("Operating system not supported.")
+        if annotation not in Config.SUPPORTED_ANNOTATIONS:
+            raise ValueError("Unsupported type annotation")
     """
 
     # Supported Architectures
