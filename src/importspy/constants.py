@@ -1,69 +1,82 @@
+"""
+importspy.constants
+====================
+
+Central repository of internal constants for ImportSpy.
+
+This module defines the `Constants` class, which provides all hardcoded values
+used throughout the validation engine. These include supported architectures,
+operating systems, annotation types, and structural metadata keys.
+
+Unlike the `Config` class — which is dynamic and environment-aware —  
+`Constants` acts as a fixed baseline of what ImportSpy considers valid and supported.
+
+By consolidating these values in one place:
+- Validation becomes more consistent and predictable.
+- Runtime errors due to unsupported types are easier to detect and debug.
+- Import contracts can be matched against a known, canonical source of truth.
+
+These constants are particularly useful when defining or validating `.yml` import contracts.
+"""
+
 from .config import Config
 
-"""
-Constants Module for ImportSpy
-
-This module defines the `Constants` class, which serves as a centralized repository for 
-predefined values and configurations used across the ImportSpy framework. By consolidating 
-these constants, the module ensures consistency and maintainability while facilitating 
-multi-environment and multi-architecture compatibility.
-
-The constants include supported architectures, operating systems, Python implementations, 
-class attribute types, annotations, and other runtime-specific configurations.
-
-This module complements the `Config` module by segregating internally used constants 
-from those meant for external configuration.
-"""
 
 class Constants:
     """
-    Centralized Repository for Internal Constants in ImportSpy.
+    Constants used internally by ImportSpy’s validation engine.
 
-    The `Constants` class provides a predefined set of values to standardize and simplify 
-    runtime checks, validations, and configurations. It encapsulates all constants needed 
-    internally within the ImportSpy framework, differentiating them from user-configurable 
-    settings in the `Config` class.
-
-    Features:
-    ---------
-    - **Architectural Compatibility**: Lists known architectures and supported operating systems.
-    - **Python Implementation Support**: Defines a range of supported Python interpreters.
-    - **Class and Annotation Types**: Specifies supported class attribute types and annotations.
-    - **Internal Metadata**: Includes constants for metadata keys (e.g., `NAME`, `VALUE`).
+    This class includes:
+    - Lists of supported architectures, OS, and Python interpreters.
+    - Types of class attributes ImportSpy recognizes.
+    - Allowed annotations for arguments, functions, and variables.
+    - Metadata keys used during model extraction and comparison.
 
     Attributes:
     -----------
     KNOWN_ARCHITECTURES : list[str]
-        List of known architectures supported by ImportSpy.
-    SUPPORTED_OS : list[str]
-        List of operating systems supported by ImportSpy.
-    SUPPORTED_PYTHON_IMPLEMENTATION : list[str]
-        Supported Python implementations.
-    SUPPORTED_CLASS_ATTRIBUTE_TYPES : list[str]
-        Types of class attributes recognized by ImportSpy.
-    SUPPORTED_ANNOTATIONS : list[str]
-        Supported annotations for functions, arguments, and variables.
-    NAME : str
-        Key representing the name of an entity.
-    VALUE : str
-        Key representing the value of an entity.
-    CLASS_TYPE : str
-        Type identifier for class-level attributes.
-    INSTANCE_TYPE : str
-        Type identifier for instance-level attributes.
-    LOG_MESSAGE_TEMPLATE : str
-        Standardized log message template.
+        Architectures supported in the `deployments` section of import contracts.
 
-    Example Usage:
-    --------------
+    SUPPORTED_OS : list[str]
+        Operating systems considered valid during runtime validation.
+
+    SUPPORTED_PYTHON_IMPLEMENTATION : list[str]
+        Accepted Python interpreters (e.g., CPython, PyPy, Jython).
+
+    SUPPORTED_CLASS_ATTRIBUTE_TYPES : list[str]
+        Distinguishes between `class` and `instance` attribute levels.
+
+    SUPPORTED_ANNOTATIONS : list[str]
+        Set of annotation types supported by ImportSpy.
+
+    NAME : str
+        Metadata key for a named entity (e.g., class name, function name).
+
+    VALUE : str
+        Metadata key representing a literal value in import contracts.
+
+    CLASS_TYPE : str
+        String identifier for class-level attributes (`class`).
+
+    INSTANCE_TYPE : str
+        String identifier for instance-level attributes (`instance`).
+
+    LOG_MESSAGE_TEMPLATE : str
+        Template used to standardize logging output.
+
+    Example:
+    --------
     .. code-block:: python
 
         from importspy.constants import Constants
 
-        if runtime.arch not in Constants.KNOWN_ARCHITECTURES:
-            raise ValueError(f"Unsupported architecture: {runtime.arch}")
+        if arch not in Constants.KNOWN_ARCHITECTURES:
+            raise ValueError(f"Unsupported architecture: {arch}")
+
+        if annotation not in Constants.SUPPORTED_ANNOTATIONS:
+            raise ValueError(f"Unsupported type: {annotation}")
     """
-    
+
     KNOWN_ARCHITECTURES = [
         Config.ARCH_x86_64, 
         Config.ARCH_AARCH64, 
