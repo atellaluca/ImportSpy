@@ -1,11 +1,29 @@
+"""
+importspy.log_manager
+======================
+
+This module defines ImportSpy’s centralized logging system.
+
+Logging is a critical part of ImportSpy: it tracks validation steps, configuration issues,  
+execution context, and errors — all with enhanced formatting for debugging and traceability.
+
+The `LogManager` ensures that all logs across ImportSpy are consistent and traceable to their source.  
+It works in both **embedded validation** and **CLI validation**, enabling readable, structured output  
+for developers, testers, and CI pipelines.
+"""
+
 import logging
+
 
 class CustomFormatter(logging.Formatter):
     """
-    Custom log formatter that enhances log messages with caller details.
+    Enhanced formatter for ImportSpy log messages.
 
-    This formatter extends the standard logging format by appending information 
-    about the calling file, line number, and function name.
+    This formatter extends the default logging format by appending the exact
+    filename, line number, and function name where each log was triggered.
+
+    This is especially useful in distributed architectures, plugin-based systems, 
+    or debugging deeply nested calls during module inspection.
 
     Format:
     -------
@@ -27,28 +45,28 @@ class CustomFormatter(logging.Formatter):
 
     def __init__(self):
         """
-        Initializes the `CustomFormatter` with the predefined log format.
+        Initializes the formatter with the ImportSpy logging format.
         """
         super().__init__(self.LOG_FORMAT)
 
     def format(self, record):
         """
-        Formats the log record by adding caller details.
+        Adds caller details to the log record.
 
-        Modifies the `record` object to include:
-        - `caller_file`: The filename where the log was generated.
-        - `caller_line`: The line number in the source file.
-        - `caller_function`: The function from which the log originated.
+        Enhances logs with:
+        - Filename where the log was triggered
+        - Line number
+        - Function name
 
         Parameters:
         -----------
         record : logging.LogRecord
-            The log record instance containing log details.
+            The original log event.
 
         Returns:
         --------
         str
-            The formatted log message.
+            The enriched, formatted log message.
         """
         record.caller_file = record.pathname.split("/")[-1]
         record.caller_line = record.lineno
@@ -58,33 +76,39 @@ class CustomFormatter(logging.Formatter):
 
 class LogManager:
     """
-    Log manager for configuring and retrieving loggers with a standardized format.
+    Centralized manager for all logging within ImportSpy.
 
-    The `LogManager` ensures consistent logging across the ImportSpy framework. 
-    It applies a custom formatter to enhance log messages with caller details and 
-    prevents duplicate log handlers.
+    This class ensures that:
+    - All loggers use the same format (`CustomFormatter`)
+    - Logging is only configured once to avoid duplication
+    - Each component of the framework can retrieve its own scoped logger
+
+    Whether ImportSpy runs embedded inside another module or as a CLI tool,  
+    the `LogManager` ensures that log output is clean, traceable, and standardized.
 
     Attributes:
     -----------
     default_level : int
-        The system's current logging level (e.g., `logging.DEBUG`, `logging.INFO`).
+        The system's current log level at the time of instantiation.
+
     default_handler : logging.StreamHandler
-        Default logging handler using `CustomFormatter`.
+        Default output handler using `CustomFormatter`.
+
     configured : bool
-        Flag indicating whether logging has already been configured.
+        Indicates whether global logging has already been configured.
 
     Methods:
     --------
-    - `configure(level=None, handlers=None)`: Sets the logging level and handlers.
-    - `get_logger(name)`: Returns a logger instance with the custom formatter.
+    - `configure(level, handlers)`: Applies global settings to the root logger.
+    - `get_logger(name)`: Retrieves a logger with consistent formatting and context.
     """
 
     def __init__(self):
         """
-        Initializes the `LogManager` with default logging settings.
+        Sets up default logging options.
 
-        - Uses the system's current logging level.
-        - Configures a default stream handler with `CustomFormatter`.
+        The default handler uses ImportSpy’s `CustomFormatter` and logs to `stdout`.
+        Logging is deferred until explicitly configured.
         """
         self.default_level = logging.getLogger().getEffectiveLevel()
         self.default_handler = logging.StreamHandler()
@@ -93,37 +117,30 @@ class LogManager:
 
     def configure(self, level: int = None, handlers: list = None):
         """
-        Configures the logging system globally.
+        Configures the global logging system.
 
-        This method sets the logging level and attaches handlers to the root logger.
-        If handlers are not provided, it applies the default stream handler.
+        This method attaches handlers to the root logger and sets the global level.  
+        It must be called only once to avoid duplicate logs or handler conflicts.
 
         Parameters:
         -----------
         level : int, optional
-            Logging level to set globally (e.g., `logging.DEBUG`, `logging.INFO`).
-            If not specified, it defaults to the system's current logging level.
+            Desired log level (e.g., `logging.DEBUG` or `logging.INFO`).  
+            Defaults to the system’s current level.
 
         handlers : list of logging.Handler, optional
-            A list of custom logging handlers. If not provided, the default 
-            stream handler is used.
+            List of custom handlers to attach. If omitted, uses the default stream handler.
 
         Raises:
         -------
         RuntimeError
-            If an attempt is made to reconfigure logging after it has already been set.
+            If logging has already been configured elsewhere in the application.
 
         Example:
         --------
         .. code-block:: python
 
-            log_manager = LogManager()
-            log_manager.configure(level=logging.DEBUG)
-
-        Notes:
-        ------
-        - This method ensures logging is configured only once to prevent 
-          duplicate handlers or inconsistent log levels.
+            LogManager().configure(level=logging.DEBUG)
         """
         if self.configured:
             raise RuntimeError("LogManager has already been configured.")
@@ -141,35 +158,27 @@ class LogManager:
 
     def get_logger(self, name: str) -> logging.Logger:
         """
-        Retrieves a logger instance with the configured settings.
+        Retrieves a scoped logger configured with ImportSpy’s formatting.
 
-        This method ensures that the logger:
-        - Uses the `CustomFormatter` for enhanced log messages.
-        - Avoids duplicate handlers.
-        - Adheres to the globally configured logging level.
+        This logger is safe to use across modules and plugins.  
+        It ensures no duplicate handlers and maintains the current log level.
 
         Parameters:
         -----------
         name : str
-            The name of the logger (typically the module or class name).
+            Name of the logger (typically `__name__` or class name).
 
         Returns:
         --------
         logging.Logger
-            A logger instance configured with `CustomFormatter`.
+            A configured logger ready for use.
 
         Example:
         --------
         .. code-block:: python
 
-            log_manager = LogManager()
-            logger = log_manager.get_logger("importspy")
-            logger.info("This is a log message.")
-
-        Notes:
-        ------
-        - If the logger already has handlers, it does not attach new ones to 
-          prevent duplicate log outputs.
+            logger = LogManager().get_logger("my_module")
+            logger.info("Validation complete.")
         """
         logger = logging.getLogger(name)
         if not logger.handlers:
