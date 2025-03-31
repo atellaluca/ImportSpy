@@ -1,61 +1,76 @@
+"""
+importspy.s
+===========
+
+Core validation logic for ImportSpy.
+
+This module defines the `Spy` class, the central component responsible for dynamically 
+inspecting and validating Python modules against **import contracts** (YAML files that declare 
+expected structure and execution context). 
+
+The validation can be triggered in two ways:
+
+- **Embedded validation**: when the `Spy` is embedded inside a core module and validates its importer.
+- **External validation (CLI/pipeline)**: when a separate process uses `Spy` to check a module before runtime.
+
+Validation covers classes, attributes, functions, and environmental settings like OS, Python version,
+and interpreter.
+
+This module is typically used as the entry point for programmatic validation workflows.
+"""
+
 from types import ModuleType
 from .models import SpyModel
 from .utilities.module_util import ModuleUtil
 from .validators.spymodel_validator import SpyModelValidator
 from .log_manager import LogManager
-from .persistences import (
-    Parser, YamlParser
-)
+from .persistences import Parser, YamlParser
 from typing import Optional
 import logging
 
+
 class Spy:
     """
-    Provides dynamic introspection, validation, and controlled loading of Python modules.
+    The `Spy` class is the core engine of ImportSpy — it handles validation, introspection, 
+    and enforcement of structural contracts for Python modules.
 
-    The `Spy` class integrates centralized logging, introspection logic, 
-    and validation mechanisms to ensure that dynamically loaded modules 
-    adhere to a given structure defined by a `SpyModel`. It supports 
-    structured configuration via external files (e.g., YAML) through pluggable parsers.
+    This class is designed to support both:
+
+    - **Embedded validation**, where it is imported and executed inside the module under control.
+    - **CLI-based or pipeline validation**, where an external tool invokes Spy programmatically.
+
+    ImportSpy uses declarative **import contracts**, written as human-readable YAML files, 
+    to describe what a valid module should contain. These contracts define expected classes, 
+    attributes, methods, and even environmental constraints (like Python version or OS).
+
+    The `Spy` class dynamically loads the target module, extracts its metadata, and checks 
+    for compliance against the contract. If validation fails, descriptive errors are raised 
+    before the module can be used improperly.
 
     Attributes:
     -----------
     logger : logging.Logger
-        Logger instance associated with the `Spy` class.
+        Logger instance used to track validation steps and internal processing.
 
     parser : Parser
-        Parser instance responsible for loading model configurations from files.
+        Parser responsible for loading the import contract from disk (currently supports YAML).
 
     Methods:
     --------
-    - `__init__()`: Initializes logger and default parser.
-    - `importspy(filepath, log_level, info_module)`: Validates a given or inferred module using a `SpyModel`.
-    - `_configure_logging(log_level)`: Ensures logging is set up correctly.
-    - `_validate_module(spymodel, info_module)`: Validates a module against a given SpyModel.
-    - `_inspect_module()`: Retrieves metadata about the calling module via stack introspection.
-
-    Example:
-    --------
-    .. code-block:: python
-
-        from importspy.spy import Spy
-
-        spy = Spy()
-        module = spy.importspy(filepath="spymodel.yml", log_level=logging.INFO)
+    - `__init__()` → Initializes logger and default parser.
+    - `importspy(filepath, log_level, info_module)` → Validates a specified or inferred module.
+    - `_configure_logging(log_level)` → Sets logging level based on user/system config.
+    - `_validate_module(contract, info_module)` → Compares a module to the contract definition.
+    - `_inspect_module()` → Introspects the call stack to locate the calling module.
     """
 
     def __init__(self):
         """
         Initializes the `Spy` instance.
 
-        Sets up the logger and the default parser (`YamlParser`) used to 
-        load serialized model configurations.
-
-        Example:
-        --------
-        .. code-block:: python
-
-            spy = Spy()
+        This method sets up:
+        - the logging system for capturing all validation and introspection steps
+        - the default parser (`YamlParser`) for loading `.yml` import contracts
         """
         self.logger = LogManager().get_logger(self.__class__.__name__)
         self.parser: Parser = YamlParser()
@@ -65,35 +80,35 @@ class Spy:
                   log_level: Optional[int] = None,
                   info_module: Optional[ModuleType] = None) -> ModuleType:
         """
-        Imports and validates a Python module based on a SpyModel configuration.
+        Loads and validates a Python module based on an import contract.
 
-        This method loads a serialized `SpyModel` definition from the specified 
-        file path and validates the structure of the provided module. If no module 
-        is explicitly provided via `info_module`, the calling module is introspected.
+        This is the primary method used to validate a module, whether in embedded mode
+        (by inspecting the importer), or in external mode (via CLI or script).
 
         Parameters:
         -----------
         filepath : Optional[str]
-            Path to the configuration file containing the `SpyModel` definition.
+            Path to the `.yml` contract file defining the expected structure.
 
         log_level : Optional[int]
-            Logging level for the current operation. If not provided, the system default is used.
+            Logging level for output verbosity. Uses system default if not provided.
 
         info_module : Optional[ModuleType]
-            The module object to be validated. If omitted, it is inferred from the call stack.
+            Optional reference to the module to validate. If not provided,
+            the calling module is inferred via stack inspection.
 
         Returns:
         --------
         ModuleType
-            The dynamically validated module object.
+            The module that was validated.
 
         Raises:
         -------
         RuntimeError
-            If `LogManager` was already configured and reconfiguration is attempted.
+            If logging is misconfigured or reconfigured unexpectedly.
 
         ValueError
-            If recursion is detected during module introspection.
+            If a recursion pattern is detected (e.g., a module validating itself).
         """
         self._configure_logging(log_level)
         spymodel: SpyModel = SpyModel(**self.parser.load(filepath=filepath))
@@ -103,12 +118,15 @@ class Spy:
 
     def _configure_logging(self, log_level: Optional[int] = None):
         """
-        Configures the logging system based on the given log level.
+        Configures ImportSpy's logging system for runtime use.
+
+        If a log level is provided, it overrides the system's default. This method ensures
+        the logger is only configured once, preventing duplicate log handlers.
 
         Parameters:
         -----------
         log_level : Optional[int]
-            Desired logging level. If not specified, uses the effective system log level.
+            The desired log level (e.g., logging.INFO, logging.DEBUG).
         """
         log_manager = LogManager()
         if not log_manager.configured:
@@ -117,49 +135,56 @@ class Spy:
 
     def _validate_module(self, spymodel: SpyModel, info_module: ModuleType) -> ModuleType:
         """
-        Validates the given module against a `SpyModel`.
+        Compares a module's structure against the loaded import contract.
+
+        This includes checking for:
+        - required classes and methods
+        - expected variable names and values
+        - inheritance and method signatures
 
         Parameters:
         -----------
         spymodel : SpyModel
-            The reference model to validate the module against.
+            Parsed import contract used as the validation baseline.
 
         info_module : ModuleType
-            The reference to the object representing the module to be validated.
+            The actual module being validated.
 
         Returns:
         --------
         ModuleType
-            The validated module object.
+            The validated module.
 
         Raises:
         -------
         ValueError
-            If the module does not match the SpyModel specification.
+            If the module does not conform to the expected structure.
         """
         self.logger.debug(f"info_module: {info_module}")
         if spymodel:
-            self.logger.debug(f"SpyModel detected: {spymodel}")
+            self.logger.debug(f"Import contract detected: {spymodel}")
             spy_module = SpyModel.from_module(info_module)
-            self.logger.debug(f"Spy module: {spy_module}")
+            self.logger.debug(f"Extracted module structure: {spy_module}")
             SpyModelValidator().validate(spymodel, spy_module)
         return ModuleUtil().load_module(info_module)
 
     def _inspect_module(self) -> ModuleType:
         """
-        Inspects and retrieves metadata about the calling module.
+        Introspects the call stack to determine which module called `importspy()`.
 
-        Uses stack frame inspection to determine which module initiated the importspy call.
+        This is used primarily in embedded mode to locate the external plugin
+        or module that triggered the validation. It prevents the system from
+        analyzing itself (recursive inspection).
 
         Returns:
         --------
         ModuleType
-            The module being inspected.
+            The module that imported or triggered validation.
 
         Raises:
         -------
         ValueError
-            If recursion is detected (i.e., the current module is trying to inspect itself).
+            If recursion is detected (i.e., the same module is inspecting itself).
         """
         module_util = ModuleUtil()
         current_frame, caller_frame = module_util.inspect_module()
@@ -167,5 +192,5 @@ class Spy:
             raise ValueError("Recursion detected during module analysis.")
 
         info_module = module_util.get_info_module(caller_frame)
-        self.logger.debug(f"Spy info_module: {info_module}")
+        self.logger.debug(f"Inferred caller module: {info_module}")
         return info_module

@@ -1,48 +1,45 @@
 """
-Centralized Error Messaging for ImportSpy
+importspy.errors
+=================
 
-This module defines the `Errors` class, which serves as a repository for all error 
-and warning messages used across the ImportSpy framework. By consolidating error 
-messages into a single location, this module ensures consistency, maintainability, 
-and clarity in issue reporting.
+Centralized error messaging for ImportSpy's validation system.
 
-Each error message includes placeholders (`{0}`, `{1}`, etc.), allowing for dynamic 
-insertion of context-specific details at runtime.
+The `Errors` class collects all exceptions and warning messages raised during 
+ImportSpy's inspection and validation process. This includes structural mismatches, 
+runtime violations, and argument inconsistencies found during contract enforcement.
+
+By consolidating these messages into a single location:
+
+- Developers can reuse consistent, human-readable phrasing across the codebase.
+- Error strings are easier to update and internationalize.
+- Each message includes placeholders (`{0}`, `{1}`, etc.) to inject context-specific
+  information at runtime, making diagnostics more informative.
+
+These messages are primarily raised when validating Python modules against their
+import contracts (usually defined in `.yml` files).
+
+Categories covered:
+-------------------
+- 🔁 General Warnings (e.g., recursion detection)
+- 📦 Module & Variable Validation
+- 🧩 Function, Class & Inheritance Validation
+- ⚙️  Runtime Context Validation (OS, architecture, version)
+- 🧪 Annotation and Type Constraints
+
+Usage:
+------
+
+.. code-block:: python
+
+    from importspy.errors import Errors
+
+    raise ValueError(
+        Errors.CLASS_ATTRIBUTE_MISSING.format("extension_name", "Extension")
+    )
 """
 
 class Errors:
-    """
-    Centralized Repository for Error Messages in ImportSpy.
-
-    The `Errors` class provides a structured collection of error and warning messages 
-    used throughout the ImportSpy framework. These messages cover module validation, 
-    runtime validation, attribute validation, and argument validation, ensuring 
-    consistent and informative error reporting.
-
-    Features:
-    ---------
-    - Centralized storage for all error messages.
-    - Dynamic placeholders for runtime-specific details.
-    - Coverage for module validation, runtime issues, and structural inconsistencies.
-
-    Usage Example:
-    --------------
-    .. code-block:: python
-
-        if some_condition_fails:
-            raise ValueError(Errors.FILENAME_MISMATCH.format(expected="module.py", found="package.py"))
-
-        if invalid_architecture:
-            raise ValueError(Errors.INVALID_ARCHITECTURE.format(found_architecture, expected_architectures))
-
-    Sections:
-    ---------
-    - General Warnings
-    - Module Validation
-    - Runtime Validation
-    - Argument and Annotation Validation
-    """
-
+    
     # General Warnings
     ANALYSIS_RECURSION_WARNING = (
         "Warning: Analysis recursion detected. Avoid analyzing code that itself handles analysis, "
