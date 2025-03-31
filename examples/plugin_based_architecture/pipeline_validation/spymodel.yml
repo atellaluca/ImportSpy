@@ -1,0 +1,70 @@
+filename: extension.py
+variables:
+  engine: docker
+  plugin_name: plugin name
+  plugin_description: plugin description
+classes:
+  - name: Extension
+    attributes:
+      - type: instance
+        name: extension_instance_name
+        value: extension_instance_value
+      - type: class
+        name: extension_name
+        value: extension_value
+    methods:
+      - name: __init__
+        arguments:
+          - name: self
+        return_annotation:
+      - name: add_extension
+        arguments:
+          - name: self
+          - name: msg
+            annotation: str
+        return_annotation: str
+      - name: remove_extension
+        arguments:
+          - name: self
+        return_annotation:
+      - name: http_get_request
+        arguments:
+          - name: self
+    superclasses:
+      - Plugin
+  - name: Foo
+    attributes:
+    methods:
+      - name: get_bar
+        arguments:
+          - name: self
+deployments:
+  - arch: x86_64
+    systems:
+      - os: windows
+        pythons:
+          - version: 3.12.8
+            interpreter: CPython
+            modules:
+              - filename: extension.py
+                version:
+                variables:
+                  author: Luca Atella
+                functions:
+                classes:
+          - version: 3.12.4
+            interpreter:
+            modules:
+              - filename: addons.py
+          - interpreter: IronPython
+            modules:
+              - filename: addons.py
+      - os: linux
+        pythons:
+          - version: 3.12.8
+            interpreter: CPython
+            modules:
+              - filename: extension.py
+                version:
+                variables:
+                  author: Luca Atella
