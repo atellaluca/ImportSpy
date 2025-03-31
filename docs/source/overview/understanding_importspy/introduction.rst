@@ -1,171 +1,86 @@
-Introduction to ImportSpy
-=========================
+Welcome to ImportSpy's Documentation
+=====================================
 
-The Challenge of Managing External Modules in Python ⚠️
---------------------------------------------------------
+ImportSpy is a Python validation framework designed to ensure that external modules  
+comply with strict structural, contextual, and runtime requirements before execution.
 
-Modern Python development is highly dependent on **modular architectures**,  
-leveraging third-party libraries, plugins, and dynamically imported modules  
-to enhance software capabilities. While this flexibility allows developers  
-to **accelerate innovation and streamline development**, it introduces  
-**significant challenges** in dependency management.
+It supports two distinct validation modes:
 
-One of the most pressing concerns arises when **external dependencies evolve unpredictably**.  
-Changes to a module—whether deliberate (such as new features and bug fixes)  
-or accidental (such as undocumented API modifications or removed functions)—  
-can introduce **breaking changes** that disrupt application functionality.  
-This issue is particularly **critical in production environments**,  
-where **unexpected failures** can lead to system downtime, security vulnerabilities,  
-and degraded user experiences.
+- **Embedded validation** – where a module (e.g. a plugin) is validated by the code it imports.
+- **CLI / Pipeline validation** – where validation is executed externally, such as in CI/CD workflows,  
+  using declarative contracts written in human-readable YAML.
 
-Python’s **dynamic nature** further compounds these risks.  
-Unlike statically-typed languages, Python allows **runtime modifications**,  
-meaning that modules can change their structure **without explicit warnings**.  
-This flexibility, while useful, makes it difficult to guarantee  
-**consistent behavior** across different execution environments.
+This flexibility allows ImportSpy to adapt to both **plugin-based architectures** and **automated pipelines**.
 
-Without an **automated validation mechanism**, developers are forced  
-to rely on **manual testing and runtime debugging**, which can lead to:  
-
-- **Unnoticed incompatibilities** between different versions of a module.
-- **Missing or altered functions, attributes, or classes**,  
-  causing unpredictable failures.
-- **Environmental inconsistencies**, where code behaves differently  
-  depending on **operating system, Python version, or execution context**.
-- **Security vulnerabilities**, where third-party modules introduce risks  
-  such as unauthorized modifications or malicious behaviors.
-
-To address these challenges, **module validation and runtime compliance  
-must be enforced at every stage of the software lifecycle**.
-
-Why Module Validation is Essential 🛠️
+What Problem Does ImportSpy Solve? ⚠️
 --------------------------------------
 
-Managing external dependencies in Python is not just about **ensuring  
-the correct version is installed**.  
-Even if a module version matches expectations,  
-its **internal structure and execution behavior**  
-may differ significantly due to **runtime dynamics, configuration mismatches,  
-or implicit modifications introduced by external sources**.
+Python’s modularity and dynamic nature offer tremendous flexibility.  
+But with that comes fragility: third-party modules can evolve, break expectations, or misbehave silently.
 
-A robust **validation framework** must enforce:
+Common risks include:
 
-- **Structural integrity**, ensuring that imported modules  
-  adhere to predefined **class hierarchies, function signatures, and attributes**.
-- **Runtime compatibility**, verifying that the module is executed  
-  in an **approved Python version and system environment**.
-- **Dependency reliability**, ensuring that third-party modules  
-  do not introduce **unauthorized changes or unexpected behaviors**.
+- APIs that change without warning
+- Modules that behave differently across environments
+- Missing functions or misaligned class structures
+- Runtime crashes caused by unvalidated imports
 
-ImportSpy was built **precisely to solve these challenges**,  
-offering a **structured validation mechanism** that prevents  
-**uncontrolled modifications** and **execution failures**  
-before they affect the application.
+ImportSpy proactively mitigates these issues by **enforcing contracts** before a module is ever used.
 
-How ImportSpy Addresses These Challenges 🔍
--------------------------------------------
+What Are Import Contracts? 📄
+------------------------------
 
-ImportSpy provides **an enforcement layer** that **validates external modules dynamically**  
-before they interact with the core application.  
-Instead of assuming that dependencies are always reliable,  
-ImportSpy **actively verifies their structure, execution context,  
-and runtime constraints** to ensure **strict compliance**.
+Import contracts are **external YAML files** that define what a module is expected to look like:  
+its classes, functions, attributes, variables, and even runtime constraints such as OS or Python version.
 
-Each time a module is imported, ImportSpy follows a **rigorous validation process**:
+Rather than writing Python code to validate Python code, contracts give you a **declarative, testable interface**  
+that can be embedded in projects or reused across pipelines.
 
-Validating Module Structure 🏗️
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Validation Modes 🔍
+--------------------
 
-- ImportSpy **extracts all key components** from the module at runtime,  
-  including **functions, classes, attributes, and global variables**.
-- The extracted structure is **compared against the expected model**  
-  defined within the **SpyModel**.
-- Any **missing, altered, or newly introduced elements** are flagged  
-  as potential inconsistencies.
+ImportSpy offers two complementary ways to enforce these contracts:
 
-Enforcing Runtime Compliance ⚙️
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. list-table::
+   :widths: 25 75
+   :header-rows: 1
 
-- ImportSpy **verifies execution conditions**, ensuring that:  
-  - The module runs in an **approved Python version and interpreter**.  
-  - The **operating system and CPU architecture** match predefined constraints.  
-  - All required **environment variables** are correctly set.  
-- If the execution environment **deviates from expected parameters**,  
-  ImportSpy **prevents the module from loading**, blocking potential failures.
+   * - Validation Mode
+     - Description
+   * - Embedded Validation
+     - The module under validation **imports a core package**, which runs ImportSpy to inspect and validate the caller.  
+       This approach is ideal for plugin-based systems or modular architectures where each extension must prove it’s valid before interacting.
+   * - CLI / Pipeline Validation
+     - The module is validated **externally via CLI**, typically as part of a **CI/CD pipeline**, a manual review process,  
+       or a pre-deployment hook. This method is fully decoupled and perfect for static inspection and continuous integration.
 
-Mitigating Security Risks 🔐
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+What This Documentation Offers 📚
+----------------------------------
 
-- ImportSpy ensures that **only validated and approved modules** are executed.  
-- This **prevents unauthorized modifications** to external dependencies,  
-  reducing the risk of **malicious code execution** or unexpected API changes.  
-- By enforcing **structural integrity**, ImportSpy protects applications  
-  from **silent failures and security vulnerabilities**.
+- 🚀 **Quickstart guides** to get you up and running
+- 📖 **Conceptual breakdowns** of how ImportSpy works internally
+- 🧱 **Examples and real-world use cases**
+- ⚙️ **Integration tips** for pipelines and distributed systems
+- ✅ **Security insights** for managing third-party code safely
+- 🧪 **Explore examples** using both validation approaches
 
-The Advantages of Using ImportSpy ✅
------------------------------------
+Get Started 🛠️
+---------------
 
-Integrating ImportSpy into software workflows provides a **powerful safeguard**  
-against dependency-related failures, ensuring **stability, security, and maintainability**.
+To start validating your modules with ImportSpy:
 
-Ensuring Application Stability 🏗️
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code-block:: bash
 
-- ImportSpy **prevents runtime crashes** by ensuring that all modules  
-  conform to **expected class structures, function definitions,  
-  and execution constraints**.
-- This reduces the risk of **unexpected failures in production environments**.
+   pip install importspy
 
-Guaranteeing Cross-Environment Consistency 🌍
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- ImportSpy enforces strict validation across different **operating systems,  
-  Python versions, and deployment scenarios**.
-- By validating **runtime compatibility**, it ensures that applications  
-  behave **predictably across local, staging, and production environments**.
-
-Enhancing Security & Compliance 🔐
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- ImportSpy actively blocks the execution of **unverified modules**,  
-  preventing unauthorized changes to external dependencies.
-- This **reduces the risk of executing untrusted code**,  
-  strengthening application security.
-
-Proactive Issue Detection 🛠️
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- Instead of catching failures **after they occur in production**,  
-  ImportSpy detects inconsistencies **as soon as a module is imported**.
-- This **accelerates debugging**, allowing teams to resolve  
-  potential issues before they escalate.
-
-Scalable and Future-Proof Dependency Management 🚀
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-- ImportSpy’s **adaptive validation approach** allows applications  
-  to integrate **new dependencies, runtime environments,  
-  and evolving software architectures** **without risking system instability**.
-- This makes ImportSpy a **long-term solution** for maintaining  
-  structured and compliant dependency management.
+Then explore the :doc:`get_started/installation` guide  
+or jump straight into :doc:`examples/examples_overview` to see it in action.
 
 Conclusion 🔚
 -------------
 
-As software complexity increases and dependencies evolve,  
-maintaining **strict module validation** is no longer optional—  
-it is a necessity for **ensuring reliability, security, and maintainability**.
+ImportSpy brings structure, safety, and clarity to Python's modular world.  
+Whether you're validating plugins at runtime or checking code during CI,  
+it empowers developers to **ship confidently, validate automatically, and control external complexity**.
 
-ImportSpy provides a **powerful, flexible, and scalable framework**  
-that enforces **module integrity, runtime compliance,  
-and execution predictability**.
-
-By integrating ImportSpy into development workflows, teams can:
-
-- **Prevent breaking changes before they impact production.**
-- **Ensure cross-platform consistency across different execution environments.**
-- **Reduce dependency-related security risks.**
-- **Accelerate development and debugging cycles.**
-
-Incorporating ImportSpy into your software lifecycle ensures  
-that your dependencies are **not just installed—but validated, secured, and controlled**.
+Let ImportSpy be your safeguard against the chaos of unchecked imports.
