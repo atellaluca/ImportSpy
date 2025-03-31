@@ -57,7 +57,7 @@ To confirm that ImportSpy is correctly installed, run:
 
    .. code-block:: bash
 
-      python -c "import importspy; print(importspy.__version__)"
+      importspy --version
 
 If ImportSpy is installed correctly, you should see the version number printed in the terminal.  
 If you encounter any issues, make sure:
