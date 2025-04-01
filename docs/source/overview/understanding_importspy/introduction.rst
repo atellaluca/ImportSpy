@@ -73,8 +73,8 @@ To start validating your modules with ImportSpy:
 
    pip install importspy
 
-Then explore the :doc:`get_started/installation` guide  
-or jump straight into :doc:`examples/examples_overview` to see it in action.
+Then explore the :doc:`../../get_started/installation` guide  
+or jump straight into :doc:`../../get_started/example_overview` to see it in action.
 
 Conclusion 🔚
 -------------
