@@ -50,7 +50,7 @@ ImportSpy uses **Pydantic models** to define and enforce **strict validation rul
 Instead of trusting that imported modules follow the expected structure, ImportSpy **explicitly validates them**  
 before allowing execution.
 
-✅ **Defining a Validation Model in ImportSpy**
+✅ **Defining a Validation Model in ImportSpy**  
 ImportSpy defines **validation models** using Pydantic, ensuring that every module meets **predefined structural constraints**.
 
 📌 **Example: Validating a Module’s Structure**
@@ -132,7 +132,7 @@ If a module **fails validation**, ImportSpy provides **detailed error messages**
    except ValidationError as e:
        print(e.json())
 
-✅ **Structured Error Messages**
+✅ **Structured Error Messages**  
 Pydantic provides **clear, structured validation errors**, making debugging easier.
 
 📌 **Example Output:**
