@@ -1,92 +1,83 @@
+"""
+importspy.validators.common_validator
+=====================================
+
+Reusable validation logic for dictionary and list structures.
+
+This module defines the `CommonValidator` class, which provides utility methods to validate
+data structures commonly used in contract inspection:
+- General list containment validation
+- Key/value consistency between dictionaries
+
+It is used across structural validators like:
+- SystemValidator
+- ModuleValidator
+- RuntimeValidator
+"""
 from typing import List, Dict
 from ..errors import Errors
 from ..constants import Constants
 from ..log_manager import LogManager
 
+
 class CommonValidator:
     """
-    Provides common validation utilities for lists and dictionaries.
+    Common validation utilities for iterable structures.
 
-    This class contains reusable methods to validate:
-    - Lists: Ensures that all elements in one list are present in another list.
-    - Dictionaries: Validates that keys and values in one dictionary match those in another.
+    This helper class enables reusable checks across all ImportSpy validators.  
+    It ensures list and dict structures match between expected (from `.yml`)  
+    and actual (live modules) data.
 
-    Validation Outcomes:
-    ---------------------
-    1. **Valid:**
-       - All elements in the expected list or dictionary match the actual list or dictionary.
+    Validation Modes:
+    -----------------
+    - list_validate(...) : All elements in list1 must exist in list2.
+    - dict_validate(...) : All key/value pairs in dict1 must match dict2.
 
-    2. **No Validation Necessary:**
-       - The expected list or dictionary is empty or undefined.
-
-    3. **Invalid:**
-       - Missing elements in the actual list or dictionary.
-       - Mismatches between expected and actual values in dictionaries.
-
-    Error Handling:
-    ----------------
-    - Raises `ValueError` with specific error messages in the following cases:
-      - Missing elements in lists or dictionaries.
-      - Value mismatches for specific keys in dictionaries.
-
-    Attributes:
-    -----------
-    logger : LogManager
-        A logging instance to provide detailed output for each validation step.
+    Attributes
+    ----------
+    logger : logging.Logger
+        A scoped logger for structured output and debugging.
     """
 
     def __init__(self):
         """
-        Initializes the CommonValidator with a logging instance.
-
-        The logger provides detailed output for debugging purposes.
+        Initializes the CommonValidator and its logger.
         """
         self.logger = LogManager().get_logger(self.__class__.__name__)
 
-    def list_validate(self,
-                      list1: List,
-                      list2: List,
-                      missing_error: str,
-                      *args) -> None:
+    def list_validate(
+        self,
+        list1: List,
+        list2: List,
+        missing_error: str,
+        *args
+    ) -> None:
         """
-        Validates that all elements in `list1` are present in `list2`.
+        Validates that all elements in `list1` exist in `list2`.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         list1 : List
-            The expected list of elements.
+            The expected list of items.
         list2 : List
-            The actual list of elements to validate against.
+            The actual list to be validated.
         missing_error : str
-            The error message to raise if an element in `list1` is not found in `list2`.
-            It should include placeholders for dynamic values (e.g., `{0}`).
+            Error message format if an element is missing (e.g., "Missing: {0}").
         *args : tuple
-            Additional arguments to format the `missing_error` message.
+            Optional dynamic context passed to `missing_error.format(...)`.
 
-        Returns:
-        --------
-        None
-            No return value, but raises exceptions if validation fails.
-
-        Raises:
-        -------
+        Raises
+        ------
         ValueError
-            If any element in `list1` is missing from `list2`.
+            If any element from `list1` is not present in `list2`.
 
-        Validation Logic:
-        -----------------
-        1. Skips validation if `list1` is empty or `None`.
-        2. Skips validation if both lists are empty or `list2` is `None`.
-        3. Raises a `ValueError` if an element in `list1` is not found in `list2`.
+        Returns
+        -------
+        None
 
-        Example Usage:
-        --------------
-        ```python
-        validator = CommonValidator()
-        expected = [1, 2, 3]
-        actual = [1, 2]
-        validator.list_validate(expected, actual, "Missing element: {0}")
-        ```
+        Example
+        -------
+        >>> CommonValidator().list_validate(["A", "B"], ["A"], "Missing item: {0}")
         """
         self.logger.debug(
             Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -102,65 +93,49 @@ class CommonValidator:
             return
         if not list2:
             raise ValueError(Errors.ELEMENT_MISSING.format(list1))
+
         for expected_element in list1:
             if expected_element not in list2:
                 raise ValueError(missing_error.format(expected_element, *args))
 
-    def dict_validate(self,
-                      dict1: Dict,
-                      dict2: Dict,
-                      missing_error: str,
-                      mismatch_error: str) -> bool:
+    def dict_validate(
+        self,
+        dict1: Dict,
+        dict2: Dict,
+        missing_error: str,
+        mismatch_error: str
+    ) -> bool:
         """
-        Validates that all keys and values in `dict1` match those in `dict2`.
+        Validates keys and values between two dictionaries.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         dict1 : Dict
-            The expected dictionary.
+            The expected key-value mapping.
         dict2 : Dict
-            The actual dictionary to validate against.
+            The actual dictionary to check.
         missing_error : str
-            The error message to raise if a key in `dict1` is not found in `dict2`.
-            It should include placeholders for dynamic values (e.g., `{0}`).
+            Format string for a missing key (e.g., "Key missing: {0}").
         mismatch_error : str
-            The error message to raise if a value for a matching key in `dict1` 
-            does not match the value in `dict2`. It should include placeholders 
-            for dynamic values (e.g., `{0}`, `{1}`, `{2}`).
+            Format string for value mismatch (e.g., "Mismatch for {0}: {1} != {2}").
 
-        Returns:
-        --------
-        bool
-            - `True` if all validations pass.
-            - Raises exceptions if validation fails.
-
-        Raises:
+        Returns
         -------
+        bool
+            True if validation passes.
+
+        Raises
+        ------
         ValueError
-            If any key is missing from `dict2`, or if values do not match.
+            If a key is missing or a value does not match.
 
-        Validation Logic:
-        -----------------
-        1. Skips validation if `dict1` is empty or `None`.
-        2. Raises a `ValueError` if `dict2` is missing or `None`.
-        3. Iterates through keys in `dict1`:
-           - Ensures the key exists in `dict2`.
-           - Checks that the value for the key matches in both dictionaries.
-           - Raises appropriate errors for missing keys or mismatched values.
-
-        Example Usage:
-        --------------
-        ```python
-        validator = CommonValidator()
-        expected = {"key1": "value1", "key2": "value2"}
-        actual = {"key1": "value1", "key2": "different_value"}
-        validator.dict_validate(
-            expected, 
-            actual, 
-            "Missing key: {0}", 
-            "Value mismatch for {0}: expected {1}, found {2}"
-        )
-        ```
+        Example
+        -------
+        >>> CommonValidator().dict_validate(
+        ...     {"x": 1}, {"x": 2},
+        ...     "Missing key: {0}",
+        ...     "Mismatch for {0}: expected {1}, got {2}"
+        ... )
         """
         self.logger.debug(
             Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -174,10 +149,13 @@ class CommonValidator:
             return True
         if not dict2:
             raise ValueError(missing_error.format(dict1))
+
         for expected_key, expected_value in dict1.items():
             if expected_key in dict2:
-                if expected_value != dict2[expected_key]:
-                    raise ValueError(mismatch_error.format(expected_key, expected_value, dict2[expected_key]))
+                actual_value = dict2[expected_key]
+                if expected_value != actual_value:
+                    raise ValueError(mismatch_error.format(expected_key, expected_value, actual_value))
             else:
                 raise ValueError(missing_error.format(expected_key))
+
         return True
