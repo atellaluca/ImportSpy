@@ -2,39 +2,39 @@
    :widths: 30 70
    :header-rows: 1
 
-   * - Error Type
-     - Description
+   * - **Error Type**
+     - **Description**
    * - Missing Elements
-     - A required function, class, or attribute is missing from the imported module.
+     - A required function, class, method, or attribute is missing from the imported module or structure defined in the import contract.
    * - Type Mismatches
-     - A function’s return type or parameter types do not match expected values.
+     - A return type, argument annotation, or class attribute annotation does not match the expected contract value.
    * - Environmental Issues
-     - A required environment variable is missing or has an unexpected value.
+     - One or more required environment variables are missing or have invalid values in the current execution environment.
    * - Architecture and Runtime Errors
-     - The CPU architecture or Python runtime version is incompatible.
+     - The current CPU architecture or Python interpreter version does not match those specified in the import contract.
    * - Module Filename Mismatch
-     - The expected module filename does not match the actual filename.
+     - The actual filename of the Python module does not match the `filename` field declared in the import contract.
    * - Version Mismatch
-     - The expected module version does not match the detected version.
+     - The module’s `__version__` attribute does not match the version specified in the import contract.
    * - Variable Missing
-     - A required global variable is missing from the module.
+     - A declared top-level (global) variable is not found in the module being validated.
    * - Variable Value Mismatch
-     - A global variable exists but its value is different from the expected one.
+     - A top-level variable exists, but its value differs from the one declared in the import contract.
    * - Function Return Type Mismatch
-     - The function's return type does not match the expected type.
+     - A function's return annotation does not match the annotation specified in the contract.
    * - Function Argument Mismatch
-     - A function argument does not match the expected name, type, or default value.
+     - One or more arguments of a function do not match in name, annotation, or default value.
    * - Class Missing
-     - A required class is missing from the module.
+     - A required class is not present in the module.
    * - Class Attribute Missing
-     - A required attribute is missing from a class.
+     - A class is missing one or more attributes as specified in the import contract.
    * - Class Attribute Type Mismatch
-     - A class attribute exists but has a different type than expected.
+     - A class attribute exists but its type or annotation does not match the declared expectations.
    * - Superclass Mismatch
-     - A class is missing a required superclass declaration.
+     - A class does not inherit from one or more superclasses listed in the import contract.
    * - Unsupported Operating System
-     - The detected OS is not among the supported operating systems.
+     - The current OS is not included in the list of allowed platforms (e.g., Linux, Windows, macOS).
    * - Missing Required Runtime
-     - A required runtime configuration is not present.
+     - A required runtime (architecture, system, or Python interpreter version) is not satisfied.
    * - Unsupported Python Interpreter
-     - The detected Python interpreter does not match the expected one.
+     - The Python interpreter (e.g., CPython, IronPython) is not supported by the contract.

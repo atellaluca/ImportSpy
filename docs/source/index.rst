@@ -13,8 +13,6 @@ This guide is structured to help you **understand, implement, and optimize Impor
 
 - **🔰 New to ImportSpy?** → Begin with the **Get Started** section, where you’ll find a structured introduction to the framework and its key advantages.
 - **🤔 Why does ImportSpy exist?** → The **Overview section** explores the challenges it solves and how it improves software reliability.
-.. - **🛠️ Looking for hands-on guidance?** → Check out **Quickstart and Recipes**, packed with **practical examples** for implementing ImportSpy in real-world projects.
-.. - **🚀 Migrating an existing project?** → Our **Refactoring Guide** streamlines the transition, while offering insights into **best practices** for legacy code integration.
 - **🔬 Need advanced control?** → Dive into **case studies, deep technical insights, and API documentation**, ensuring you get the most out of ImportSpy’s powerful validation mechanisms.
 
 No matter your level of expertise, this documentation will **guide you through each step of integrating ImportSpy**, transforming your **Python imports into a secure, predictable, and controlled process**.  
