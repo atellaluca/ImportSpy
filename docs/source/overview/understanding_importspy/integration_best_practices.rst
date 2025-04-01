@@ -1,151 +1,130 @@
 Best Practices for Integrating ImportSpy
-=========================================
+========================================
 
-Effectively integrating ImportSpy within a software project requires a **structured approach**  
-that ensures clarity, maintainability, and seamless validation across different execution environments.  
-While ImportSpy provides a **powerful mechanism to enforce compliance** at the module level,  
-its effectiveness depends on how well the SpyModel is **declared, structured, and managed**  
-within the project’s source code.
+Effectively integrating ImportSpy into a Python project requires a **structured approach** that promotes clarity, maintainability, and reliable execution across environments. ImportSpy acts as a **validation layer**, and its effectiveness depends on how well **import contracts** (defined as `.yml` files) are designed and managed.
 
-A well-defined SpyModel should be:
-- **Readable**, ensuring clarity for developers maintaining the code.
-- **Scalable**, allowing easy adaptation as new dependencies and execution environments emerge.
-- **Maintainable**, structured in a way that minimizes complexity while covering a wide range of validation requirements.
+A well-written contract should be:
 
-By adopting **best practices**, development teams can ensure that ImportSpy functions  
-as an effective validation layer without introducing unnecessary overhead.
+- **Readable** – Easy to understand for developers and maintainers.
+- **Scalable** – Adaptable as new environments and dependencies are introduced.
+- **Maintainable** – Structured to minimize duplication and maximize reuse.
 
-Structuring SpyModel Declarations for Maintainability 🏗️
-----------------------------------------------------------
+By applying the following best practices, teams can leverage ImportSpy without adding unnecessary overhead or complexity.
 
-One of the most common challenges in integrating ImportSpy is defining a **SpyModel**  
-that supports **multiple execution environments** while maintaining a clean, structured,  
-and **easily manageable codebase**.
+Designing Modular Import Contracts 🧱
+-------------------------------------
 
-When a project must support:
-- **Multiple deployment configurations** (e.g., cloud, on-premise, containerized environments).
-- **Different hardware architectures** (e.g., ARM, x86_64).
-- **Various Python interpreters** (e.g., CPython, PyPy).
-- **Cross-platform execution** across multiple operating systems.
+Avoid creating monolithic `.yml` files that mix unrelated validation logic.  
+Instead, adopt a modular design that reflects the architecture of the system:
 
-A poorly structured SpyModel declaration can become **unreadable and difficult to maintain**.  
-Instead of embedding all runtime configurations into a single declaration,  
-it is best to **adopt a modular approach**, separating concerns **logically and cleanly**.
+- **Separate deployment scenarios** into distinct `deployments:` blocks.
+- **Define runtime conditions independently** – such as `os`, `architecture`, and `interpreter`.
+- **Avoid repetition** by reusing common configurations where possible.
 
-**Recommended Approach:**  
-- **Define Deployments Separately:** Each deployment scenario should have a clear definition  
-  that encapsulates specific runtime constraints.
-- **Structure System Environments Clearly:** Group system-level constraints logically,  
-  avoiding mixing them with module-specific validation.
-- **Keep Python Configurations Modular:** If multiple Python versions or interpreters are supported,  
-  define them separately to ensure clear readability and maintainability.
+This approach allows you to manage contracts that cover:
 
-This approach **improves maintainability** and ensures that modifications to a single component  
-(such as adding a new supported Python version) **do not require refactoring the entire SpyModel**.
+- Multiple environments (CI, production, staging).
+- Platform variations (Windows, Linux, ARM, x86_64).
+- Python runtime variations (e.g., CPython, PyPy).
 
-Hierarchical Organization of SpyModel Components 🏛️
-----------------------------------------------------
+Structuring the Contract Hierarchically 🏗️
+-------------------------------------------
 
-For projects that span **cloud-based, containerized, and on-premise deployments**,  
-it is crucial to **organize SpyModel declarations hierarchically**, ensuring that:
-- **Validation rules remain explicit and adaptable.**
-- **Execution scenarios are clearly separated.**
-- **Each validation layer is logically structured.**
+Each import contract can express nested constraints:
 
-A **hierarchical SpyModel** allows each execution context to be validated **independently**,  
-preventing redundant or conflicting validation rules.
+1. **Module metadata** (`filename`, `version`, `variables`).
+2. **Classes**, each with:
+   - `attributes`
+   - `methods`
+   - `superclasses`
+3. **Deployments**, each with:
+   - `arch`
+   - List of `systems`, each having:
+     - `os`
+     - `envs` (environment variables)
+     - List of `pythons`, each specifying:
+       - `version`
+       - `interpreter`
+       - List of nested `modules` (re-validating structure at runtime)
 
-When integrating ImportSpy into large-scale applications,  
-SpyModel declarations should be designed to:
-- **Minimize duplication**, ensuring that common validation logic is reused efficiently.
-- **Encapsulate execution environments separately**, making it easier to introduce new architectures or interpreters.
-- **Maintain alignment with real-world execution conditions**, ensuring that validation remains relevant.
+This structure ensures that validation logic **mirrors the real-world deployment hierarchy**.
 
-By ensuring **clear separation of concerns**, development teams can maintain a **SpyModel  
-that is both scalable and adaptable** to changing runtime requirements.
+Maintaining Runtime Relevance ⚙️
+--------------------------------
 
-Keeping SpyModel Aligned with Runtime Environments ⚙️
-------------------------------------------------------
+An import contract must reflect **real, expected runtime conditions**. Don’t hardcode constraints that don't match how your software is actually deployed.
 
-A common mistake in defining validation models is **hardcoding runtime constraints**  
-without considering their **actual execution context**.  
-To ensure **long-term maintainability**, a SpyModel should be **dynamically adjustable**  
-based on its execution environment.
+- In **CI pipelines**, allow flexibility but check for critical dependencies.
+- In **production**, apply strict runtime enforcement (exact interpreter, architecture, env vars).
+- Avoid assumptions about the host system unless explicitly controlled.
 
-For example:
-- **During CI/CD execution**, validation should focus on **predefined testing environments**.
-- **In production**, SpyModel enforcement should be stricter, ensuring **full compliance**.
+Keep your contracts versioned and updated alongside the modules they describe.
 
-By dynamically **adapting validation rules**, ImportSpy can effectively **validate modules**  
-without introducing unnecessary rigid constraints.
+Avoiding Duplication 🔄
+------------------------
 
-Maintaining **consistency between SpyModel declarations and real-world execution environments**  
-is fundamental to ensuring **that validation remains relevant and effective**.
+Don’t repeat validation logic across contracts. If multiple modules share the same environment or runtime expectations:
 
-Reducing Redundancy and Improving Reusability 🔄
-------------------------------------------------
+- Define shared `deployments:` entries that are reused.
+- Use templating tools or contract generators if necessary.
+- Extract shared constraints into include-able components.
 
-When defining SpyModel declarations, **avoid duplication** by structuring validation logic  
-into **reusable components**.
+This makes the contracts easier to maintain and minimizes the risk of inconsistencies.
 
-- If the same validation rules apply to **multiple modules**, they should be defined in a **shared configuration**.
-- Abstracting **common runtime constraints** prevents unnecessary repetition,  
-  making it easier to **update validation logic** without modifying multiple parts of the codebase.
-
-By ensuring that validation logic is **modular and reusable**, development teams can:
-- **Improve maintainability**, making it easier to adjust validation rules.
-- **Reduce errors**, avoiding inconsistencies between different module declarations.
-- **Simplify debugging**, ensuring that compliance rules are easily understandable.
-
-Ensuring Environmental Validation 🌍
+Validating External Environments 🌍
 ------------------------------------
 
-Many Python applications rely on **environment variables, system dependencies, or external configurations**  
-to function correctly. If these dependencies **are missing or misconfigured**,  
-runtime failures may occur.
+ImportSpy is ideal for validating that modules are not imported in environments that lack:
 
-To prevent such failures, ImportSpy should be configured to **validate environmental dependencies explicitly**.  
-- Ensure that all **required system parameters are defined** in the SpyModel.
-- Validate the **presence and correctness of critical environment variables**.
-- Enforce **architecture constraints**, preventing execution in unsupported environments.
+- Required OS and architecture.
+- Critical `envs` (e.g., `DATABASE_URL`, `PLATFORM_KEY`).
+- Specific Python versions or interpreter types.
 
-By integrating **environmental validation** directly into the SpyModel,  
-ImportSpy ensures that **runtime dependencies are explicitly validated before execution**,  
-preventing unexpected failures.
+**Declare these explicitly** in the `deployments:` section. This ensures consistent behavior in:
 
-Integrating ImportSpy with Testing Pipelines 🧪
------------------------------------------------
+- Local development environments.
+- Docker containers.
+- Cloud-based runtimes.
+- Virtual environments or remote builds.
 
-While ImportSpy ensures **structural validation**, it should complement—not replace—functional testing.  
-To maintain **robust software quality**, ImportSpy should be integrated into **testing workflows**  
-alongside **unit tests and integration tests**.
+Enforcing Consistency Through CI/CD 🧪
+--------------------------------------
 
-A **best practice** is to:
-- **Validate modules early in the CI/CD pipeline**, catching compliance violations before deployment.
-- **Use ImportSpy validation alongside functional testing**, ensuring that both **code correctness and compliance** are enforced.
-- **Continuously update validation rules**, aligning them with software updates.
+Integrate ImportSpy checks early in your testing pipeline:
 
-By treating validation as a **continuous process**, development teams ensure that software remains:
-- **Reliable across different execution environments.**
-- **Compliant with expected runtime configurations.**
-- **Adaptable to future dependencies and system constraints.**
+- Run ImportSpy as a **validation step before tests**, using the CLI:
 
-Final Considerations 🔚
------------------------
+  .. code-block:: bash
 
-ImportSpy serves as a **critical validation layer** in modern Python applications,  
-but its effectiveness **depends on how well it is integrated** into the software’s architecture.
+     importspy -s spymodel.yml -l DEBUG mymodule.py
 
-By following structured **best practices**, ensuring that SpyModel declarations are **modular,  
-readable, and adaptable**, development teams can fully leverage ImportSpy’s capabilities  
-to create **predictable, reliable, and secure software environments**.
+- Fail fast if contract validation fails.
+- Log mismatches and mismatched environments explicitly.
+- Combine with other linting, testing, and build tools.
 
-To summarize:
-- **A well-structured SpyModel should be clear, scalable, and easy to maintain.**
-- **Validation logic should be modular and reusable, reducing duplication.**
-- **Environmental dependencies should be explicitly validated.**
-- **SpyModel configurations should be dynamically adjustable to real-world execution conditions.**
-- **Testing should complement ImportSpy validation, ensuring both correctness and compliance.**
+This ensures that structural issues are caught **before deployment**.
 
-By **adopting these best practices**, development teams can integrate ImportSpy **seamlessly**  
-into their software workflows, ensuring **long-term stability, security, and compliance**.
+Matching ImportSpy to Team Workflows 👥
+---------------------------------------
+
+Choose how to handle contract violations depending on your risk profile:
+
+- **Strict mode**: Block execution entirely if violations occur (default behavior).
+- **Debug mode**: Use `--log-level DEBUG` to trace execution without stopping.
+- **Warning-only mode**: (Coming soon) Log issues without raising exceptions.
+
+Teams should treat ImportSpy as part of their **software quality gate**, customizing its usage across development, staging, and production environments.
+
+Final Thoughts 🔚
+------------------
+
+ImportSpy is not a replacement for tests or linters — it is a **complementary layer** that ensures modules are **only executed in environments where they’re guaranteed to behave as expected**.
+
+To get the most out of ImportSpy:
+
+- Keep your import contracts clean, hierarchical, and runtime-aware.
+- Integrate validation checks into CI/CD pipelines.
+- Use strict enforcement for high-assurance deployments.
+- Update contracts alongside your codebase.
+
+By following these best practices, ImportSpy becomes a **predictability enabler** in modern Python software — enforcing not just what your code does, but **where and how it can run safely**.

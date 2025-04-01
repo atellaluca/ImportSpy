@@ -3,146 +3,138 @@ Design Decisions Behind ImportSpy
 
 ImportSpy is designed to **validate and enforce execution constraints at runtime**,  
 ensuring that a module is only imported in a **compliant environment**.  
-Rather than checking the structure of a module, ImportSpy verifies whether  
-**the execution context of the importer meets the declared requirements**.
+Rather than validating the structure of a module itself, ImportSpy focuses on **where and how it is imported**,  
+and whether the **importing environment matches the declared requirements** specified in an import contract.
 
-Every design choice has been made to **balance performance, flexibility,  
-and strict enforcement** while ensuring **predictable execution behavior**.
-
-This section provides an **in-depth analysis of the architectural decisions**  
-that shaped ImportSpy and explains **why certain approaches were chosen over others**.
+This document provides an **in-depth overview of the design choices** that shaped ImportSpy,  
+explaining why each strategy was chosen to balance **security, performance, and flexibility**  
+in complex, modular Python ecosystems.
 
 Why Runtime Validation Instead of Static Analysis? ⚡
-------------------------------------------------------
-
-Static analysis tools like **mypy** or **pylint** can detect issues **before execution**,  
-but they **cannot enforce execution constraints dynamically**, especially in cases where:
-
-- **Modules are loaded dynamically**, such as in **plugin-based architectures**.  
-- **Microservices rely on execution-specific configurations**, requiring runtime enforcement.  
-- **Dependencies are determined at runtime**, rather than being statically defined.  
-
-**Decision:** ImportSpy was designed for **runtime validation**, ensuring that compliance checks  
-occur **at the moment of import**, regardless of whether the importing module is  
-**statically known or dynamically loaded**.
-
-This guarantees that execution is **only permitted in approved environments**.
-
-Why Hook into Python’s Import System? 🚪
-----------------------------------------
-
-Python’s **import mechanism** allows for **lazy loading, dynamic imports, and conditional execution**.  
-However, this flexibility introduces **risks**:
-
-- Modules can be **imported in unexpected environments**, leading to **silent failures**.  
-- Dependency mismatches can cause **runtime issues in different execution contexts**.  
-- External plugins may **introduce execution conditions that violate a module’s requirements**.  
-
-**Decision:** ImportSpy **intercepts imports** at runtime to ensure:
-
-1. **The importing environment satisfies predefined execution constraints.**  
-2. **Only compliant execution contexts are allowed to proceed.**  
-3. **Violations trigger immediate feedback, preventing misconfigurations.**  
-
-Why Use Reflection & Introspection for Validation? 🔍
-------------------------------------------------------
-
-Python’s **dynamic nature** allows for **runtime modifications**, making it impossible  
-to rely solely on **static type checks or predefined schemas** for validation.
-
-ImportSpy leverages **Python reflection (introspection)** to:
-
-- **Analyze the importing environment dynamically** (Python version, OS, system properties).  
-- **Extract runtime execution context** to validate compliance with the **SpyModel**.  
-- **Detect non-compliant execution scenarios** and block the import if necessary.  
-
-**Decision:** Reflection is used **intelligently** to balance **flexibility and efficiency**, ensuring:
-
-- **Minimal overhead** by validating only when necessary.  
-- **Adaptability** to dynamically generated execution contexts.  
-- **Security enforcement** by blocking unauthorized execution attempts.  
-
-Why Introduce SpyModel for Execution Validation? 🛡️
 -----------------------------------------------------
 
-Instead of relying on **hardcoded validation rules**, ImportSpy introduces **SpyModel**,  
-a **declarative execution contract** that allows developers to define **where and how their module can be imported**.
+While tools like `mypy` and `pylint` catch issues **before execution**,  
+they cannot address **runtime-specific conditions** such as:
 
-Benefits of **SpyModel**:
+- Modules imported dynamically (e.g., plugins).
+- Runtime-determined dependencies or interpreters.
+- Environment-variable-driven execution logic.
 
-- **Customizable** → Developers can define **execution constraints** dynamically.  
-- **Extensible** → The model can be **updated** without modifying ImportSpy’s core logic.  
-- **Runtime-Enforced** → Ensures that imports **only proceed in compliant environments**.  
+**Design Rationale:**  
+ImportSpy focuses on **runtime validation** to ensure imports occur only  
+under the correct execution conditions—**when and where the module is actually imported**.  
+This provides dynamic protection that **static analysis cannot guarantee**.
 
-**Decision:** The **SpyModel abstraction** allows ImportSpy to enforce structured  
-**execution validation** while remaining **adaptable** to different Python ecosystems.
-
-Why Validate the Runtime Environment? 🏗️
-------------------------------------------
-
-Python applications often run across **different OS environments, Python versions, and architectures**.  
-A module that functions correctly **on one setup** may break **on another** due to:
-
-- **OS-specific execution behavior** (e.g., Windows vs. Linux differences).  
-- **Python version discrepancies** (e.g., breaking changes in 3.x releases).  
-- **Dependency mismatches** (e.g., incorrect package versions).  
-
-**Decision:** ImportSpy enforces **execution environment validation** by:
-
-1. **Checking OS compatibility** at runtime.  
-2. **Verifying Python version constraints** before executing an import.  
-3. **Ensuring that all required environment variables are correctly set.**  
-
-This prevents **unexpected failures** and ensures that software **executes consistently**  
-in all deployment environments.
-
-Why Prioritize Performance Optimization? ⚡
--------------------------------------------
-
-Since ImportSpy **operates at runtime**, **performance is a key consideration**.  
-To minimize overhead, ImportSpy:
-
-- **Uses caching mechanisms** to avoid redundant validation.  
-- **Performs lazy evaluation** to reduce unnecessary computations.  
-- **Integrates with Python’s module system** to streamline execution.  
-
-**Decision:** ImportSpy was designed to be **as lightweight as possible**  
-while still enforcing strict execution constraints.
-
-Why Provide Detailed Error Reporting? 📝
+Why Hook Into Python’s Import System? 🚪
 ----------------------------------------
 
-A major drawback of traditional validation tools is **minimal error feedback**,  
-making debugging difficult.
+Python’s flexible import system is a **double-edged sword**.  
+It supports lazy and dynamic imports, but also allows code to be executed  
+**in unintended or unsafe contexts**.
 
-**Decision:** ImportSpy **enhances developer experience** by:
+**Design Rationale:**  
+ImportSpy **hooks into the import stack** to:
 
-- Providing **detailed error messages** explaining **why validation failed**.  
-- Offering **structured compliance reports** to identify **specific execution mismatches**.  
-- Allowing **configurable validation policies**, so developers can choose between **strict enforcement or warnings**.  
+- Trace **who is importing the protected module**.
+- Block execution if the importing environment **violates contract rules**.
+- Detect **contextual mismatches** that static analysis would miss.
 
-This ensures **fast debugging**, reducing misconfigurations and improving **deployment reliability**.
+This interception enables precise validation at the **point of interaction**.
 
-Final Considerations 🚀
------------------------
+Why Use Introspection for Environment Validation? 🔍
+----------------------------------------------------
 
-The architectural choices behind ImportSpy were driven by the need for:
+Python is **dynamic by nature**, which means runtime characteristics often differ  
+across systems and deployments.
 
-- **Dynamic execution validation** that adapts to Python’s flexibility.  
-- **Minimal runtime overhead** while enforcing strict compliance.  
-- **Extensible validation rules** through SpyModel.  
-- **Security and stability** in modular and distributed Python applications.  
+**Design Rationale:**  
+ImportSpy uses **Python’s introspection and reflection** to:
 
-By leveraging **runtime validation, introspection, and import interception**,  
-ImportSpy enables developers to **enforce controlled execution environments**,  
-preventing **unexpected failures, dependency mismatches, and security risks**.
+- Extract execution context (OS, architecture, interpreter, env variables).
+- Detect real-time execution anomalies.
+- Build a runtime model (`SpyModel`) of the environment for validation.
+
+This allows ImportSpy to **enforce contextual rules dynamically**.
+
+Why Introduce Import Contracts (SpyModel)? 🛡️
+---------------------------------------------
+
+Hardcoding validation logic in code would be inflexible and difficult to maintain.
+
+**Design Rationale:**  
+ImportSpy introduces the `SpyModel`, a **declarative execution contract**  
+that describes how and where a module can be used. It:
+
+- Allows modules to express expectations as **data, not logic**.
+- Makes validation **portable, maintainable, and testable**.
+- Serves as the foundation for **external contracts in YAML**.
+
+This abstraction supports **both embedded and external validation modes**.
+
+Why Validate the Runtime Environment? 🏗️
+----------------------------------------
+
+Python modules often break when moved across:
+
+- OSes (Windows/Linux/Mac)
+- CPU architectures (x86_64, ARM)
+- Python versions (e.g., 3.9 vs. 3.12)
+- Interpreters (CPython, PyPy)
+
+**Design Rationale:**  
+ImportSpy enforces:
+
+- **OS and architecture matching**
+- **Python version compliance**
+- **Interpreter validation**
+- **Presence and correctness of required environment variables**
+
+This ensures modules only run in **safe, verified conditions**.
+
+Why Optimize for Runtime Performance? ⚙️
+----------------------------------------
+
+Runtime tools risk introducing latency or overhead.
+
+**Design Rationale:**  
+ImportSpy includes:
+
+- **Validation caching** for repeated imports
+- **Lazy context extraction**
+- **Minimal interference with module load time**
+
+This enables **strict compliance** without degrading user experience.
+
+Why Provide Detailed Validation Errors? 📝
+---------------------------------------------
+
+Generic error messages frustrate developers.
+
+**Design Rationale:**  
+ImportSpy returns:
+
+- **Specific exception types** per validation error
+- **Context-aware feedback** (e.g., missing env var, OS mismatch)
+- **Configurable behavior** (warnings vs hard failures)
+
+This makes debugging **faster and more transparent**.
+
+Final Design Principles 🔚
+--------------------------
+
+ImportSpy’s design is shaped by the following principles:
+
+- **Zero-Trust Imports** → Non-compliant modules are blocked immediately.
+- **Context-First Validation** → Only the environment of the **importer** is analyzed.
+- **Declarative by Default** → Validation rules live in **contracts, not code**.
+- **Scalable to Large Systems** → Works across microservices, plugins, and CI/CD.
 
 Next Steps 🔬
 -------------
 
-Explore the **internal mechanics of ImportSpy** in detail:
+To understand how these design choices work in practice, explore:
 
-- **:doc:`architecture_runtime_analysis`** → How ImportSpy extracts execution context dynamically.  
-- **:doc:`spy_execution_flow`** → A step-by-step breakdown of ImportSpy’s validation process.  
+- :doc:`architecture_runtime_analysis` → Runtime context extraction and modeling.
 
-Understanding these sections will give you **expert-level insights** into ImportSpy’s design and implementation. 🚀
+These sections provide deeper insight into how ImportSpy brings **structure, safety,  
+and runtime governance** to modern Python development.

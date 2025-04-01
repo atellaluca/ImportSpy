@@ -93,7 +93,7 @@ in understanding how ImportSpy works.
    all modules pass compliance checks before production deployment.  
 
 Who Should Read This Guide? 👩‍💻👨‍💻
------------------------------------
+----------------------------------------------
 
 This section serves as an **essential guide** for:  
 
@@ -111,8 +111,11 @@ this guide will provide the **foundational knowledge** needed to fully leverage 
    :caption: Understanding ImportSpy:
 
    understanding_importspy/introduction
-   understanding_importspy/defining_spymodel
+   understanding_importspy/defining_import_contracts
+   understanding_importspy/contract_structure.rst
    understanding_importspy/spy_execution_flow
+   understanding_importspy/embedded_mode
+   understanding_importspy/external_mode
    understanding_importspy/validation_and_compliance
    understanding_importspy/error_handling
    understanding_importspy/integration_best_practices

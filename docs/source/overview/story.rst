@@ -10,8 +10,8 @@ where problem-solving is replaced by **rote tasks and bureaucratic complexity**.
 It is more than just a validation framework—it is the result of a **personal journey of resilience**,  
 a project that transformed frustration into purpose and reignited a **passion for building meaningful software**.
 
-Losing Passion in a World of Repetition 🔄
-------------------------------------------
+Losing Passion in a World of Repetition
+---------------------------------------
 
 For **Luca Atella**, the creator of ImportSpy, programming had always been more than just a job.  
 Like many developers, he started young, drawn by the magic of **turning logic into solutions**  
@@ -26,8 +26,8 @@ It was a leap into the unknown, driven by the realization that working without p
 Yet, stepping away was only the beginning. What followed was a **period of uncertainty, self-doubt,  
 and a difficult question—how do you rebuild passion for something that once defined you?**
 
-Rebuilding Passion, One Line at a Time ✍️
-------------------------------------------
+Rebuilding Passion, One Line at a Time
+--------------------------------------
 
 The answer was not to **abandon programming** but to **redefine its purpose**.  
 Luca didn’t need to walk away from code—he needed to reclaim it **on his own terms**.  
@@ -42,8 +42,8 @@ This question became the foundation of ImportSpy.
 More than just a tool, it became a **manifesto**—a way to transform frustration into creation,  
 to build something that solved a real problem while rekindling the excitement of software development.
 
-More Than Code: A Community-Driven Journey 🌍
----------------------------------------------
+More Than Code: A Community-Driven Journey
+------------------------------------------
 
 What started as a **personal experiment** quickly grew into something bigger.  
 ImportSpy isn’t just **a validation framework**—it’s a testament to the **resilience of developers**  
@@ -61,10 +61,10 @@ It stands as a **reminder** that:
 
 ImportSpy represents **an alternative perspective**—one that values clarity, precision, and the joy of writing software that just works.
 
-Why ImportSpy Matters 🔍
-------------------------
+Why ImportSpy Matters
+---------------------
 
-ImportSpy is not just another framework—it is a **statement**.  
+ImportSpy is not just another framework—it is a **statement**.
 
 - A statement that **modular software should be predictable, compliant, and secure**.  
 - A statement that **developers deserve tools that make their lives easier, not harder**.  
@@ -73,16 +73,16 @@ ImportSpy is not just another framework—it is a **statement**.
 The technical rigor behind ImportSpy ensures that software remains **stable, compliant, and efficient**,  
 but its true impact goes beyond the code—it is about **building with purpose**.
 
-Join the Movement 🤝
---------------------
+Join the Movement
+-----------------
 
 If you’ve ever felt **stuck, burned out, or disconnected from the work you once loved**,  
-know that you’re **not alone**.  
+know that you’re **not alone**.
 
 ImportSpy is more than just a tool—it’s a **community-driven project** built on the belief  
-that software should be **precise, reliable, and thoughtfully designed**.  
+that software should be **precise, reliable, and thoughtfully designed**.
 
 This project is a **tribute to all developers** who strive to build **better, more predictable software**  
-and who believe that even the smallest ideas can create **meaningful impact**.  
+and who believe that even the smallest ideas can create **meaningful impact**.
 
-🔹 **Reclaim your passion, build with confidence, join the movement.**  
+**🔹 Reclaim your passion, build with confidence, join the movement.**
