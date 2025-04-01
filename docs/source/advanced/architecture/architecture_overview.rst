@@ -54,7 +54,7 @@ ImportSpy is structured into several layers, each with a distinct responsibility
 Visual Overview
 ^^^^^^^^^^^^^^^
 
-.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
+.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/importspy-embedded-mode.png
    :align: center
    :alt: ImportSpy Architecture Diagram
 

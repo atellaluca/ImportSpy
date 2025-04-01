@@ -15,9 +15,10 @@ What You’ll Learn 🏗️
 This section covers the **foundations of ImportSpy**, guiding you step by step through:
 
 - **Installation** → How to install ImportSpy and configure it for your project.  
-- **Example Overview** → A walkthrough of a **real-world use case** demonstrating ImportSpy's power.  
-- **Code Walkthrough** → A detailed breakdown of the example, explaining each component.  
-- **Running the Example** → How to execute ImportSpy validation and interpret its results.  
+- **Example Overview** → A walkthrough of a **real-world use case** demonstrating ImportSpy's power in validating modules.
+- **Using Import Contracts** → Learn about the new **YAML-based Import Contracts**, how they replace the previous SpyModel, and how to configure validation for your modules.
+- **Code Walkthrough** → A detailed breakdown of the example, explaining each component and how the validation rules are applied dynamically.
+- **Running the Example** → How to execute ImportSpy validation with the contracts and interpret its results.  
 
 Each part of this guide is designed to build on the previous one, ensuring you gain  
 a **strong understanding** of ImportSpy’s role in **module validation and compliance**.
@@ -27,7 +28,7 @@ Getting the Most Out of This Guide 📖
 
 Before you begin, here are a few things to keep in mind:
 
-- **No prior experience with ImportSpy is required!** This guide is structured for beginners.  
+- **No prior experience with ImportSpy is required!** This guide is structured for beginners.
 - **A basic understanding of Python modules and imports will be helpful.**  
 - **Hands-on learning** is encouraged—try running the example code as you follow along!  
 
@@ -41,3 +42,4 @@ Ready to dive in? Let’s get started! 🚀
 
    get_started/installation
    get_started/example_overview
+   get_started/import_contracts
