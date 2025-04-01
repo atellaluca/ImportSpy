@@ -1,3 +1,16 @@
+"""
+importspy.validators.python_validator
+=====================================
+
+Validator for Python runtime configurations.
+
+This module defines the `PythonValidator` class, responsible for validating
+the Python version, interpreter, and associated modules declared in an
+import contract against the actual Python runtime context.
+
+Delegates module-level validation to `ModuleValidator`.
+"""
+
 from ..models import Python
 from ..errors import Errors
 from .module_validator import ModuleValidator
@@ -5,70 +18,65 @@ from ..log_manager import LogManager
 from ..constants import Constants
 from typing import List, Optional
 
+
 class PythonValidator:
     """
-    Validates Python configurations for structural consistency.
+    Validates Python runtime configuration and associated modules.
 
-    This class compares a list of expected Python configurations (`pythons_1`) with 
-    a list of actual Python configurations (`pythons_2`), ensuring that their 
-    versions, interpreters, and modules match the expected structure.
-
-    Validation Outcomes:
-    ---------------------
-    1. **Validation Not Necessary (Returns `None`)**:
-       - `pythons_1` is empty, indicating no Python configurations to validate.
-
-    2. **Validation Completed Successfully (Returns `None`)**:
-       - All Python configurations in `pythons_1` align with the structure of `pythons_2`.
-
-    3. **Validation Error (Raises `ValueError`)**:
-       - Mismatched or missing versions, interpreters, or modules.
-       - `pythons_2` is not provided while `pythons_1` is defined.
+    Attributes
+    ----------
+    logger : logging.Logger
+        Logger instance for debugging and tracing.
+    _module_validator : ModuleValidator
+        Validator for modules within the Python configuration.
     """
 
     def __init__(self):
         """
-        Initializes the PythonValidator.
-
-        Creates an instance of `ModuleValidator` to handle validation of modules within Python configurations.
+        Initialize the validator and internal module validator.
         """
         self.logger = LogManager().get_logger(self.__class__.__name__)
         self._module_validator = ModuleValidator()
 
-    def validate(self,
-                 pythons_1: List[Python],
-                 pythons_2: Optional[List[Python]]) -> Optional[None]:
+    def validate(
+        self,
+        pythons_1: List[Python],
+        pythons_2: Optional[List[Python]]
+    ) -> Optional[None]:
         """
-        Validates a list of expected Python configurations against actual configurations.
+        Validate a list of expected Python environments against actual ones.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         pythons_1 : List[Python]
-            The list of expected Python configurations to validate.
-        pythons_2 : List[Python], optional
-            The list of actual Python configurations to validate against.
+            Expected Python configurations from the contract.
+        pythons_2 : Optional[List[Python]]
+            Actual Python runtime details extracted from the system.
 
-        Returns:
-        --------
-        None
-            - If `pythons_1` is empty (validation not necessary).
-            - If validation completes successfully.
-
-        Raises:
+        Returns
         -------
+        None
+            Returned when:
+            - `pythons_1` is empty (no validation needed).
+            - Validation succeeds.
+
+        Raises
+        ------
         ValueError
-            - If `pythons_2` is missing but `pythons_1` is defined.
-            - If discrepancies are found in versions, interpreters, or modules.
+            If `pythons_2` is missing or does not match
+            the declared expectations in `pythons_1`.
+
+        Example
+        -------
+        >>> validator = PythonValidator()
+        >>> validator.validate([expected_python], [actual_python])
         """
-        # Case 1: Validation not necessary
         if not pythons_1:
             return
 
-        # Case 2: Error - `pythons_2` is missing
         if not pythons_2:
             raise ValueError(Errors.ELEMENT_MISSING.format(pythons_1))
 
-        # Validate each Python configuration
         python_2 = pythons_2[0]
         for python_1 in pythons_1:
             self.logger.debug(
@@ -78,43 +86,50 @@ class PythonValidator:
                     details=f"Expected python: {python_1} ; Current python: {python_2}"
                 )
             )
+
             if self._is_python_match(python_1, python_2):
-                # Validate modules if present
                 if python_2.modules:
                     self._module_validator.validate(python_1.modules, python_2.modules[0])
                 return
 
-    def _is_python_match(self, python_1: Python, python_2: Python) -> bool:
+    def _is_python_match(
+        self,
+        python_1: Python,
+        python_2: Python
+    ) -> bool:
         """
-        Checks if two Python configurations match based on version and interpreter.
+        Determine whether two Python configurations match.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         python_1 : Python
-            The expected Python configuration.
+            Expected configuration.
         python_2 : Python
-            The actual Python configuration.
+            Actual system configuration.
 
-        Returns:
-        --------
+        Returns
+        -------
         bool
-            - `True` if the configurations match based on defined criteria.
-            - `False` otherwise.
+            `True` if the two configurations match according to the declared criteria,
+            otherwise `False`.
+
+        Matching Criteria
+        -----------------
+        - If both version and interpreter are defined: match both.
+        - If only version is defined: match version.
+        - If only interpreter is defined: match interpreter.
+        - If none are defined: match anything (default `True`).
         """
-        # Match both version and interpreter if both are defined
         if python_1.version and python_1.interpreter:
             return (
                 python_1.version == python_2.version and
                 python_1.interpreter == python_2.interpreter
             )
 
-        # Match version only
         if python_1.version:
             return python_1.version == python_2.version
 
-        # Match interpreter only
         if python_1.interpreter:
             return python_1.interpreter == python_2.interpreter
 
-        # Default to True if no specific criteria are defined
         return True

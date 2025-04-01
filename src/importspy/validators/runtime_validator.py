@@ -1,76 +1,82 @@
-from ..models import (
-    Runtime,
-)
-from typing import List
+"""
+importspy.validators.runtime_validator
+======================================
+
+Validator for runtime configurations.
+
+This module defines the `RuntimeValidator` class, which ensures that the
+runtime architecture and system-level environment of a Python module
+conform to what is declared in its import contract.
+
+Delegates system validation to `SystemValidator`.
+"""
+
+from ..models import Runtime
 from ..errors import Errors
 from .system_validator import SystemValidator
+from typing import List
+
 
 class RuntimeValidator:
     """
-    Validates runtime configurations for architectural consistency.
+    Validates runtime architecture and system configurations.
 
-    This class compares a list of expected runtime configurations (`runtimes_1`) with
-    a list of actual runtime configurations (`runtimes_2`). It ensures that their 
-    architectures match and validates the systems within the runtimes.
-
-    Validation Outcomes:
-    ---------------------
-    1. **Validation Not Necessary (Returns `None`)**:
-       - `runtimes_1` is empty, indicating no runtimes to validate.
-
-    2. **Validation Completed Successfully (Returns `None`)**:
-       - All runtimes in `runtimes_1` align with the structure of `runtimes_2`.
-
-    3. **Validation Error (Raises `ValueError`)**:
-       - `runtimes_2` is not provided while `runtimes_1` is defined.
-       - Mismatched architectures or missing system configurations.
+    Attributes
+    ----------
+    _system_validator : SystemValidator
+        Handles validation of OS and platform-specific system expectations.
     """
 
     def __init__(self):
         """
-        Initializes the RuntimeValidator.
-
-        Creates an instance of `SystemValidator` to handle validation of systems within runtimes.
+        Initialize the runtime validator and prepare the system validator.
         """
         self._system_validator = SystemValidator()
 
-    def validate(self, runtimes_1: List[Runtime], runtimes_2: List[Runtime]) -> None:
+    def validate(
+        self,
+        runtimes_1: List[Runtime],
+        runtimes_2: List[Runtime]
+    ) -> None:
         """
-        Validates a list of expected runtime configurations against actual configurations.
+        Validate expected runtime declarations against actual runtime data.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         runtimes_1 : List[Runtime]
-            The list of expected runtime configurations to validate.
+            The expected runtime environments declared in the contract.
         runtimes_2 : List[Runtime]
-            The list of actual runtime configurations to validate against.
+            The actual detected runtime environments from the host system.
 
-        Returns:
-        --------
-        None
-            - If `runtimes_1` is empty (validation not necessary).
-            - If validation completes successfully.
-
-        Raises:
+        Returns
         -------
+        None
+            Returned when:
+            - `runtimes_1` is empty (no validation required).
+            - Validation completes successfully.
+
+        Raises
+        ------
         ValueError
-            - If `runtimes_2` is missing but `runtimes_1` is defined.
-            - If discrepancies are found in architectures or systems.
+            - If `runtimes_2` is missing but expectations are defined.
+            - If the architectures do not match.
+            - If any contained system-level configuration mismatches are detected.
+
+        Example
+        -------
+        >>> validator = RuntimeValidator()
+        >>> validator.validate([expected_runtime], [actual_runtime])
         """
-        # Case 1: Validation not necessary
         if not runtimes_1:
             return
 
-        # Case 2: Error - `runtimes_2` is missing
         if not runtimes_2:
             raise ValueError(Errors.ELEMENT_MISSING.format(runtimes_1))
 
-        # Validate each runtime configuration
         runtime_2 = runtimes_2[0]
+
         for runtime_1 in runtimes_1:
-            # Match architecture
             if runtime_1.arch == runtime_2.arch:
-                # Validate systems if present
                 if runtime_1.systems:
                     self._system_validator.validate(runtime_1.systems, runtime_2.systems)
                 return
