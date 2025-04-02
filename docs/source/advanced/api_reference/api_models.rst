@@ -1,61 +1,104 @@
-Models & Contracts
-==================
+Model Layer: SpyModel & Contract Validation System
+==================================================
 
-ImportSpy structures its validation and compliance process through a unified concept called the **Import Contract**.
+At the heart of ImportSpy’s compliance framework lies the `SpyModel`:  
+a fully structured representation of how a Python module **should behave** across different runtime environments.
 
-An **Import Contract** is a declarative specification (typically written in YAML) that describes the **expected structure, behavior, and runtime constraints** of a Python module.  
-This contract is loaded and interpreted by the internal model class: `SpyModel`.
+ImportSpy does not merely analyze code — it validates whether a module conforms to a **contractual definition**  
+that includes its **structure**, **runtime expectations**, and **execution constraints**.
 
-Supported Validation Modes 🧭
+🔍 Whether you’re operating in **embedded mode** or running validations via the **CLI**,  
+`SpyModel` is the foundation on which all validation logic is built.
+
+Validation Modes Supported 🧭
 -----------------------------
 
-Import Contracts are used consistently across **both validation modes** offered by ImportSpy:
+Import contracts defined via `.yml` files (or SpyModel objects in code) are evaluated in:
 
-- 🔌 **Embedded Validation** – ImportSpy is embedded inside the imported module.  
-  The contract is enforced *by the module being imported*, inspecting its caller at runtime.
-  
-- 🛠️ **CLI/Pipeline Validation** – ImportSpy is run as an **external CLI tool** or as part of a **CI/CD pipeline**,  
-  validating a module against a contract before it is deployed or integrated.
+- **Embedded Mode** 🔌  
+  Modules protect themselves by invoking `Spy().importspy()` and enforcing contracts on their importers.
 
-Regardless of the mode, the validation process is powered by the same internal logic and model structures.
+- **External (CLI) Mode** 🛠️  
+  Used in pipelines or audits to validate a target module before execution or integration.
 
-SpyModel 🏗️
-------------
+Both workflows rely on **SpyModel-based comparison** between expected and actual module states.
 
-The `SpyModel` class is the **core abstraction** that defines the **expected structure and execution constraints**  
-for modules being validated.
+SpyModel Class 🏗️
+-------------------
 
-It transforms a YAML Import Contract into a structured, queryable Python object and enables runtime comparison  
-between **what is declared** and **what is actually present** in the target module.
+The `SpyModel` is a high-level, Pydantic-based model that transforms an import contract into a validated runtime object.
 
-Key Responsibilities:
-^^^^^^^^^^^^^^^^^^^^^^
+It defines:
 
-- Captures **module structure**:
-  - Classes, functions, attributes, annotations
-- Defines **runtime and environmental constraints**:
-  - Supported OS, architecture, Python version, interpreter
-- Enables **cross-environment consistency checks**
-- Validates **import-time metadata** (e.g., variables, file names, version)
+- 🧱 Structural rules → Expected classes, attributes, methods, return types  
+- 🧪 Runtime rules → Supported OS, CPU architectures, Python interpreters  
+- 🔐 Environment rules → Required environment variables and submodule dependencies
 
 .. autoclass:: importspy.models.SpyModel
    :members:
    :undoc-members:
    :show-inheritance:
 
-Validators ✅
-------------
+Model Subcomponents 📦
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-ImportSpy includes a **modular validation system** that enforces compliance  
-between a module and its declared `SpyModel`.
+`SpyModel` is composed of granular submodels that represent the contract’s declarative schema:
 
-Each validator focuses on a specific layer:
+- `Function` → Represents function name, arguments, and return annotations  
+- `Attribute` → Captures class or global variables (with value, type, and scope)  
+- `Class` → Groups attributes and methods, along with expected inheritance  
+- `Module` → Represents nested modules inside deployments  
+- `Python`, `System`, `Deployment` → Define runtime matrix for cross-platform validation
 
-- **Runtime validation** → OS, Python version, hardware
-- **Structural validation** → Classes, methods, variables, annotations
-- **System & environment validation** → Dependencies, variables, environment setup
+.. autoclass:: importspy.models.Function
+   :members:
+   :undoc-members:
 
-For a complete breakdown of validators, see:
+.. autoclass:: importspy.models.Attribute
+   :members:
+   :undoc-members:
+
+.. autoclass:: importspy.models.Argument
+   :members:
+   :undoc-members:
+
+.. autoclass:: importspy.models.Class
+   :members:
+   :undoc-members:
+
+.. autoclass:: importspy.models.Module
+   :members:
+   :undoc-members:
+
+.. autoclass:: importspy.models.Python
+   :members:
+   :undoc-members:
+
+.. autoclass:: importspy.models.System
+   :members:
+   :undoc-members:
+  
+.. autoclass:: importspy.models.Runtime
+   :members:
+   :undoc-members:
+
+Validator Interface ✅
+----------------------
+
+ImportSpy includes a pluggable validator system that compares:
+
+- The `SpyModel` contract (expected)
+- The actual runtime snapshot of the importing environment
+
+Validators are executed as part of a pipeline that checks:
+
+- ✔️ Function and method presence  
+- ✔️ Signature alignment and argument types  
+- ✔️ Class structure and attribute correctness  
+- ✔️ Deployment compatibility and environment config  
+- ✔️ Interpreter and version compliance  
+
+To explore how validators are defined and chained:
 
 .. toctree::
    :maxdepth: 1

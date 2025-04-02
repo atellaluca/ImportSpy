@@ -1,55 +1,61 @@
-Validation Engine
-=================
+The Validation Engine
+=====================
 
-ImportSpy provides a **modular validation engine** that enforces compliance between a target module  
-and its associated **Import Contract**.
+ImportSpy’s validation system is a modular, extensible framework designed to enforce the integrity  
+and runtime compatibility of any Python module protected by an **Import Contract**.  
+Whether used in **embedded validation** (inside the module) or in **external CLI mode**,  
+this engine guarantees that no module is loaded in an unauthorized or structurally inconsistent environment.
 
-This validation engine operates transparently in both execution modes:
+Core Validator Pipeline ⚙️
+--------------------------
 
-- **Embedded Validation** 🧬 – Where a module uses ImportSpy to **validate the context of its own importer**.
-- **CLI/Pipeline Validation** 🛠️ – Where ImportSpy is run **externally** to validate a target module against a contract.
+At the center of the engine is the `SpyModelValidator`, a coordinator that orchestrates multiple specialized validators.  
+Each validator is responsible for comparing part of the actual runtime context or module structure against its declared expectations.
 
-All validations are orchestrated by the `SpyModelValidator` and delegated to a rich set of internal validators,  
-each responsible for checking a specific domain (structure, runtime, environment).
+This pipeline enforces:
 
-Core Responsibilities 🔎
-------------------------
+- ✅ Structural integrity  
+- ✅ Environment compatibility  
+- ✅ Runtime reproducibility  
+- ✅ Compliance with declared variables and system settings
 
-The validation system ensures that modules:
+.. note::
+   All validators are executed **at runtime**, just before the module is made accessible to the importing code.
 
-- Are executed in **approved environments** (e.g., OS, architecture, Python version)
-- Contain all **required structural elements** (e.g., classes, attributes, methods)
-- Match all **contractual expectations** defined in the Import Contract
-- Respect **environmental and system constraints** (e.g., variables, superclasses)
+Validation Modes Supported
+---------------------------
 
-SpyModelValidator 🏗️
+The validation engine operates seamlessly across both execution modes:
+
+- **🧬 Embedded Mode** — The module validates its own importer at the moment it is loaded.
+- **🛠️ External Mode (CLI)** — The module is validated *before* execution begins, often in CI/CD or static validation workflows.
+
+SpyModelValidator 🧠
 ---------------------
 
-The `SpyModelValidator` is the **entry point** of the validation engine.
+This is the **entry point** to the validation pipeline. It receives both:
 
-It orchestrates the entire process by comparing:
+- The expected structure (parsed from a `.yml` contract or inline SpyModel), and  
+- The actual runtime data (extracted via introspection)
 
-- The **expected model** (parsed from an Import Contract)
-- The **actual structure** of the loaded Python module
+It dispatches these to domain-specific validators, collects results, and raises structured errors on failure.
 
 .. autoclass:: importspy.validators.spymodel_validator.SpyModelValidator
    :members:
    :undoc-members:
    :show-inheritance:
 
-Structural Validators 🧱
+Structural Validators 🔎
 ------------------------
 
-These validators ensure the **internal structure** of the module matches expectations.
+These validators inspect the internal structure of the target module:
 
 AttributeValidator 🔤
 ^^^^^^^^^^^^^^^^^^^^^
 
-Validates presence and values of:
-
-- Class-level attributes
-- Instance-level attributes
-- Global variables
+- Ensures global/module/class attributes exist  
+- Validates `type`, `value`, and `scope` (class vs instance)  
+- Supports default values and optional annotations
 
 .. autoclass:: importspy.validators.attribute_validator.AttributeValidator
    :members:
@@ -59,11 +65,9 @@ Validates presence and values of:
 FunctionValidator 🛠️
 ^^^^^^^^^^^^^^^^^^^^^
 
-Ensures all declared methods and functions exist, with matching:
-
-- Names  
-- Signatures  
-- Return annotations
+- Verifies function/method presence  
+- Checks signatures and return annotations  
+- Detects function mismatches across versions or overrides
 
 .. autoclass:: importspy.validators.function_validator.FunctionValidator
    :members:
@@ -73,30 +77,25 @@ Ensures all declared methods and functions exist, with matching:
 ArgumentValidator 🎛️
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Validates function and method **arguments** against expectations for:
-
-- Argument names  
-- Annotations (type hints)  
-- Default values
+- Validates function arguments against contract declarations  
+- Supports type annotations and default value checks  
+- Ensures complete function interface compliance
 
 .. autoclass:: importspy.validators.argument_validator.ArgumentValidator
    :members:
    :undoc-members:
    :show-inheritance:
 
-Runtime & Environment Validators 🌍
+Environment & Runtime Validators 🌍
 -----------------------------------
 
-These validators ensure the execution environment meets all runtime constraints defined in the Import Contract.
+These components validate that the system attempting to import the module is authorized:
 
 ModuleValidator 📦
 ^^^^^^^^^^^^^^^^^^
 
-Validates **module metadata** such as:
-
-- Filename  
-- Version  
-- Declared global variables
+- Validates module metadata (`filename`, `version`, global `variables`)  
+- Applies naming constraints defined in contracts
 
 .. autoclass:: importspy.validators.module_validator.ModuleValidator
    :members:
@@ -106,10 +105,9 @@ Validates **module metadata** such as:
 SystemValidator 🖥️
 ^^^^^^^^^^^^^^^^^^^
 
-Validates system-specific constraints:
-
-- Supported OS (Linux, Windows, macOS)  
-- Environment variables  
+- Verifies OS name and version compatibility  
+- Enforces required `env` variables (e.g., `API_KEY`, `DEPLOY_REGION`)  
+- Useful for containerized and multi-host setups
 
 .. autoclass:: importspy.validators.system_validator.SystemValidator
    :members:
@@ -119,10 +117,9 @@ Validates system-specific constraints:
 PythonValidator 🐍
 ^^^^^^^^^^^^^^^^^^
 
-Validates Python interpreter constraints:
-
-- Required version (e.g., 3.10+)  
-- Python implementation (e.g., CPython, PyPy)
+- Checks that the interpreter matches contract constraints  
+- Supports semantic Python version matching  
+- Verifies implementation type (`CPython`, `PyPy`, `IronPython`)
 
 .. autoclass:: importspy.validators.python_validator.PythonValidator
    :members:
@@ -132,12 +129,26 @@ Validates Python interpreter constraints:
 RuntimeValidator 🚀
 ^^^^^^^^^^^^^^^^^^^^
 
-Validates hardware-level constraints:
-
-- Supported CPU architectures (e.g., x86_64, ARM64)  
-- Interpreter/platform-specific settings
+- Validates CPU architecture (`x86_64`, `ARM64`, etc.)  
+- Filters deployments that must only run on specific hardware targets  
+- Useful for embedded devices, edge computing, and platform-specific plugins
 
 .. autoclass:: importspy.validators.runtime_validator.RuntimeValidator
    :members:
    :undoc-members:
    :show-inheritance:
+
+Extending the Engine 🧩
+-----------------------
+
+Want to add your own validator?
+
+- Subclass any validator listed here  
+- Implement the `.validate()` interface  
+- Register it manually via `SpyModelValidator` or contract-driven hooks
+
+This makes ImportSpy ideal for **internal compliance layers**, **custom rule sets**, or **secure enterprise environments**.
+
+See also:
+
+- :doc:`api_models` for understanding SpyModel structure  

@@ -1,49 +1,62 @@
 External Mode
 =============
 
-Overview
---------
+External mode allows you to use ImportSpy as a **standalone validator**, without embedding any logic in the module being validated.
 
-In **external mode**, ImportSpy acts as a **standalone validator**, allowing you to  
-check the integrity and correctness of a Python module **from the outside**,  
-without embedding any validation logic within the module itself.
+It’s ideal for teams who want to enforce structure and runtime compliance from the outside —  
+during **CI checks**, **code review gates**, or **manual inspections** of dynamic modules, plugins, or extensions.
 
-The core idea is to use a YAML-based file (called an **import contract**)  
-to describe the structural and runtime expectations for a target module,  
-and then validate it **before executing** any business logic.
+What Is External Validation?
+----------------------------
 
-This mode is ideal for:
+In this mode, ImportSpy runs from the command line and:
 
-- Plugin or extension validation
-- Pre-deployment checks in CI/CD pipelines
-- Security auditing of third-party modules
-- Runtime enforcement for framework-based architectures
+- Loads the target module dynamically  
+- Parses a separate **YAML import contract**  
+- Validates the module’s **structure**, **metadata**, and **runtime compatibility**  
+- Blocks execution if any contract rule is violated
 
-How It Works
-------------
+It’s perfect for use cases where **you don’t own the module**, or want to **validate before running anything at all**.
 
-1. Define the **import contract** (`spymodel.yml`) for the module you want to validate.
-2. Run the ImportSpy CLI tool with the path to the module and contract.
-3. ImportSpy loads the module, extracts its metadata, and compares it against the contract.
-4. If validation fails, execution is blocked and detailed errors are shown.
+Typical Use Cases
+------------------
 
-Usage Example
+- ✅ Pre-deployment contract checks in CI/CD pipelines  
+- ✅ Validating plugins before registering them in a host application  
+- ✅ Enforcing runtime assumptions for sandboxed or remote code  
+- ✅ Auditing third-party extensions for structural and environmental compliance
+
+How to Use It
 -------------
 
-To validate a Python module using an external contract:
+1. Write your import contract (usually `spymodel.yml`):
+
+.. code-block:: yaml
+
+   filename: extension.py
+   classes:
+     - name: Extension
+       methods:
+         - name: run
+           arguments:
+             - name: self
+
+2. Run the validation using the ImportSpy CLI:
 
 .. code-block:: bash
 
-    importspy -s spymodel.yml -l DEBUG extension.py
+   importspy -s spymodel.yml -l DEBUG extension.py
 
-This command:
+This will:
 
-- Uses `spymodel.yml` as the import contract.
-- Runs the validation with `DEBUG` log verbosity.
-- Validates the module `extension.py`.
+- Load `extension.py`  
+- Parse `spymodel.yml`  
+- Validate all structure, types, env vars, OS, interpreter, and Python version  
+- Print any errors or mismatches to the terminal  
+- Exit with an error if validation fails
 
-CLI Reference
--------------
+Full CLI Reference
+-------------------
 
 .. code-block:: text
 
@@ -52,42 +65,55 @@ CLI Reference
     CLI command to validate a Python module against a YAML-defined import contract.
 
     Arguments:
-      modulepath            Path to the Python module to load and validate.
+      modulepath              Path to the Python module to load and validate.
 
     Options:
-      --version, -v               Show the version and exit.
+      --version, -v               Show ImportSpy version and exit.
       --spymodel, -s TEXT         Path to the import contract file (.yml). [default: spymodel.yml]
       --log-level, -l [DEBUG|INFO|WARNING|ERROR]
                                   Log level for output verbosity.
-      --install-completion        Install shell completion.
-      --show-completion           Show shell completion snippet.
+      --install-completion        Install completion for the current shell.
+      --show-completion           Output shell snippet for autocompletion.
       --help                      Show this message and exit.
 
-Execution Flow
---------------
+How External Validation Works 🔍
+--------------------------------
 
-The external validation process involves:
+Here’s what happens under the hood:
 
-1. **Parsing the import contract** (YAML → SpyModel)
-2. **Loading the target module dynamically**
-3. **Extracting its structure, classes, functions, variables**
-4. **Reading runtime info (OS, Python version, interpreter, etc.)**
-5. **Validating the actual metadata against contract rules**
-6. **Raising an exception if violations are found**
+1. 📥 **Contract is loaded** → Parsed from YAML into an internal `SpyModel`  
+2. 🧠 **Module is dynamically loaded** → No execution is triggered, just inspection  
+3. 🏗️ **Structure is reconstructed** → Classes, methods, attributes, annotations, etc.  
+4. 🌐 **Runtime context is gathered** → OS, architecture, interpreter, Python version, env vars  
+5. ⚖️ **Contract is evaluated** → Actual vs expected values are compared deeply  
+6. ❌ **Violations are raised** → A detailed `ValueError` is thrown with full diagnostics
 
-This guarantees that the module complies with strict runtime and structural expectations.
+All of this happens **before any code is executed**, ensuring a safe, validated runtime context.
 
-Best Practices
---------------
+Best Practices 🧪
+-----------------
 
-- Keep import contracts under version control
-- Validate before execution, not after
-- Use in automated CI pipelines or manual audits
-- Structure contracts clearly using :doc:`contract_structure`
+- Keep `.yml` contracts **under version control**  
+- Integrate into **CI/CD** to block broken modules from reaching production  
+- Use `--log-level DEBUG` to get full trace information when testing  
+- Validate all external plugins **before dynamic loading**  
+- Combine with :doc:`contract_structure` for clean, declarative specs
+
+Comparison to Embedded Mode
+----------------------------
+
+External mode:
+
+- ✅ Validates modules **without modifying them**  
+- ✅ Decouples validation logic from business logic  
+- ✅ Ideal for **automated pipelines** and **security reviews**
+
+If you want the **imported module to enforce rules about its importer**,  
+see :doc:`embedded_mode`.
 
 Related Topics
 --------------
 
-- :doc:`contract_structure` – Detailed YAML schema and contract rules
-- :doc:`spy_execution_flow` – Full validation lifecycle explanation
-- :doc:`embedded_mode` – For modules that validate their importers from within
+- :doc:`contract_structure` – Full breakdown of contract syntax and nesting  
+- :doc:`spy_execution_flow` – Internals of validation lifecycle  
+- :doc:`embedded_mode` – For runtime protection from inside the validated module

@@ -1,34 +1,43 @@
-Advanced Topics and Internal Architecture
-=========================================
+Advanced Topics & Internals of ImportSpy
+========================================
 
-ImportSpy is built upon a **robust and extensible architecture** that balances flexibility,  
-runtime performance, and deep structural validation. This section is tailored for **advanced developers,  
-contributors, and integrators** seeking to explore the inner workings of ImportSpy, extend its behavior,  
-or adopt it within custom runtime frameworks and validation layers.
+Welcome to the advanced section of ImportSpy’s documentation — built for developers, integrators, and contributors who want to **go beyond usage** and dive into **how ImportSpy works under the hood**.
 
-🔬 Unlocking the Full Power of ImportSpy
-----------------------------------------
+Whether you're building runtime enforcement pipelines, customizing structural validators, or embedding ImportSpy into multi-tenant plugin architectures, this section provides the **deep technical foundation** to unlock ImportSpy's full capabilities.
 
-To fully leverage ImportSpy in advanced scenarios—such as **plugin orchestration, dynamic runtime validation,  
-cross-environment compatibility enforcement, or CI/CD rule injection**—it’s essential to understand:
+🧠 Who This Is For
+-------------------
 
-🧱 **Architecture Deep-Dive**  
-   - Explore the core execution pipeline, including how ImportSpy performs **environment introspection**,  
-     dynamically builds the execution model, and enforces import contracts in both **embedded** and **external** modes.
+- Engineers building **custom validation flows**
+- Contributors exploring the **internal mechanics** of ImportSpy
+- Teams integrating ImportSpy into **CI/CD, containers, and plugin frameworks**
+- Architects enforcing **organization-wide import policies**
 
-🛠️ **Extending ImportSpy**  
-   - Learn how to plug in custom validators, intercept runtime decisions, or inject organization-specific rules  
-     through ImportSpy's **modular validator system**.
+🔍 What You’ll Explore
+-----------------------
+
+This section is structured into two complementary areas:
+
+🏗️ **Architectural Internals**  
+   - A deep technical exploration of ImportSpy’s runtime model, validation stack, and modular design.  
+   - Learn how ImportSpy inspects environments, builds validation contexts, and enforces contracts in both embedded and CLI modes.
+
+🛠️ **Extension & Integration Points**  
+   - Discover how to write custom validators, extend `SpyModel`, inject runtime policies, or build tooling on top of ImportSpy’s API.  
+   - Ideal for integrating with internal frameworks, policy engines, or advanced CI/CD pipelines.
 
 📚 **API Reference**  
-   - A comprehensive, fully documented overview of all **core classes**, **validators**, and **internal models**  
-     (like `SpyModel`, `Function`, `Attribute`, etc.), useful for building custom compliance layers or tooling.
+   - Browse a fully documented catalog of internal components:
+     - `SpyModel`, `Function`, `Attribute`, `Deployment`, `Validator`, etc.
+   - Includes type annotations, usage patterns, and extension strategies.
 
-Each section offers **practical guidance, annotated examples**, and **advanced customization techniques**  
-for integrating ImportSpy into sophisticated development workflows.
+This section balances **low-level documentation** with **real-world extensibility guidance**.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Explore the Internals
 
    architecture_index
    api_reference_index
+
+🚀 Whether you're enforcing security boundaries or writing custom validators, this section is your blueprint for building with — and on top of — ImportSpy.

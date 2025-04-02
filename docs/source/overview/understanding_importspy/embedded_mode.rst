@@ -1,111 +1,127 @@
 Embedded Mode
 =============
 
-In **embedded mode**, ImportSpy is executed *inside* the protected module itself.
+Embedded mode allows a Python module to **protect itself** at runtime.
 
-This means that a module embeds its own import contract and executes ImportSpy to validate the environment from which it is being imported. This model is particularly effective for **plugin systems**, **extensions**, and **cross-runtime libraries**, where you want to ensure that your module is used *only* in compliant environments.
+Unlike external validation, where checks are triggered from outside, embedded mode runs ImportSpy **from within the module**,  
+verifying whether the environment that imported it complies with a declared contract.
 
-Overview
---------
+It’s a powerful mechanism to ensure that **your module only runs in safe, predictable, and validated contexts**.
 
-- The contract is stored in a YAML file (import contract).
-- The protected module executes the validation at the top of its file.
-- If the importing context does not meet the requirements, execution is halted.
+What Is Embedded Validation?
+-----------------------------
 
-Execution Flow
+In embedded mode, the validated module:
+
+- ✅ Includes ImportSpy directly in its own code  
+- ✅ Loads a local `.yml` import contract (e.g., `spymodel.yml`)  
+- ✅ Introspects the caller (who is importing it)  
+- ✅ Validates the **importing environment**, not itself  
+- ❌ Refuses to execute if validation fails
+
+This is ideal for:
+
+- Plugins in plugin-based architectures  
+- Shared packages used across teams or platforms  
+- Sensitive modules with **runtime assumptions** (OS, interpreter, env vars)  
+- Security-hardened components
+
+How It Works
+------------
+
+Here’s the execution flow:
+
+1. 🧠 The module runs `Spy().importspy(...)` when imported  
+2. 📁 It parses its import contract (`spymodel.yml`)  
+3. 👀 It introspects the **importing module** (via stack trace)  
+4. 🔍 The importing context is matched against the contract:
+   - OS, CPU, Python version, interpreter  
+   - Required env vars  
+   - Module structure and metadata  
+5. ❌ If validation fails, a `ValueError` is raised and execution is blocked  
+6. ✅ If validation passes, the importing module is returned and can be used programmatically
+
+🔒 This creates a **Zero-Trust contract gate** — your module is only usable when the importing context is compliant.
+
+Example Usage
 --------------
 
-.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
-   :align: center
-   :alt: Embedded Execution Flow
+Inside your protected module (e.g., `package.py`):
 
-The flow consists of the following steps:
+.. code-block:: python
 
-1. The module detects who is importing it via runtime introspection.
-2. It loads the import contract (usually `spymodel.yml`).
-3. It compares the importing environment against the declared contract.
-4. If validation fails, it blocks execution with a detailed error.
+   from importspy import Spy
+   import logging
 
-This is a **Zero-Trust validation mechanism**: if the contract isn't satisfied, nothing runs.
+   caller_module = Spy().importspy(filepath="spymodel.yml", log_level=logging.DEBUG)
 
-Example: Minimal Contract
+   # You now have access to the validated importer
+   caller_module.Foo().get_bar()
+
+Minimal Contract Example
 -------------------------
 
-Here’s an example import contract used in embedded mode:
+Here’s a simplified import contract for embedded validation:
 
 .. code-block:: yaml
 
-    filename: extension.py
-    variables:
-      engine: docker
-      plugin_name: plugin name
-      plugin_description: plugin description
-    classes:
-      - name: Extension
-        attributes:
-          - type: instance
-            name: extension_instance_name
-            value: extension_instance_value
-          - type: class
-            name: extension_name
-            value: extension_value
-        methods:
-          - name: __init__
-            arguments:
-              - name: self
-          - name: add_extension
-            arguments:
-              - name: self
-              - name: msg
-                annotation: str
-            return_annotation: str
-          - name: remove_extension
-            arguments:
-              - name: self
-          - name: http_get_request
-            arguments:
-              - name: self
-        superclasses:
-          - Plugin
-      - name: Foo
-        methods:
-          - name: get_bar
-            arguments:
-              - name: self
-    deployments:
-      - arch: x86_64
-        systems:
-          - os: windows
-            pythons:
-              - version: 3.12.8
-                interpreter: CPython
-                modules:
-                  - filename: extension.py
-                    variables:
-                      author: Luca Atella
-              - version: 3.12.4
-                modules:
-                  - filename: addons.py
-              - interpreter: IronPython
-                modules:
-                  - filename: addons.py
-          - os: linux
-            pythons:
-              - version: 3.12.8
-                interpreter: CPython
-                modules:
-                  - filename: extension.py
-                    variables:
-                      author: Luca Atella
+   filename: extension.py
+   variables:
+     plugin_name: my_plugin
+   classes:
+     - name: Extension
+       methods:
+         - name: run
+           arguments:
+             - name: self
+   deployments:
+     - arch: x86_64
+       systems:
+         - os: linux
+           pythons:
+             - version: 3.12.8
+               interpreter: CPython
 
-Developer Notes
----------------
+This contract says:
 
-- Embedded mode is ideal for reusable plugins, extensions, and modules intended to run in dynamic environments.
-- The validation happens *inside the module*, which means the module actively protects itself.
-- Use `Spy().importspy(filepath="spymodel.yml")` at the beginning of the module to activate the validation.
+- Only modules named `extension.py`  
+- With a class `Extension` containing a `run(self)` method  
+- Are allowed to import this module  
+- Only on Linux + x86_64 + Python 3.12.8 + CPython
 
-Next Steps
-----------
+If even one condition is not satisfied, execution is halted immediately.
 
-🔗 See also: :doc:`external_mode`
+Why Use Embedded Mode?
+-----------------------
+
+- ✅ The module validates **who is importing it**  
+- ✅ Ensures runtime safety without relying on external checks  
+- ✅ Makes plugins and extensions **self-defensive**  
+- ✅ Protects against unverified execution contexts in dynamic systems  
+- ✅ Integrates smoothly into plugin registries or dynamic loaders
+
+Best Practices
+--------------
+
+- Always run embedded validation **at the top** of your module  
+- Version control both the module and its contract together  
+- Use detailed contracts in production, relaxed ones in dev/test  
+- Log validation steps using `log_level=logging.DEBUG` for traceability
+
+Comparison to External Mode
+----------------------------
+
+Use embedded mode when:
+
+- You want **tight control over where your module is used**  
+- You are building a **plugin** or **shared extension**  
+- You need to **validate the importing environment**, not just structure
+
+Use :doc:`external_mode` when you want to validate a module from the outside (e.g., in CI/CD).
+
+Related Topics
+--------------
+
+- :doc:`contract_structure` – Learn how to define rich, nested import contracts  
+- :doc:`spy_execution_flow` – Understand how validation works under the hood  
+- :doc:`external_mode` – External validation for static and pipeline use cases

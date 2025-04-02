@@ -1,145 +1,93 @@
-Managing ImportSpy with Poetry
-==============================
+Using Poetry with ImportSpy
+===========================
 
-**Poetry** is the official dependency management and packaging tool used in ImportSpy.  
-It ensures **dependency consistency, streamlined versioning, and isolated environments**, making development and contribution more efficient.  
+Poetry is the **official packaging and dependency management tool** used in ImportSpy.  
+It ensures reproducibility, streamlines development workflows, and enables better collaboration.  
+This guide will help you understand how to use Poetry within ImportSpy’s ecosystem and learn why it’s essential.
 
-This guide will help you:  
+Why Poetry?
+-----------
 
-- ✅ Set up ImportSpy using Poetry  
-- 🔄 Manage dependencies and update packages  
-- 🚀 Handle versioning and releases  
-- 📝 Understand ImportSpy’s `pyproject.toml` configuration  
-- 👥 Follow best practices for collaboration and contribution  
+Poetry offers a modern alternative to legacy tools like `pip`, `setup.py`, and `requirements.txt`.  
+It provides:
 
-Why ImportSpy Uses Poetry 🛠️
-----------------------------
+- ✅ **Isolated virtual environments** with automatic activation
+- ✅ **Declarative dependency management** via `pyproject.toml`
+- ✅ **Lockfile consistency** with `poetry.lock`
+- ✅ **Integrated build and publishing workflow**
+- ✅ **Support for multiple dependency groups** (dev, docs, ci, etc.)
 
-Traditional package management with `pip` and `requirements.txt` can lead to **dependency conflicts and inconsistencies**.  
-Poetry provides a **modern approach** with:
+Installing Poetry
+-----------------
 
-- ✅ **Reproducible environments** — Locked dependencies with `poetry.lock`  
-- ✅ **Automatic Virtual Environments** — Isolated Python environments  
-- ✅ **Simplified Versioning** — Integrated SemVer version bumping and publishing  
-- ✅ **Grouped Dependencies** — Logical separation of dev/docs/runtime dependencies  
-
-Installing Poetry 💾
---------------------
-
-Install Poetry:
+You can install Poetry with the official script:
 
 .. code-block:: bash
 
    curl -sSL https://install.python-poetry.org | python3 -
 
-Check that it’s working:
+Verify installation:
 
 .. code-block:: bash
 
    poetry --version
 
-Setting Up ImportSpy 📦
------------------------
+Setting Up ImportSpy
+--------------------
 
-1️⃣ **Clone the repo**:
+1. Clone the repository:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   git clone https://github.com/atellaluca/importspy.git
-   cd importspy
+      git clone https://github.com/atellaluca/importspy.git
+      cd importspy
 
-2️⃣ **Install dependencies**:
+2. Install all project dependencies:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   poetry install
+      poetry install
 
-3️⃣ **(Optional) Enter shell manually**:
+3. Activate the virtual environment (optional):
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   poetry shell
+      poetry shell
 
-Use `exit` to leave the environment.
+Dependency Management
+---------------------
 
-Dependency Management 🔄
-------------------------
-
-**Add dependencies**:
+Add dependencies:
 
 .. code-block:: bash
 
-   poetry add requests
+   poetry add pydantic
    poetry add --group dev pytest
 
-**Remove dependencies**:
+Remove dependencies:
 
 .. code-block:: bash
 
-   poetry remove requests
+   poetry remove pydantic
 
-**Update packages**:
-
-.. code-block:: bash
-
-   poetry update
-   poetry update requests
-
-**Important differences**:
-
-- `poetry install` → Uses `poetry.lock`, ensures **exact versions**  
-- `poetry update` → Updates versions **within constraints** from `pyproject.toml`
-
-Team best practice:  
-👉 Always **commit `poetry.lock`** to avoid version drift.
-
-Versioning and Releases 🚀
---------------------------
-
-ImportSpy follows **Semantic Versioning (SemVer)**.
-
-Update version with:
+Update dependencies:
 
 .. code-block:: bash
 
-   poetry version patch|minor|major
-   poetry build
-   poetry publish  # Requires authentication
+   poetry update                # Update all
+   poetry update pydantic      # Update a specific one
 
-Handling Conflicts ⚖️
-----------------------
+Best practice:  
+✅ Always commit `poetry.lock` to your VCS to ensure reproducibility.
 
-Use:
-
-.. code-block:: bash
-
-   poetry show --tree              # See dependency graph
-   poetry lock --no-update         # Rebuild lock without updates
-   poetry add foo@latest           # Force update single package
-
-Exporting for Pip-based Systems 📦
+Understanding the `pyproject.toml`
 ----------------------------------
-
-To share a `requirements.txt`:
-
-.. code-block:: bash
-
-   poetry export -f requirements.txt --output requirements.txt
-
-Then:
-
-.. code-block:: bash
-
-   pip install -r requirements.txt
-
-Understanding `pyproject.toml` 📝
----------------------------------
 
 .. code-block:: toml
 
    [tool.poetry]
    name = "importspy"
-   version = "0.1.12"
+   version = "0.2.0"
    description = "A validation and compliance framework for Python modules."
    authors = ["Luca Atella <atellaluca@outlook.it>"]
 
@@ -151,29 +99,48 @@ Understanding `pyproject.toml` 📝
    pytest = "^8.3.3"
 
    [tool.poetry.group.docs.dependencies]
-   sphinx = ">=5,<9"
+   sphinx = "^7.2"
    furo = "^2024.8.6"
 
-Defining CLI Commands 🖥️
--------------------------
-
-Poetry supports entry points for CLI tools:
-
-.. code-block:: toml
-
    [tool.poetry.scripts]
-   importspy-validate = "importspy.cli:validate"
+   importspy = "importspy.cli:validate"
 
-Usage:
+To run CLI commands defined in the `pyproject.toml`:
 
 .. code-block:: bash
 
-   poetry run importspy-validate
+   poetry run importspy --help
 
-Next Steps 🔍
--------------
+Versioning and Releases
+-----------------------
 
-Now that you understand Poetry’s role in ImportSpy, continue with:
+ImportSpy follows Semantic Versioning (SemVer).  
+You can bump versions like this:
 
-- :doc:`python_reflection` — Learn how ImportSpy uses Python's introspection tools  
-- :doc:`pydantic_in_importspy` — See how validation models power the framework
+.. code-block:: bash
+
+   poetry version patch | minor | major
+
+Build and publish (requires authentication):
+
+.. code-block:: bash
+
+   poetry build
+   poetry publish
+
+Exporting Requirements
+----------------------
+
+If you need a `requirements.txt` (e.g., for Docker or legacy tooling):
+
+.. code-block:: bash
+
+   poetry export -f requirements.txt --output requirements.txt
+
+Next Steps
+----------
+
+Now that you’ve configured Poetry, continue learning about ImportSpy’s internals:
+
+- :doc:`python_reflection`
+- :doc:`pydantic_in_importspy`

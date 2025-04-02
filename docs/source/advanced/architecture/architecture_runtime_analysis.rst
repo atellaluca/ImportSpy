@@ -1,112 +1,125 @@
-Runtime Analysis in ImportSpy
+architecture_runtime_analysis
 =============================
 
-ImportSpy’s runtime analysis engine ensures that a module is imported and executed  
-**only in a compliant, verified environment**. Rather than validating the imported module itself,  
-ImportSpy focuses on validating the **importing context**—the environment that attempts to load the module—  
-against a predefined **import contract** (a SpyModel or external `.yml` contract).
+Understanding Runtime Analysis in ImportSpy
+-------------------------------------------
 
-This is achieved through **runtime reflection**, **environment inspection**,  
-and **structured contract enforcement**, making ImportSpy a critical layer  
-for controlled execution in dynamic Python applications.
+ImportSpy doesn’t guess — it **knows exactly who’s importing your code, from where, and how**.
 
-Why Runtime Analysis Matters 🔬
--------------------------------
+Its runtime analysis engine reconstructs the **real-time execution context** surrounding an import and evaluates whether it complies with the expectations declared in an **Import Contract**.
 
-Unlike static validation tools, runtime analysis operates at the **moment of execution**.  
-This allows ImportSpy to detect and prevent:
+This section explains how ImportSpy leverages Python's introspection system to **enforce validation dynamically**, across both embedded and CLI modes.
 
-- **Inconsistent runtime behavior** due to OS/Python/interpreter mismatches.  
-- **Silent failures** caused by missing environment variables or structural changes.  
-- **Improper module usage** across deployments or by unauthorized code.
+🧠 What Makes ImportSpy Runtime-Aware?
+---------------------------------------
 
-Runtime analysis is essential in:
+At the heart of ImportSpy is a fundamental insight:
 
-- **Plugin architectures** where modules are dynamically discovered and loaded.  
-- **CI/CD pipelines** where execution context differs from local development.  
-- **Containerized or multi-architecture environments** with varied runtimes.
+> A Python module isn’t just *defined* — it’s *executed in context.*
 
-Key Stages of Runtime Validation ⚙️
-------------------------------------
+ImportSpy inspects that context to answer questions like:
 
-ImportSpy performs validation through the following structured steps:
+- Who is importing this code?
+- Is the environment approved (OS, Python version, interpreter)?
+- Are expected environment variables and metadata in place?
+- Does the runtime architecture match the contract?
 
-1️⃣ **Import Interception**  
-   - Hooks into Python’s import stack to **trace the source of the import call**.  
-   - Identifies the **calling module** and its execution environment.  
+Instead of assuming compliance, ImportSpy **validates the reality of execution** — and blocks code that violates it.
 
-2️⃣ **Execution Context Extraction**  
-   - Dynamically retrieves:  
-     - **OS & architecture** (e.g. Linux, x86_64)  
-     - **Python version & interpreter** (e.g. 3.12.4 CPython)  
-     - **Environment variables**  
-     - **System-level runtime characteristics**  
+🧱 Key Layers of Runtime Analysis
+----------------------------------
 
-3️⃣ **Import Contract Enforcement**  
-   - Compares the actual environment against a declared **SpyModel** or YAML-based contract.  
-   - Validates that all declared constraints (e.g., required variables, version compatibility, architecture) are satisfied.  
+Here’s how ImportSpy turns Python’s dynamic nature into a validation pipeline:
 
-4️⃣ **Validation Outcome**  
-   - ✅ If compliant → the import proceeds.  
-   - ❌ If mismatched → ImportSpy raises a `ValueError`, blocking execution.  
+1️⃣ **Call Stack Introspection**  
+   - Uses `inspect.stack()` to trace back to the module attempting the import.
+   - Identifies the **caller module**, not just the callee.
 
-5️⃣ **Structured Logging & Feedback**  
-   - Errors are logged with detailed diagnostics.  
-   - Developers receive **clear messages** indicating **what failed and why**.  
+2️⃣ **Context Extraction**  
+   - Gathers system metadata, including:
+     - OS (Linux, macOS, Windows)
+     - CPU architecture (e.g. `x86_64`, `arm64`)
+     - Python version and interpreter (CPython, PyPy, IronPython)
+     - Environment variables (e.g., `API_KEY`, `STAGE`)
+     - Installed module structure (classes, functions, globals)
 
-Introspection and Reflection in Action 🪞
+3️⃣ **SpyModel Construction**  
+   - Dynamically builds an internal `SpyModel` from the importing context.
+   - Matches structure and environment against the import contract.
+
+4️⃣ **Validation Decision**  
+   - Compares expected constraints from YAML or Python object.
+   - Raises `ValidationError` if mismatches are found — or returns control if all checks pass.
+
+🔍 Core Python Tools Behind the Magic
+--------------------------------------
+
+ImportSpy uses only built-in Python modules — no black magic, just introspection:
+
+- `inspect.stack()` – call stack tracing
+- `inspect.getmodule()` – resolve module context
+- `platform.system()`, `platform.machine()` – OS and architecture
+- `sys.version_info`, `platform.python_implementation()` – Python version and interpreter
+- `os.environ` – environment variable resolution
+- `getmembers()` – dynamic class/function structure extraction
+
+These are the building blocks behind ImportSpy’s runtime truth-checking engine.
+
+⚙️ Embedded vs External Mode: Runtime Differences
+--------------------------------------------------
+
+| Mode            | Validated Context          | Typical Use Case                                  |
+|-----------------|----------------------------|---------------------------------------------------|
+| **Embedded**    | The **importer** of a module | Plugin architectures, sandbox validation           |
+| **External**    | The **module itself**        | CI pipelines, security audits, pre-release checks  |
+
+Both modes rely on the **same runtime model**, but invert the direction of validation.
+
+✅ Embedded Mode Example:
+- `my_plugin.py` calls `import core_module.py`
+- Inside `core_module`, validation ensures `my_plugin` is allowed to import it.
+
+✅ CLI Mode Example:
+- You run `importspy -s contract.yml my_plugin.py`
+- ImportSpy checks if `my_plugin` complies with its declared structure and runtime constraints.
+
+🚀 Why Runtime Analysis Changes the Game
 -----------------------------------------
 
-ImportSpy leverages Python's dynamic inspection tools to extract execution metadata:
+ImportSpy’s runtime model enables features few tools can offer:
 
-🔍 **Stack Inspection**  
-- `inspect.stack()` → Identifies the importing module.  
-- `inspect.getmodule()` → Resolves context for validation.  
+- **Import-time contract enforcement** — with precise control over OS, interpreter, architecture
+- **Real context validation** — no assumptions, just introspection
+- **Full plugin safety** — modules can reject untrusted importers
+- **CI/CD guarantees** — validate module deployment conditions at build time
 
-🔍 **System Identification**  
-- `platform.system()`, `platform.machine()` → Ensures OS and architecture match.  
-- `platform.python_version()`, `sys.version_info` → Validates interpreter compatibility.  
+Python’s flexibility is often seen as a liability — ImportSpy turns it into an *auditable gate*.
 
-🔍 **Environment Configuration**  
-- `os.environ` → Fetches runtime environment variables for validation.  
+⚡ Performance Considerations
+-----------------------------
 
-These techniques allow ImportSpy to **construct a SpyModel representation** of the importing context,  
-which is then validated against the import contract.
+Runtime analysis has a cost — but ImportSpy minimizes it through:
 
-How Runtime Analysis Powers ImportSpy 🚀
-----------------------------------------
+- **Lazy evaluation** — modules are only analyzed when loaded
+- **Context caching** — previously computed SpyModels are reused
+- **Selective enforcement** — system modules are skipped unless explicitly targeted
 
-Runtime analysis is the foundation of ImportSpy’s compliance engine, enabling:
+Validation takes milliseconds, not seconds — even in dynamic plugin workflows.
 
-✅ **Import-time contract validation**  
-✅ **Execution boundary enforcement**  
-✅ **Detection of structural and environmental mismatches**  
-✅ **Cross-environment consistency** across Python versions, OSes, and architectures  
+🔐 Final Takeaway
+------------------
 
-In plugin systems, this means untrusted code cannot load modules unless the execution context is compliant.  
-In pipelines, it ensures deployments are executed in the intended environment.
+ImportSpy’s runtime analysis engine turns **introspection into validation**.
 
-Performance Optimizations ⚡
-----------------------------
+By deeply understanding **who is importing what, from where, and under which conditions**, ImportSpy enforces:
 
-Runtime validation, if not optimized, can slow down import performance.  
-ImportSpy introduces several mechanisms to **minimize runtime overhead**:
+✅ Structural correctness  
+✅ Environmental compliance  
+✅ Runtime safety — across interpreters, containers, and pipelines
 
-- **Lazy Evaluation** → Contract checks only occur when needed.  
-- **Context Caching** → Repeated validations reuse previously computed state.  
-- **Scope Targeting** → Only external imports are evaluated, skipping system/internal code.  
+Whether you’re building a plugin system, securing a package, or hardening your CI,  
+ImportSpy gives you the tools to **intercept, introspect, and enforce — right at import time.**
 
-These features allow ImportSpy to offer **strict enforcement** with **minimal cost**.
-
-Final Considerations 🏆
-------------------------
-
-ImportSpy’s runtime engine is more than a validation tool—it’s a **gatekeeper** for execution boundaries.  
-By dynamically inspecting the importing context and enforcing declared constraints, it ensures:
-
-- ✅ **Compliance across all environments**  
-- ✅ **Predictable, secure execution**  
-- ✅ **Control over where and how your code is run**  
-
-Runtime analysis transforms Python’s flexibility into **enforceable safety guarantees**,  
-making ImportSpy an essential part of **modern, scalable Python ecosystems**.
+Next:
+- :doc:`architecture_validation_engine` → See how the validator pipeline executes
+- :doc:`architecture_design_decisions` → Understand the rationale behind ImportSpy’s runtime-first approach

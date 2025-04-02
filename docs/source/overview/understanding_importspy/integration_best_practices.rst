@@ -1,130 +1,144 @@
-Best Practices for Integrating ImportSpy
-========================================
+Integration Best Practices
+===========================
 
-Effectively integrating ImportSpy into a Python project requires a **structured approach** that promotes clarity, maintainability, and reliable execution across environments. ImportSpy acts as a **validation layer**, and its effectiveness depends on how well **import contracts** (defined as `.yml` files) are designed and managed.
+ImportSpy is most powerful when it’s seamlessly integrated into your development lifecycle.  
+It acts as a **structural firewall** — ensuring that Python modules are only executed in validated environments,  
+with predictable interfaces and runtime guarantees.
 
-A well-written contract should be:
+To get the most out of ImportSpy, it’s essential to follow practices that promote **clarity, maintainability**,  
+and long-term compliance.
 
-- **Readable** – Easy to understand for developers and maintainers.
-- **Scalable** – Adaptable as new environments and dependencies are introduced.
-- **Maintainable** – Structured to minimize duplication and maximize reuse.
+Contract Design Principles
+---------------------------
 
-By applying the following best practices, teams can leverage ImportSpy without adding unnecessary overhead or complexity.
+A good import contract is:
 
-Designing Modular Import Contracts 🧱
--------------------------------------
+- 🧠 **Readable** → Easy to understand by developers and reviewers  
+- 🔁 **Reusable** → Avoids repetition by isolating shared environments  
+- 🔧 **Maintainable** → Easy to update as your system evolves  
+- 🎯 **Targeted** → Matches how your code is actually deployed, not just idealized setups
 
-Avoid creating monolithic `.yml` files that mix unrelated validation logic.  
-Instead, adopt a modular design that reflects the architecture of the system:
+Design your contracts with these goals in mind — and treat them as part of your project’s architecture.
 
-- **Separate deployment scenarios** into distinct `deployments:` blocks.
-- **Define runtime conditions independently** – such as `os`, `architecture`, and `interpreter`.
-- **Avoid repetition** by reusing common configurations where possible.
+Modularize Your Contracts 🧱
+----------------------------
 
-This approach allows you to manage contracts that cover:
+Avoid monolithic `.yml` files with everything mixed together.
 
-- Multiple environments (CI, production, staging).
-- Platform variations (Windows, Linux, ARM, x86_64).
-- Python runtime variations (e.g., CPython, PyPy).
+Instead:
 
-Structuring the Contract Hierarchically 🏗️
--------------------------------------------
+- Create **separate `deployments:` blocks** for each OS, architecture, or runtime  
+- Group constraints based on **real deployment contexts** (e.g., CI, Docker, staging)  
+- Keep **top-level structure global**, and specialize deeper in deployment-specific modules  
+- Use **baseline declarations** to enforce a minimum structure across all environments
 
-Each import contract can express nested constraints:
+This makes your contracts scalable, and keeps them aligned with your actual execution model.
 
-1. **Module metadata** (`filename`, `version`, `variables`).
-2. **Classes**, each with:
-   - `attributes`
-   - `methods`
-   - `superclasses`
-3. **Deployments**, each with:
-   - `arch`
-   - List of `systems`, each having:
-     - `os`
-     - `envs` (environment variables)
-     - List of `pythons`, each specifying:
-       - `version`
-       - `interpreter`
-       - List of nested `modules` (re-validating structure at runtime)
+Match Contracts to Real Environments ⚙️
+----------------------------------------
 
-This structure ensures that validation logic **mirrors the real-world deployment hierarchy**.
+Don't write constraints that don't reflect reality.
 
-Maintaining Runtime Relevance ⚙️
---------------------------------
+- ✅ In production: lock down OS, interpreter, variables, and structure  
+- ⚠️ In development: relax constraints slightly for flexibility  
+- 🧪 In CI: validate structure early, fail fast, and log everything
 
-An import contract must reflect **real, expected runtime conditions**. Don’t hardcode constraints that don't match how your software is actually deployed.
+ImportSpy’s power comes from accuracy — so your contract should describe **how your code really runs**, not how you wish it did.
 
-- In **CI pipelines**, allow flexibility but check for critical dependencies.
-- In **production**, apply strict runtime enforcement (exact interpreter, architecture, env vars).
-- Avoid assumptions about the host system unless explicitly controlled.
+Reduce Duplication 🔁
+----------------------
 
-Keep your contracts versioned and updated alongside the modules they describe.
+Avoid repeating validation rules between modules.
 
-Avoiding Duplication 🔄
-------------------------
+Strategies:
 
-Don’t repeat validation logic across contracts. If multiple modules share the same environment or runtime expectations:
+- Define shared `deployments:` blocks and reuse them across multiple contracts  
+- Use generation tools to inject common blocks  
+- Extract reusable parts (e.g., shared classes or envs) into templated components
 
-- Define shared `deployments:` entries that are reused.
-- Use templating tools or contract generators if necessary.
-- Extract shared constraints into include-able components.
+Keeping contracts DRY improves maintainability and reduces the chance of silent mismatches.
 
-This makes the contracts easier to maintain and minimizes the risk of inconsistencies.
+Structure Contracts Clearly 🏗️
+-------------------------------
 
-Validating External Environments 🌍
-------------------------------------
+A recommended hierarchy:
 
-ImportSpy is ideal for validating that modules are not imported in environments that lack:
+1. `filename`, `version`, and top-level `variables`  
+2. `functions` (optional, with argument specs)  
+3. `classes`, with:
+   - `attributes` (instance/class, with optional types and values)  
+   - `methods`, defined like functions  
+   - `superclasses`  
+4. `deployments`, each with:
+   - `arch`, `os`, and optional `envs`  
+   - `pythons`, with version/interpreter/modules  
+   - `modules`, repeating structure at the environment level if needed
 
-- Required OS and architecture.
-- Critical `envs` (e.g., `DATABASE_URL`, `PLATFORM_KEY`).
-- Specific Python versions or interpreter types.
+This structure allows deep validation of runtime-specific behavior.
 
-**Declare these explicitly** in the `deployments:` section. This ensures consistent behavior in:
+Validate Where It Matters 🌍
+----------------------------
 
-- Local development environments.
-- Docker containers.
-- Cloud-based runtimes.
-- Virtual environments or remote builds.
+ImportSpy is perfect for verifying:
 
-Enforcing Consistency Through CI/CD 🧪
---------------------------------------
+- Plugins or dynamic modules running in cloud or hybrid environments  
+- Modules that depend on env-specific config (e.g., secrets, endpoints)  
+- Microservices where drift between containers or hosts can break integrations
 
-Integrate ImportSpy checks early in your testing pipeline:
+Explicitly declare:
 
-- Run ImportSpy as a **validation step before tests**, using the CLI:
+- OS and architecture  
+- Required environment variables  
+- Supported Python versions and interpreters
 
-  .. code-block:: bash
+Consistency across environments starts with precise expectations.
 
-     importspy -s spymodel.yml -l DEBUG mymodule.py
+Embed ImportSpy in Your Pipeline 🧪
+-----------------------------------
 
-- Fail fast if contract validation fails.
-- Log mismatches and mismatched environments explicitly.
-- Combine with other linting, testing, and build tools.
+Use the CLI tool during CI builds and before deployments:
 
-This ensures that structural issues are caught **before deployment**.
+.. code-block:: bash
 
-Matching ImportSpy to Team Workflows 👥
----------------------------------------
+   importspy -s spymodel.yml -l DEBUG path/to/module.py
 
-Choose how to handle contract violations depending on your risk profile:
+Fail the build if the contract isn't satisfied.  
+This catches integration issues **before** they reach staging or production.
 
-- **Strict mode**: Block execution entirely if violations occur (default behavior).
-- **Debug mode**: Use `--log-level DEBUG` to trace execution without stopping.
-- **Warning-only mode**: (Coming soon) Log issues without raising exceptions.
+Consider combining ImportSpy with:
 
-Teams should treat ImportSpy as part of their **software quality gate**, customizing its usage across development, staging, and production environments.
+- Linting (e.g., `ruff`, `flake8`)  
+- Typing (e.g., `mypy`)  
+- Unit and integration tests  
+- Security scanners
 
-Final Thoughts 🔚
-------------------
+ImportSpy adds **structural guarantees** on top of these tools.
 
-ImportSpy is not a replacement for tests or linters — it is a **complementary layer** that ensures modules are **only executed in environments where they’re guaranteed to behave as expected**.
+Choose Enforcement Mode Strategically 👥
+----------------------------------------
 
-To get the most out of ImportSpy:
+ImportSpy supports strict and soft enforcement:
 
-- Keep your import contracts clean, hierarchical, and runtime-aware.
-- Integrate validation checks into CI/CD pipelines.
-- Use strict enforcement for high-assurance deployments.
-- Update contracts alongside your codebase.
+- **Strict Mode** → Violations raise `ValueError`. Use in CI and production.  
+- **Debug Logging** → Add `--log-level DEBUG` to trace without halting execution.  
+- **Soft Mode** (planned) → Logs validation failures as warnings. Ideal for onboarding or dry runs.
 
-By following these best practices, ImportSpy becomes a **predictability enabler** in modern Python software — enforcing not just what your code does, but **where and how it can run safely**.
+Adapt validation levels to your team's tolerance for risk and your deployment maturity.
+
+Final Advice 🎯
+---------------
+
+ImportSpy is not a replacement for testing — it complements it.
+
+It ensures your modules are used **only where and how they’re meant to be**,  
+preventing drift, mismatches, and unexpected runtime behavior.
+
+To integrate ImportSpy effectively:
+
+- 📁 Keep contracts clean and modular  
+- 🔄 Update them alongside the code they protect  
+- ⚙️ Match them to real-world runtimes  
+- 🚦 Automate validation in CI/CD  
+- 🔐 Use strict enforcement in trusted production pipelines
+
+ImportSpy helps you build **modular, secure, and future-proof Python systems** — one contract at a time.

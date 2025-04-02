@@ -1,94 +1,115 @@
 Spy Execution Flow
-==================
+===================
 
-ImportSpy operates as an **execution validation layer**, ensuring that the environment in which a Python module is imported  
-complies with the structural and runtime constraints defined in its associated **import contract**.  
+At the heart of ImportSpy lies a powerful validation engine that activates the moment an import occurs.
 
-Rather than inspecting the imported module directly, ImportSpy validates whether **the importing environment**  
-satisfies the expected execution conditions, as specified by the module author.
+Whether you're using **embedded mode** or **CLI validation**, ImportSpy reconstructs a full picture of the runtime environment, compares it to your declared import contract, and enforces compliance **before execution begins**.
 
-.. note::
+This page explains, step by step, how ImportSpy processes a validation request — from **introspection to enforcement**.
 
-   ImportSpy supports two execution modes:
-   
-   - :doc:`Embedded Mode <embedded_mode>`: validation is embedded inside the protected module.
-   - :doc:`External Mode <external_mode>`: validation is invoked externally (e.g., via CLI or CI pipeline).
+Overview
+--------
 
-This architecture enables strict enforcement of execution guarantees in both local and distributed systems.
+ImportSpy enforces a simple but strict rule:
 
-Execution Phases
-----------------
+> ❌ If the importing environment does not match the contract, the module is blocked.  
+> ✅ If the environment is compliant, execution proceeds normally.
 
-The import validation process follows a structured sequence of dynamic runtime operations:
+This model brings **predictability and control** to Python's otherwise dynamic import system.
 
-1. **Identifying the Importing Module**
+Execution Modes Supported
+--------------------------
 
-   ImportSpy uses stack introspection to detect which module is attempting to import a protected module.  
-   This allows it to establish a *validation boundary* and enforce constraints **at the exact point of interaction**.
+ImportSpy works in two execution modes:
 
-2. **Extracting Execution Context**
+- :doc:`Embedded Mode <embedded_mode>` → The validated module runs `importspy()` internally to inspect its importer  
+- :doc:`External Mode <external_mode>` → Validation is triggered via CLI, often in CI/CD or static validation steps
 
-   Once the importing module is identified, ImportSpy dynamically reconstructs a runtime snapshot, including:
+Execution Pipeline
+------------------
 
-   - Operating system and CPU architecture  
-   - Python version and interpreter  
-   - Available environment variables  
-   - Installed modules and dependencies  
+Here’s how ImportSpy validates imports, broken down into phases:
 
-   This snapshot is converted into a `SpyModel` object that represents the current state of the importing environment.
+1. Detect the Importer
+~~~~~~~~~~~~~~~~~~~~~~
 
-3. **Parsing the Import Contract**
+ImportSpy uses **stack introspection** to determine which module is importing the validated one.  
+This lets it establish a **validation boundary**, isolating the exact caller and its context.
 
-   The protected module defines a set of expected conditions in an external YAML file, known as an **import contract**.  
-   ImportSpy parses this contract to produce a target `SpyModel`, defining the **required runtime configuration**.
+2. Capture Runtime Context
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-4. **Validation Checkpoint**
+Once the importer is found, ImportSpy collects runtime data:
 
-   The dynamically generated `SpyModel` (actual environment) is compared with the parsed import contract (expected environment).  
-   The validation includes:
+- Current OS and CPU architecture  
+- Python version and interpreter type  
+- Available environment variables  
+- Installed Python modules and paths
 
-   - Matching architecture, OS, interpreter, and Python version  
-   - Checking declared environment variables  
-   - Ensuring structural alignment of attributes, functions, and classes  
-   - Verifying declared modules and submodules  
-   - Matching custom variable names and values
+This snapshot is encoded into an internal `SpyModel` object, representing the actual runtime conditions.
 
-5. **Enforcement**
+3. Parse the Contract
+~~~~~~~~~~~~~~~~~~~~~
 
-   If discrepancies are found, ImportSpy:
+Next, ImportSpy loads and parses the YAML-based import contract (typically `spymodel.yml`).
 
-   - Blocks execution immediately  
-   - Raises a `ValueError` with detailed diagnostics  
-   - Prevents unsafe or non-compliant usage
+This creates a second `SpyModel` representing the **expected structure and execution environment**.
 
-   If validation passes, execution proceeds securely and predictably.
+4. Compare & Validate
+~~~~~~~~~~~~~~~~~~~~~
 
-6. **Runtime Optimization**
+ImportSpy performs a deep comparison between the **actual SpyModel** and the **expected SpyModel**.
 
-   For performance, ImportSpy uses **runtime caching** of validated environments, avoiding redundant checks in long-running processes.
+Validation includes:
 
-Security Guarantees
+- Matching CPU architecture and operating system  
+- Checking Python version and interpreter type  
+- Verifying required environment variables  
+- Matching declared functions, classes, methods, and attributes  
+- Validating module variables and custom metadata  
+- Checking nested modules and deployment-specific rules
+
+5. Enforce or Reject
+~~~~~~~~~~~~~~~~~~~~~
+
+- If the validation **fails**:  
+  - ImportSpy raises a `ValueError`  
+  - Detailed diagnostics are included in the exception  
+  - Execution is halted immediately
+
+- If the validation **passes**:  
+  - The validated importer is returned (in embedded mode)  
+  - Execution proceeds safely
+
+6. Optimize for Runtime
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+To avoid repeated validation during long-running processes or multi-import scenarios, ImportSpy uses **caching** to store validated environments.
+
+This provides fast re-entry for already-validated modules without compromising security.
+
+Security Philosophy
 -------------------
 
-ImportSpy follows a **Zero-Trust approach**:
+ImportSpy follows a **fail-fast and zero-trust model**:
 
-- No execution is allowed unless the import contract is fully respected.
-- The contract acts as a **pre-execution firewall**, blocking misconfigured or malicious import attempts.
-- This protects against accidental misuse, API drift, and environment inconsistencies.
+- 🚫 No module runs unless it satisfies all declared constraints  
+- ✅ All failures are explicit and traceable  
+- 🔐 This prevents silent regressions, broken interfaces, and unpredictable imports
 
-Contract Enforcement Is Not Optional
-------------------------------------
+There is **no fallback behavior** — if a violation is detected, it is blocked **by design**.
 
-ImportSpy does not offer a fallback or "best-effort" mode.  
-Any violation of the import contract results in **enforced termination** of the importing process.
+Best Practices
+--------------
 
-By enforcing constraints before code execution begins, ImportSpy guarantees:
+- Use :doc:`embedded_mode` to validate who is importing your module  
+- Use :doc:`external_mode` to validate a module before deployment  
+- Always define structural + runtime constraints in your contract for full coverage
 
-- High-integrity imports  
-- Traceable and explainable runtime behavior  
-- Fail-fast debugging with actionable logs
+Related Topics
+--------------
 
-.. important::
-
-   Use :doc:`Embedded Mode <embedded_mode>` for internal validation logic  
-   or :doc:`External Mode <external_mode>` for decoupled validation pipelines.
+- :doc:`defining_import_contracts`  
+- :doc:`contract_structure`  
+- :doc:`error_handling`  
+- :doc:`validation_and_compliance`

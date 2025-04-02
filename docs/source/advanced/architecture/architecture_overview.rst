@@ -1,109 +1,114 @@
-ImportSpy Architecture
-======================
+Architecture Overview
+=====================
 
-ImportSpy is a **runtime validation framework** that enforces **execution constraints** on the environment where a module is imported.  
-Unlike traditional validation systems, ImportSpy allows a **module to define an import contract** that explicitly declares the  
-conditions required by any importing environment—blocking non-compliant usage at runtime.
+ImportSpy is a structural validation engine for Python that operates across two distinct execution models: **embedded mode** and **external (CLI) mode**.  
+Its architecture is designed to adapt seamlessly to both, providing a **runtime validation system** that enforces **import contracts**—declarative YAML specifications defining how and where a module is allowed to run.
 
-This section provides a **comprehensive introduction** to ImportSpy’s architecture, exploring its **core components**,  
-**execution model**, and the mechanisms it uses to guarantee **safe, predictable, and secure imports**.
+This section introduces the architectural layers, flows, and principles behind ImportSpy’s execution model.
 
-Architectural Philosophy & Objectives 📌
-----------------------------------------
+Architectural Objectives
+------------------------
 
-ImportSpy’s design is driven by four fundamental principles:
+ImportSpy is built upon four core pillars:
 
-1. **Environment-Centric Validation**  
-   Validation targets the **importing environment**, not the imported module itself.
+1. **Contract-Driven Validation**  
+   Modules define import contracts that describe the expected runtime and structural context.
 
-2. **Dynamic Runtime Enforcement**  
-   All checks occur **at runtime**, leveraging Python’s introspection capabilities.
+2. **Zero-Trust Execution Model**  
+   Code is never executed unless the importing or imported module complies with declared constraints.
 
-3. **Zero-Trust Security Model**  
-   If the environment does not meet contract conditions, execution is **blocked** by default.
+3. **Dynamic Runtime Enforcement**  
+   System context is reconstructed at runtime using reflection and introspection.
 
-4. **Declarative Import Contracts**  
-   Modules can define YAML-based import contracts that **codify their expectations**.
+4. **Composable Validation Layers**  
+   Validation is performed in discrete phases (structure, environment, runtime, interpreter), making the architecture modular and extensible.
 
-This architectural approach allows ImportSpy to protect sensitive modules from being used in unintended contexts  
-—ensuring that execution is **predictable, compliant, and reproducible**.
+Supported Execution Modes
+--------------------------
 
-Architectural Layers Overview 📊
---------------------------------
+ImportSpy is dual-mode by design:
 
-ImportSpy is structured into several layers, each with a distinct responsibility:
+🔹 **Embedded Mode** (for modules that protect themselves)
 
-- 🏗️ **Context Extraction Layer**  
-  Gathers system details: OS, architecture, environment variables, interpreter, Python version, etc.
+- Validation is triggered **inside** the protected module.
+- The module inspects **who is importing it** and verifies the caller’s structure and runtime context.
+- Typical use case: plugins that must ensure their importing host complies with an expected contract.
 
-- ⚡ **Import Interception Layer**  
-  Hooks into Python’s import system and determines **who is importing the protected module**.
+🔹 **External Mode** (for CI/CD or static compliance pipelines)
 
-- 🔍 **Runtime Analysis & SpyModel Construction**  
-  Dynamically builds a `SpyModel` from the importing module's context to compare against declared expectations.
+- Validation is triggered via CLI before execution.
+- The target module is validated **from the outside**, ensuring it conforms to its declared contract.
+- Typical use case: pipeline validation of Python modules before deployment.
 
-- 🛡️ **Validator Pipeline**  
-  A modular stack of validators that **checks system, runtime, environment, and structural integrity**.
+Both modes share the same validation engine and contract semantics but differ in the **direction** of the inspection (who validates whom).
 
-- ❌ **Enforcement Layer**  
-  Raises errors and halts execution if **any constraint fails**—in accordance with the contract.
+Architectural Layers
+--------------------
 
-- ✅ **Pass-through Layer**  
-  If validation succeeds, the import is allowed to proceed **transparently**.
+The architecture of ImportSpy can be decomposed into the following logical layers:
 
-Visual Overview
-^^^^^^^^^^^^^^^
+🏗️ **Context Reconstruction Layer**  
+   - Gathers system information from the current runtime.
+   - Captures OS, Python version, architecture, interpreter, and environment variables.
 
-.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/importspy-embedded-mode.png
+🔁 **SpyModel Builder**  
+   - Builds a structured representation of the runtime or module to validate.
+   - Converts contracts and runtime state into Pydantic models.
+
+📦 **Import Contract Loader**  
+   - Parses the YAML `.yml` contract into a typed validation model.
+   - Supports nested structures, deployment variations, and type annotations.
+
+🔍 **Validation Pipeline**  
+   - Compares the reconstructed runtime or module state against the contract.
+   - Handles structure (functions, classes), environment (variables), and system (interpreter, OS, arch).
+
+🔐 **Enforcement & Error Handling**  
+   - Raises structured exceptions on failure (with detailed error classification).
+   - Blocks execution in embedded mode; returns exit codes in CLI mode.
+
+Execution Flow
+--------------
+
+📌 Embedded Mode:
+
+1. Module executes `Spy().importspy(...)` at the top of its source.
+2. The call stack is inspected to identify the **caller module**.
+3. A `SpyModel` of the caller is reconstructed.
+4. The module’s own contract is loaded.
+5. If the caller matches the contract, execution continues.
+6. If not, a `ValidationError` is raised and execution is blocked.
+
+📌 External Mode:
+
+1. CLI is invoked with `importspy -s contract.yml my_module.py`.
+2. `my_module.py` is dynamically loaded and introspected.
+3. Its structure is extracted: classes, functions, attributes, variables.
+4. The YAML contract is parsed into a validation model.
+5. Structural and runtime validation is performed.
+6. Success → status code 0. Failure → detailed error message and exit code 1.
+
+Illustration:
+
+.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/main/assets/importspy-architecture.png
    :align: center
-   :alt: ImportSpy Architecture Diagram
+   :alt: ImportSpy Architecture Overview
 
-How Runtime Enforcement Works 🧠
-------------------------------------
+Why This Architecture Matters
+-----------------------------
 
-ImportSpy performs the following steps when a module protected by an import contract is imported:
+This architecture provides:
 
-1. **Intercept Import Call**  
-   ImportSpy inspects the call stack and identifies the **importing module**.
+- ✅ Full control over **execution guarantees** of Python modules
+- ✅ Runtime enforcement of **environmental and structural policies**
+- ✅ Dual-mode support for **plugin protection and CI/CD validation**
+- ✅ A uniform validation model across **local, container, and distributed runtimes**
 
-2. **Extract Execution Context**  
-   It collects OS, interpreter type, Python version, environment variables, and installed modules.
+What’s Next?
+------------
 
-3. **Build Runtime SpyModel**  
-   A `SpyModel` object is generated based on the execution context of the **importing code**.
+Continue with:
 
-4. **Compare Against Contract**  
-   The runtime model is compared with the declared contract (defined via YAML or Python object).
-
-5. **Enforce Rules**  
-   - If compliant → import proceeds normally.  
-   - If non-compliant → a `ValueError` is raised, and execution halts immediately.
-
-Strict Validation Flow 🧱
--------------------------
-
-ImportSpy’s runtime architecture is designed to support:
-
-- **Cross-platform compatibility enforcement**  
-- **Zero-tolerance validation policies for high-security environments**  
-- **Dynamic enforcement across CI/CD, container runtimes, or plugin architectures**
-
-This guarantees **structural consistency and environmental compatibility** without modifying existing application logic.
-
-Why This Architecture Matters 🚀
-------------------------------------
-
-ImportSpy’s layered architecture is critical for enforcing:
-
-- ✅ **Predictable execution** across multiple systems and runtime configurations  
-- 🔐 **Security boundaries** between sensitive code and unverified third-party dependencies  
-- 📦 **Contract-driven integration** for plugins, extensions, and modular frameworks  
-- 🔄 **CI/CD compliance enforcement**, ensuring environment correctness at every pipeline stage  
-
-Next Steps 🔬
--------------
-
-Explore ImportSpy's internals in more detail:
-
-- :doc:`architecture_runtime_analysis` → Deep dive into the context extraction layer.  
-- :doc:`architecture_design_decisions` → Understand the motivations behind the architectural choices.  
+- :doc:`architecture_runtime_analysis` → How ImportSpy reconstructs runtime environments  
+- :doc:`architecture_validation_engine` → The core validation logic and error system  
+- :doc:`architecture_design_decisions` → Design trade-offs, limitations, and rationale

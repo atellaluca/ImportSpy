@@ -1,125 +1,153 @@
 Error Handling in ImportSpy
-===========================
+============================
 
-Validation failures are inevitable in any dynamic Python environment.  
-What makes ImportSpy stand out is its structured, transparent, and developer-friendly approach  
-to **reporting and managing validation errors**, ensuring they become actionable steps toward stability—not obstacles.
+Validation errors are not failures — they are **enforced expectations**.
 
-ImportSpy does not merely detect errors. It classifies, documents, and reports them with precision,  
-enabling fast resolution and long-term system compliance.
+ImportSpy treats every contract violation as a **signal**, not just a disruption.  
+Its error system is designed to be **precise, informative, and traceable**,  
+helping developers identify and resolve problems early, consistently, and with confidence.
 
-Structured Validation Feedback
-------------------------------
+Why Structured Errors Matter
+----------------------------
 
-ImportSpy provides highly structured error messages that include:
+In complex Python systems, especially those using plugins, microservices, or dynamic loading,  
+errors can be vague and hard to reproduce.
 
-- **Error category** (e.g., structural, runtime, environmental)
-- **Human-readable messages** with contextual information
-- **Pre-formatted placeholders** to include names, values, or contracts involved
-- **Hints on resolution**, based on best practices and expected module behavior
+ImportSpy solves this by generating:
 
-This makes every error **not just informative**, but also **diagnostic**, helping teams trace  
-misalignments, inconsistencies, or violations quickly and accurately.
+- 🧠 **Human-readable messages** with contextual hints  
+- 🧩 **Categorized errors**, sorted by validation layer  
+- 🛠️ **Diagnostic templates** that identify the cause and expected structure  
+- 🔎 **Traceable exceptions**, usable in CLI, IDE, or CI pipelines
+
+Whether you’re debugging a failing import or enforcing a strict policy in production,  
+ImportSpy makes validation feedback **clear, consistent, and useful**.
 
 Error Categories
-----------------
+-----------------
 
-ImportSpy classifies validation failures into clear categories:
+ImportSpy groups errors into well-defined categories to simplify resolution:
 
-**Missing Elements**
-  Raised when required modules, classes, functions, or attributes are not found.  
-  This protects against incomplete implementations or outdated imports.
+Missing Elements
+~~~~~~~~~~~~~~~~
 
-**Mismatched Types or Values**
-  Triggered when a return annotation, argument type, or value does not match expectations.  
-  Prevents breaking changes in APIs, especially in shared or inherited code.
+Raised when a required function, class, attribute, or variable is **not present**.
 
-**Environment Misconfigurations**
-  Raised when expected environment variables are absent or misconfigured.  
-  Also applies to version mismatches in interpreters, OS, or dependency layers.
+Example:  
+`Missing method in class Extension: 'run'`
 
-**Runtime and Architecture Errors**
-  Raised when the executing environment differs from the allowed runtime constraints:  
-  unsupported Python version, OS, or CPU architecture.
+Type or Value Mismatch
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Each of these categories helps isolate the nature of the failure and speed up resolution.
+Triggered when types, annotations, or literal values do not match.
 
-Error Table
------------
+Example:  
+`Return type mismatch: expected 'str', found 'None'`
 
-All validation errors are documented in a central reference file.
+Environmental Misconfiguration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Raised when runtime assumptions are unmet, such as:
+
+- Missing environment variables  
+- Incompatible OS or interpreter  
+- Python version mismatch
+
+Example:  
+`Missing required environment variable: API_KEY`
+
+Unsupported Runtime
+~~~~~~~~~~~~~~~~~~~
+
+Validation fails if the runtime environment does not match any declared `deployment`.
+
+Example:  
+`Unsupported Python version: 3.7. Expected: 3.12.8`
+
+The goal of these categories is to **pinpoint root causes** and prevent regression over time.
+
+Reference Error Table
+----------------------
+
+All known validation errors are defined in a centralized table:
 
 .. include:: error_table.rst
 
 Each entry includes:
 
-- The constant (e.g., `Errors.CLASS_ATTRIBUTE_MISSING`)
-- A dynamic template using `.format()`
-- Description and suggested fix
+- A symbolic error constant (e.g., `Errors.CLASS_ATTRIBUTE_MISSING`)  
+- A dynamic message template  
+- A short description and suggested resolution
 
-These error definitions are raised across ImportSpy's internal validation layers,  
-and remain consistent whether running in embedded or external validation mode.
+These errors are **reused consistently across embedded and CLI validation**.
 
-Strict vs Soft Enforcement
---------------------------
+Enforcement Strategies
+-----------------------
 
-ImportSpy supports two primary enforcement strategies:
+ImportSpy enforces contracts in strict mode by default:
 
-**Strict Mode (default)**
-  - Any validation error raises a `ValueError`
-  - Execution halts immediately
-  - Best for CI/CD pipelines, secure deployments, and production
+Strict Mode (Default)
+~~~~~~~~~~~~~~~~~~~~~~
 
-**Soft Mode (planned)**
-  - Warnings are logged, but execution proceeds
-  - Useful for iterative development, onboarding new contracts, or dry runs
+- ❌ Any error raises a `ValueError`  
+- ⛔ Execution halts immediately  
+- 🔐 Recommended for CI/CD, production, and regulated systems
 
-This separation allows ImportSpy to adapt to different risk profiles and team preferences.
+Soft Mode (Future Feature)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Debugging and Traceability
---------------------------
+- ⚠️ Errors are downgraded to warnings  
+- 🔁 Execution proceeds  
+- 🧪 Ideal for development, onboarding, or exploratory validation
 
-Each error message includes enough context to trace:
+Traceability and Debugging
+---------------------------
 
-- Which element failed validation (e.g., `function foo()`)
-- Which part of the contract was not satisfied
-- Which actual value or type caused the failure
+Every raised exception includes:
 
-Thanks to centralized logging (via `LogManager`) and custom exceptions (`PersistenceError`, `ValidationError`),  
-ImportSpy provides full traceability across the stack—ideal for debugging remote systems,  
-containerized environments, or CI runs.
+- The failing **element** (function, class, attribute, etc.)  
+- The **context** of the violation (e.g., deployment block or module scope)  
+- The **expected vs actual** values/types
 
-Workflow Integration
---------------------
+Thanks to integrated logging (`LogManager`) and specific exception classes (`ValidationError`, `PersistenceError`),  
+ImportSpy ensures traceability across:
 
-ImportSpy's errors are designed to surface clearly in:
+- Local debugging  
+- Containerized runtimes  
+- CI pipelines  
+- Logging dashboards
 
-- Terminal logs
-- CI build outputs
-- IDE consoles (when embedding ImportSpy in code)
+Developer-Focused Feedback
+---------------------------
 
-In CLI mode, `ValueError` exceptions are reported with full context and can be parsed programmatically  
-to integrate with dashboards or validation gates.
+Validation errors are formatted to be helpful across:
+
+- Terminal sessions and shell scripts  
+- IDE consoles with embedded validation  
+- CI output logs for quality gates or metrics
+
+If you're using ImportSpy in CLI mode, errors are printed with full detail —  
+ready to be parsed, logged, or even turned into automated reports.
 
 Best Practices
 --------------
 
-To avoid repetitive validation failures:
+- ✅ Run with `--log-level DEBUG` to get full trace on failure  
+- ✅ Keep `spymodel.yml` in version control and in sync with module changes  
+- ✅ Use error messages as checklists during onboarding or code review  
+- ✅ Integrate the error table into your internal docs or linting rules
 
-- Always run modules with `--log-level DEBUG` to see full inspection trace
-- Keep contracts (`spymodel.yml`) up to date with structural changes
-- Start in soft enforcement mode (dev) and escalate to strict mode (prod)
-- Use error table as a checklist during integration
+Errors Are Enforced Contracts
+------------------------------
 
-Final Notes
------------
+ImportSpy’s validation model is **contract-first** — if a rule is declared, it’s enforced.
 
-ImportSpy’s error handling system is a critical part of its Zero-Trust execution model.  
-It helps development teams:
+That means errors are not just problems — they’re confirmations that the system is working.  
+By treating every validation failure as a source of insight, ImportSpy helps your team:
 
-- Understand failure causes quickly
-- Maintain clear and consistent module definitions
-- Reduce debugging cycles through clear context
-- Adopt proactive validation practices
+- Identify problems early  
+- Understand context clearly  
+- Move toward stronger modularity and runtime safety
 
-Errors in ImportSpy are **not interruptions**—they are **contracts being enforced**.
+📌 Errors are not interruptions.  
+They are the **boundary where safety begins**.

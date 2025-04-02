@@ -1,46 +1,41 @@
-===========================
-Core Components of ImportSpy
-===========================
+Core Engine: Classes, Controllers, and Contracts
+================================================
 
-The **core components of ImportSpy** define its internal architecture for  
-**validation logic**, **logging**, **contract parsing**, and **global configuration**.
+This section documents the **core subsystems of ImportSpy** — the internal machinery that powers its runtime validation engine, CLI interface, and contract execution model.
 
-These components are the backbone of ImportSpy’s enforcement engine,  
-ensuring that every module validated — whether internally or via CLI —  
-follows strict rules for structure, context, and runtime integrity.
+These APIs are essential for:
+
+- 🧠 Understanding how validation requests are orchestrated  
+- 🔄 Hooking into the enforcement lifecycle  
+- 🛠 Extending ImportSpy for custom validation, logging, or policy enforcement  
+
+Each class below plays a **central role in ImportSpy’s internal flow**, and is fully documented for integration and contribution use cases.
 
 Spy Class 🕵️‍♂️
-----------------
-The `Spy` class is **the primary controller** of ImportSpy.
+^^^^^^^^^^^^^^^^^
 
-It manages the full validation flow, including:
+The `Spy` class is the **central controller** of ImportSpy’s validation pipeline.
 
-- Receiving external modules (from within code or via CLI)
-- Configuring logging levels dynamically
-- Coordinating contract parsing and validation against loaded modules
-- Detecting recursion or misuse during introspection
+It handles:
+
+- Contract parsing and validation  
+- Import-time introspection of the calling environment  
+- Runtime orchestration for embedded validation  
+- Entry point for dynamic execution enforcement
 
 .. autoclass:: importspy.s.Spy
    :members:
    :undoc-members:
    :show-inheritance:
 
-Import Contracts & Parsers 💾
------------------------------
+Contract Parsers 💾
+^^^^^^^^^^^^^^^^^^^^
 
-ImportSpy supports **declarative validation** through **import contracts** —  
-simple `.yml` files that define expected module structure, variables, classes,  
-functions, and runtime environments.
+Import contracts are defined externally as `.yml` files and parsed into structured models.
 
-To work with these contracts, ImportSpy uses a **pluggable parser interface**.  
-Currently, YAML is the default and only supported format, but the architecture  
-is designed to support future extensions (e.g. JSON, TOML).
-
-The `Parser` abstract class defines the core methods required for a new format backend,  
-while `YamlParser` provides a production-ready YAML implementation.
-
-This parser is also what powers ImportSpy’s **CLI and pipeline validation**,  
-allowing contracts to be injected externally without modifying the validated code.
+- `Parser` is the abstract interface that defines contract loading behavior.  
+- `YamlParser` is the default parser implementation supporting YAML-based contracts.  
+- `handle_persistence_error` is a decorator for consistent exception wrapping and traceability.
 
 .. autoclass:: importspy.persistences.Parser
    :members:
@@ -52,10 +47,6 @@ allowing contracts to be injected externally without modifying the validated cod
    :undoc-members:
    :show-inheritance:
 
-The `handle_persistence_error` decorator is applied to persistence methods  
-to catch and raise consistent, user-friendly errors when contract files  
-are missing, unreadable, or malformed.
-
 .. autofunction:: importspy.persistences.handle_persistence_error
 
 .. autoclass:: importspy.persistences.PersistenceError
@@ -63,51 +54,49 @@ are missing, unreadable, or malformed.
    :undoc-members:
    :show-inheritance:
 
-LogManager Class 📝
--------------------
-The `LogManager` handles all log collection and formatting for ImportSpy.  
-It ensures consistent output whether validation is performed in code,  
-from a CLI command, or inside CI/CD pipelines.
+Log Manager 📝
+^^^^^^^^^^^^^^^
 
-Every validation step — including configuration, parsing, and inspection —  
-is logged in real time, supporting both debugging and auditability.
+The `LogManager` provides **structured logging** across both CLI and embedded modes.  
+It supports log-level control (`DEBUG`, `INFO`, `ERROR`, etc.) and unified message formatting.
 
 .. autoclass:: importspy.log_manager.LogManager
    :members:
    :undoc-members:
    :show-inheritance:
 
-Errors Class ⚠️
----------------
-The `Errors` class centralizes **standardized error messages**  
-used throughout ImportSpy’s validation process.
+Error Messaging ⚠️
+^^^^^^^^^^^^^^^^^^^^
 
-By consolidating messages here, ImportSpy ensures clear, structured feedback  
-for every type of violation or inconsistency found during validation.
+The `Errors` class contains standardized error templates used across ImportSpy.  
+It defines **consistent, user-facing messages** for contract violations, misconfigurations, and environment mismatches.
 
 .. autoclass:: importspy.errors.Errors
    :members:
    :undoc-members:
    :show-inheritance:
 
-Constants Class 📌
-------------------
-This class contains all **shared constants** used in ImportSpy —  
-from validation rules and labels to keys used in contracts.
+Constants 📌
+^^^^^^^^^^^^
 
-It keeps configuration consistent across internal modules and user-defined extensions.
+All shared constants, labels, and tags used by the validation engine, parsers, and CLI.  
+These are used to maintain **naming consistency** across internal modules.
 
 .. autoclass:: importspy.constants.Constants
    :members:
    :undoc-members:
    :show-inheritance:
 
-Config Class ⚙️
----------------
-The `Config` class defines **global runtime settings** for ImportSpy.  
-It governs how validation is executed, what options are active,  
-and allows advanced users to tailor ImportSpy’s behavior  
-for different environments or modes.
+Configuration ⚙️
+^^^^^^^^^^^^^^^^
+
+The `Config` class defines **runtime settings and execution context** for ImportSpy.
+
+It allows developers to:
+
+- Customize behavior based on validation mode  
+- Register external contract paths  
+- Modify enforcement flags dynamically
 
 .. autoclass:: importspy.config.Config
    :members:

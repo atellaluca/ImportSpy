@@ -1,170 +1,121 @@
 Understanding Python Reflection in ImportSpy
-===========================================
+============================================
 
-Reflection is a **powerful feature** in Python that allows a program to **inspect and modify itself at runtime**.  
-Think of it like **a mirror for your code**: just as a mirror lets you see your own face, reflection lets Python "look at itself"  
-to analyze modules, functions, and classes dynamically.
+Why Reflection Matters 🪞
+--------------------------
 
-🔍 **Why Reflection Matters in ImportSpy**  
-ImportSpy **heavily relies on reflection** to validate external modules dynamically.  
-Instead of analyzing code statically, ImportSpy inspects **what is actually present in a module at runtime**,  
-ensuring that all dependencies follow strict validation rules before they are executed.
+Python's reflection capabilities allow code to inspect, analyze, and interact with itself at runtime.  
+This is central to how **ImportSpy** validates modules dynamically — it doesn't just look at source code,  
+it actively examines **what exists and how it behaves** at the moment of import.
 
-This guide covers:
+In a system where plugins or modules are loosely coupled, this allows ImportSpy to:
 
-- **What Reflection Is**, with beginner-friendly explanations and examples.  
-- **How to Use Basic Reflection in Python**, before moving to advanced topics.  
-- **How ImportSpy Uses Reflection** for dynamic module validation, considering the new **Import Contracts** functionality.
-- **Best Practices** and potential pitfalls when working with reflection.
+- Validate structural expectations (`classes`, `functions`, `attributes`).
+- Detect runtime constraints (`interpreter`, `version`, `environment`).
+- Prevent unexpected or unauthorized imports.
 
-📌 **By the end of this guide, you will:**
-- Understand **how reflection works** in Python.
-- Know **how ImportSpy leverages reflection** to enforce compliance, especially with **Import Contracts**.
-- Be able to **use reflection tools like `inspect`, `getattr()`, and `importlib` effectively**.
+Core Python Reflection Tools 🔍
+-------------------------------
 
-**1. Reflection Explained: The Mirror Analogy** 🌟 
---------------------------------------------------
+ImportSpy uses several key components of Python’s reflection toolbox:
 
-Imagine you’re in a **dark room**, trying to describe yourself without a mirror.  
-You know your hands and face are there, but you can’t see them.  
-**This is like a Python module without reflection**—it has functions and classes,  
-but without explicitly calling them, Python doesn’t "see" them.
+**1. `inspect`** — Runtime introspection
 
-Now, if you **turn on a light and look in a mirror**, you can see every detail.  
-Reflection is that light: it allows Python to **examine its own structure** at runtime.
-
-**2. First Steps with Python Reflection** 🛠 
---------------------------------------------
-
-Before diving into ImportSpy’s advanced use of reflection, let’s explore its **basic building blocks**.
-
-✅ **`dir()` – Listing Attributes in an Object**
-.. code-block:: python
-
-   class Person:
-       def __init__(self, name):
-           self.name = name
-
-   p = Person("Alice")
-
-   print(dir(p))  # Lists all attributes of the object
-
-This command shows **everything that exists in the object**, including methods and variables.
-
-✅ **`getattr()` – Accessing Attributes Dynamically**
-.. code-block:: python
-
-   print(getattr(p, "name"))  # Output: Alice
-
-If we don’t know an object’s attributes beforehand, `getattr()` lets us access them **dynamically**.
-
-✅ **`hasattr()` – Checking if an Attribute Exists**
-.. code-block:: python
-
-   print(hasattr(p, "age"))  # Output: False
-
-This prevents errors when accessing unknown attributes.
-
-✅ **`setattr()` – Modifying Attributes at Runtime**
-.. code-block:: python
-
-   setattr(p, "age", 30)  
-   print(p.age)  # Output: 30
-
-**3. Advanced Reflection Tools in Python** 🔬
----------------------------------------------
-
-Once comfortable with basic reflection, we can use **more advanced tools**  
-like `inspect` and `importlib`, which ImportSpy relies on heavily.
-
-✅ **`inspect` – Extracting Function and Class Information**
 .. code-block:: python
 
    import inspect
 
-   class Sample:
-       def method(self):
-           return "Hello"
+   def foo(): pass
 
-   print(inspect.getmembers(Sample, inspect.isfunction))
-   # Output: [('method', <function Sample.method>)]
+   print(inspect.isfunction(foo))          # True
+   print(inspect.getmembers(foo))          # List all members of the function object
 
-✅ **`importlib` – Dynamic Module Importing**
+**2. `getattr` / `hasattr` / `setattr`** — Attribute access and mutation
+
+.. code-block:: python
+
+   class User: name = "Alice"
+
+   u = User()
+   print(getattr(u, "name"))               # "Alice"
+   print(hasattr(u, "email"))              # False
+   setattr(u, "email", "a@example.com")    # Dynamically add attribute
+
+**3. `importlib`** — Dynamic module loading
+
 .. code-block:: python
 
    import importlib
 
-   module_name = "math"
-   math_module = importlib.import_module(module_name)
+   mod = importlib.import_module("math")
+   print(mod.sqrt(16))                     # 4.0
 
-   print(math_module.sqrt(25))  # Output: 5.0
+These techniques allow ImportSpy to analyze **any arbitrary Python module** during validation.
 
-These tools allow ImportSpy to **analyze modules dynamically**,  
-checking **which functions and attributes exist at runtime**.
+How ImportSpy Uses Reflection 🧠
+--------------------------------
 
-**4. How ImportSpy Uses Reflection** 🚀 
----------------------------------------
+ImportSpy doesn’t hardcode validation rules into your code.  
+Instead, it reads a YAML contract, parses it into a structured `SpyModel`, and:
 
-Now that we understand **Python’s reflection tools**,  
-let’s see **how ImportSpy leverages them for module validation, especially with Import Contracts**.
+1. **Intercepts the importing context**  
+   → via `inspect.stack()` to determine *who* is importing the validated module.
 
-✅ **Tracking the Execution Stack**  
-ImportSpy uses `inspect.stack()` to determine **which module is calling an import**  
-and apply validation rules accordingly. This is especially useful for **CLI validation** as well as **embedded validation** using Import Contracts.
+2. **Loads the target module**  
+   → via `importlib` or by extracting from `sys.modules`.
 
-✅ **Dynamically Extracting Module Metadata**  
-Using `inspect.getmodule()`, ImportSpy retrieves information about an imported module, including details from the **Import Contract** file (YAML) for validation.
+3. **Validates its structure**  
+   → using `inspect.getmembers()` to check for methods, annotations, and base classes.
 
-✅ **Enforcing Structural Compliance**  
-By analyzing **functions, classes, and attributes at runtime**,  
-ImportSpy ensures every module follows the correct validation model as defined in the **Import Contracts**.
+4. **Checks runtime environment**  
+   → including Python version, interpreter type, and required variables.
 
-**5. Best Practices & Pitfalls of Reflection** ⚠ 
--------------------------------------------------
+This **dynamic, contract-driven validation** is only possible thanks to Python's reflective architecture.
 
-Reflection is powerful but can **cause performance issues and security risks**  
-if not used correctly. Here’s what to keep in mind:
+Reflection in Embedded Mode vs CLI Mode 🔁
+------------------------------------------
 
-❌ **Avoid Overusing Reflection**  
-Excessive use of `inspect` functions can **slow down execution**.
+In **Embedded Mode**, reflection is used by the validated module itself:
 
-✅ **Cache Reflection Results**  
-If you need to **check the same attributes multiple times**, store them in a variable.
+- It calls `Spy().importspy(...)`
+- Uses `inspect.stack()` to identify the **caller**
+- Then validates that external environment using reflection
 
-❌ **Be Careful with `setattr()`**  
-Modifying objects dynamically can **introduce bugs** if used improperly.
+In **CLI Mode**, reflection is applied directly to the target file:
 
-✅ **Always Validate Input Before Execution**  
-Instead of blindly calling `getattr()`, ensure the function exists and is safe to execute.
+- `importspy -s contract.yml module.py`
+- ImportSpy dynamically loads and introspects the module
+- Checks all runtime constraints before it can be deployed
 
-🔹 **Example: Safe Execution of Methods**
+Best Practices & Pitfalls ⚠️
+----------------------------
+
+Reflection is powerful — but should be used wisely:
+
+✅ **Cache inspection results** to avoid repeat analysis  
+❌ Avoid calling unknown or unsafe methods with `getattr()` blindly  
+✅ Combine with type checks (`callable`, `isinstance`) before execution  
+❌ Don’t mutate live objects unless you're in full control
+
+Example: safe method invocation
+
 .. code-block:: python
 
-   method = getattr(module, "run", None)
-   if method and callable(method):
-      method()  # ✅ Safe execution
+   if hasattr(module, "run") and callable(module.run):
+       module.run()
 
-**6. Further Resources** 📚 
----------------------------
+Takeaway 🧠
+-----------
 
-Want to go deeper? Here are some great resources:
+Reflection is what makes ImportSpy possible.
 
-- **Python’s Official Reflection Docs** → 🔗 `https://docs.python.org/3/library/inspect.html`
-- **ImportSpy’s Validation System** → :doc:`../overview/understanding_importspy/validation_and_compliance`
-- **Dynamic Module Loading in Python** → 🔗 `https://docs.python.org/3/library/importlib.html`
+By using `inspect`, `importlib`, and Python’s runtime model, ImportSpy can:
 
-**Final Thoughts** 🎯 
----------------------
+- Enforce validation without altering your code
+- Dynamically adapt to different environments
+- Offer a robust, runtime-safe contract enforcement system
 
-Reflection is a **core component** of ImportSpy, allowing it to:
+Explore more:
 
-✅ **Dynamically inspect and validate imported modules**.  
-✅ **Enforce strict compliance rules before execution**.  
-✅ **Provide a flexible and adaptive validation framework**, especially with the new **Import Contracts** feature.
-
-By mastering Python’s reflection capabilities,  
-you can **better understand how ImportSpy works** and use it effectively in your projects.  
-
-🚀 **Next Steps:**
-- **Explore ImportSpy’s Compliance Model** → :doc:`../overview/understanding_importspy/validation_and_compliance`
-- **Learn About Pydantic’s Role in ImportSpy** → :doc:`pydantic_in_importspy`
+- :doc:`pydantic_in_importspy`
+- `https://docs.python.org/3/library/inspect.html`

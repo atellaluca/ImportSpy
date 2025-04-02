@@ -1,138 +1,129 @@
 Validation and Compliance in ImportSpy
-======================================
+=======================================
 
-Ensuring that external modules are **imported in a valid execution environment**  
-is fundamental to maintaining software **stability and security**.
+ImportSpy is more than a validator — it's a **compliance enforcement layer**  
+that ensures every import happens under the right conditions.
 
-ImportSpy introduces a **robust validation mechanism** that systematically verifies  
-whether the **importing environment** meets the constraints imposed by the module  
-being imported. This prevents **uncontrolled modifications, runtime inconsistencies,  
-and unexpected failures**.
+It prevents fragile integrations, runtime surprises, and architectural drift by validating  
+**both the structure of modules** and **the environment they run in** — before they’re allowed to execute.
 
-By enforcing **compliance at multiple levels**, ImportSpy guarantees that modules  
-operate within a **predictable, structured, and controlled execution context**.
+Why Compliance Matters
+-----------------------
 
-Understanding Execution Context Validation
-------------------------------------------
+In modern Python systems, you often deal with:
 
-Validation in ImportSpy begins by analyzing **the environment in which a module is being imported**.  
-Rather than inspecting the module itself, ImportSpy **traces the source of the import**,  
-verifying that the importing module and its execution context **comply with the rules  
-declared in the import contract (SpyModel)**.
+- Multiple operating systems and architectures  
+- Third-party plugins and dynamic module loading  
+- Varying Python runtimes across dev/staging/prod  
+- Environment variables that silently shape behavior  
 
-Python’s **dynamic nature** allows execution across **different OS environments, Python versions,  
-and system configurations**, which can introduce **significant risks**  
-when dependencies evolve **unpredictably**.
+Without strict validation, these differences introduce risk.
 
-ImportSpy **mitigates these risks** by ensuring that the execution environment is **fully compliant**  
-with the predefined **constraints set by the contract**.
+ImportSpy guarantees that external modules only execute if their importing environment **matches the declared constraints** in their import contract.
 
-If an environment **fails to meet these constraints**, ImportSpy **prevents execution**,  
-ensuring that the module is only used in **controlled, verified conditions**.
+Multilayer Validation
+----------------------
 
-Runtime Environment Compliance
-------------------------------
+ImportSpy checks compliance at multiple levels:
 
-Beyond **execution context validation**, ImportSpy enforces **compliance with runtime constraints**, such as:
+Execution Context
+~~~~~~~~~~~~~~~~~
 
-- **Python version** and interpreter (e.g. CPython, PyPy)
-- **Operating system** (e.g. Linux, Windows, macOS)
-- **Hardware architecture** (e.g. x86_64, ARM64)
+Before a module runs, ImportSpy validates:
 
-Examples:
+- Which module is trying to import it (via introspection)  
+- The **OS**, **architecture**, **Python version**, and **interpreter**  
+- Any required **environment variables**  
+- Whether the current runtime matches one of the allowed **deployment blocks**
 
-- If a contract declares compatibility **only with Python 3.9**, but the import occurs in **Python 3.7**,  
-  validation **fails** and execution is blocked.
+If anything is off, validation fails — no execution occurs.
 
-- If the contract restricts execution to **Linux**, but the code runs on **Windows**,  
-  ImportSpy halts the import.
+Example:
 
-- If the interpreter does not match (e.g., PyPy is used instead of CPython),  
-  ImportSpy prevents execution.
+- ✅ Declared: CPython 3.12.8 on Linux  
+  ✅ Actual: CPython 3.12.8 on Linux → Allowed  
+- ❌ Declared: Windows-only  
+  ❌ Actual: Linux → Rejected  
+- ❌ Declared: Requires `PLUGIN_KEY`  
+  ❌ Missing from environment → Blocked
 
-By enforcing these rules, ImportSpy ensures **modules only run in supported environments**,  
-preventing compatibility errors and undefined behavior.
+Module Structure
+~~~~~~~~~~~~~~~~
 
-Enforcing System-Level Constraints
-----------------------------------
+Structural validation includes:
 
-Many Python modules depend on:
+- Required **functions**, with specific argument names and annotations  
+- Required **classes**, including attributes, methods, and superclasses  
+- Top-level **variables** and their expected values  
+- Submodule definitions (when declared inside a `deployment`)
 
-- **Environment variables** (e.g., credentials, flags, endpoints)
-- **External system configurations**
-- **Architecture-specific optimizations**
+If a module fails to meet these expectations, it's rejected at import time.
 
-ImportSpy allows import contracts to declare these constraints explicitly. For example:
+System-Level Constraints
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-- If a module requires the environment variable `API_KEY`, ImportSpy verifies its presence before proceeding.
-- If a module targets **ARM architecture only**, ImportSpy blocks execution on incompatible systems.
+ImportSpy allows contracts to specify:
 
-This level of enforcement prevents:
+- Required environment variables  
+- Specific OS-level deployments  
+- Architecture-specific compatibility (e.g., only ARM64)
 
-- **Silent misconfiguration**
-- **Missing dependencies**
-- **Runtime crashes**
+This prevents issues like:
 
-and ensures that all **system-level expectations are fulfilled** at import time.
+- Silent misconfiguration  
+- Undeclared system assumptions  
+- Crashes due to missing runtime data
 
-Handling Compliance Failures
-----------------------------
-
-When validation fails, ImportSpy raises **structured errors** that explain:
-
-- What failed
-- Why it failed
-- Where the violation occurred
-
-For example:
-
-- `"Missing required environment variable: API_KEY"`
-- `"Unsupported OS: Expected Linux, found Windows"`
-- `"Function 'process' has mismatched argument signature"`
-
-ImportSpy distinguishes between:
-
-- **Critical violations** (e.g., missing components) → execution is blocked
-- **Minor inconsistencies** → warnings may be raised (depending on enforcement mode)
-
-This allows teams to adopt a **Zero-Trust stance**, while still providing **actionable diagnostics**.
-
-Maintaining Long-Term Compliance
+Diagnostics and Failure Behavior
 --------------------------------
 
-ImportSpy enables **ongoing compliance validation** through:
+ImportSpy is strict: when validation fails, execution halts.
 
-- **Versioned import contracts**, updated as modules evolve
-- **Automated enforcement in CI/CD pipelines**
-- **Runtime validation in production or sandboxed environments**
+But it also provides **high-quality error feedback**, including:
 
-This ensures consistency across:
+- ❌ What went wrong (e.g., `"Missing method 'run'"`)  
+- ❌ Where the mismatch occurred (e.g., `"In class Extension"`)  
+- ❌ Why it’s invalid (e.g., `"Expected str, found int"`)
 
-- Development
-- Testing
-- Deployment
+Errors are raised as `ValueError` with clear stack traces and contract violation summaries.
 
-and reduces the risks of:
+This fail-fast approach prevents issues from reaching production — or worse, going unnoticed.
 
-- Configuration drift
-- Hidden regressions
-- Undocumented structural changes
+Maintaining Long-Term Compliance
+---------------------------------
 
-Final Considerations
---------------------
+ImportSpy helps teams enforce long-term consistency via:
 
-Validation and compliance are **not optional** in modern Python software.  
-They are essential to maintaining:
+- **Versioned contracts** that evolve with your code  
+- **Validation in CI/CD pipelines** to catch regressions early  
+- **Runtime checks** in production or sandbox environments
 
-- Predictability
-- Stability
-- Security
+This ensures:
 
-ImportSpy provides a complete framework to:
+- No configuration drift  
+- No mismatches between staging and production  
+- Structural integrity across deployments and updates
 
-- **Enforce strict contracts**
-- **Detect mismatches early**
-- **Prevent fragile imports**
+Compliance Is Not Optional
+---------------------------
 
-Whether you're writing a plugin, managing a deployment pipeline, or hardening production code,  
-ImportSpy ensures that every import **happens under the right conditions**—no more, no less.
+ImportSpy adopts a **Zero-Trust philosophy**:
+
+> ❌ No module is trusted without validation  
+> ✅ No import occurs unless the environment is approved
+
+This guarantees:
+
+- Secure plugin systems  
+- Stable microservice communication  
+- Predictable behavior across machines and versions
+
+If you care about runtime integrity, ImportSpy turns your import logic into **an enforceable contract** — and blocks anything that breaks it.
+
+Related Topics
+--------------
+
+- :doc:`spy_execution_flow`  
+- :doc:`contract_structure`  
+- :doc:`error_handling`  
+- :doc:`integration_best_practices`

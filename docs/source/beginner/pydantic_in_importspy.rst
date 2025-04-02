@@ -1,189 +1,126 @@
-Pydantic in ImportSpy: Enforcing Data Validation
-================================================
+Pydantic in ImportSpy
+======================
 
-Pydantic is a **powerful data validation and serialization library**  
-that ImportSpy leverages to **ensure structural integrity and enforce compliance rules dynamically**.
-
-📌 **Why does ImportSpy use Pydantic?**  
-Python is a **dynamically typed language**, which means that modules and objects can change at runtime.  
-This flexibility, while powerful, can lead to **unexpected errors, missing attributes, or type inconsistencies**.
-
-Pydantic helps **prevent these issues** by providing:
-
-- ✅ **Strict data validation** at runtime.  
-- ✅ **Automatic type enforcement** for module attributes.  
-- ✅ **Error handling and structured validation messages**.  
-
-By integrating **Pydantic with ImportSpy**, we ensure that every module meets **predefined validation constraints**,  
-preventing incorrect or non-compliant modules from being executed.
-
-**1. Understanding Pydantic: A Quick Primer** 🌟 
-------------------------------------------------
-
-Before diving into **how ImportSpy uses Pydantic**, let’s take a quick look at its **core principles**.
-
-🔹 **What is Pydantic?**  
-Pydantic is a **data validation and settings management library** that allows you to:
-
-✅ **Define structured data models** using Python classes.  
-✅ **Enforce strict type validation** at runtime.  
-✅ **Automatically parse and validate data** from various sources (JSON, dictionaries, environment variables).  
-
-📌 **Example: A Simple Pydantic Model**
-.. code-block:: python
-
-   from pydantic import BaseModel
-
-   class User(BaseModel):
-       name: str
-       age: int
-
-   u = User(name="Alice", age=25)  # ✅ Valid
-   u = User(name="Bob", age="twenty")  # ❌ Error: age must be an int
-
-Pydantic automatically **raises an error if the data does not match the expected type**.
-
-**2. How ImportSpy Uses Pydantic** 🛠
+Why Pydantic Matters for ImportSpy 🧠
 -------------------------------------
 
-ImportSpy uses **Pydantic models** to define and enforce **strict validation rules** for modules.  
-Instead of trusting that imported modules follow the expected structure, ImportSpy **explicitly validates them**  
-before allowing execution.
+ImportSpy uses **Pydantic** as the foundation for its validation engine, enabling it to model and enforce strict structural and environmental expectations.
 
-✅ **Defining a Validation Model in ImportSpy**  
-ImportSpy defines **validation models** using Pydantic, ensuring that every module meets **predefined structural constraints**.
+In a dynamic language like Python, where anything can change at runtime, Pydantic provides **deterministic enforcement** of expected module attributes, function signatures, return types, and environment variables.
 
-📌 **Example: Validating a Module’s Structure**
+By wrapping all validation logic in **Pydantic-based models**, ImportSpy transforms flexible contracts into **strict runtime guards**.
+
+Core Advantages:
+
+- ✅ Declarative schemas that model module structure and runtime constraints.
+- ✅ Precise, readable errors that help developers fix violations quickly.
+- ✅ Built-in support for complex types, enums, environment parsing, and more.
+
+How Pydantic Is Used in ImportSpy 🔍
+------------------------------------
+
+All import contracts (`.yml`) are parsed and converted into nested **Pydantic models** during runtime or CLI validation. These models serve as the "expected shape" against which a module or runtime is validated.
+
+Each layer of the import contract is mapped to a Pydantic model:
+
+- A class like `Extension` in a plugin? → `ClassModel`.
+- A function like `add_extension(msg: str) -> str`? → `FunctionModel`.
+- An interpreter requirement? → `InterpreterModel`.
+- OS/environment constraints? → `SystemModel`.
+
 .. code-block:: python
 
    from pydantic import BaseModel
-   from typing import List
+   from typing import List, Optional
 
-   class ModuleSchema(BaseModel):
+   class MethodModel(BaseModel):
        name: str
-       version: str
-       functions: List[str]
+       arguments: List[str]
+       return_annotation: Optional[str] = None
 
-This model ensures that:
+   class ClassModel(BaseModel):
+       name: str
+       methods: List[MethodModel]
 
-- Every module has a **name** (string).  
-- It includes a **version** (string).  
-- It defines a list of **expected functions**.  
+Validation Example 🧪
+----------------------
 
-✅ **Applying Validation at Runtime**  
-When ImportSpy inspects an imported module, it dynamically extracts **metadata**  
-(such as its name, version, and available functions) and validates it against the Pydantic model.
+Here’s a simplified validation use case.
 
-📌 **Example: Checking if a Module Meets the Validation Criteria**
 .. code-block:: python
 
-   import inspect
-   import some_module  # Example external module
+   class PluginContract(BaseModel):
+       filename: str
+       classes: List[ClassModel]
 
-   module_data = {
-       "name": some_module.__name__,
-       "version": getattr(some_module, "__version__", "unknown"),
-       "functions": [name for name, _ in inspect.getmembers(some_module, inspect.isfunction)]
-   }
+   contract = PluginContract(
+       filename="extension.py",
+       classes=[
+           ClassModel(
+               name="Extension",
+               methods=[
+                   MethodModel(name="add_extension", arguments=["self", "msg"], return_annotation="str")
+               ]
+           )
+       ]
+   )
 
-   validated_module = ModuleSchema(**module_data)  # ✅ Raises an error if the structure is incorrect
+Now at runtime, if a module lacks that method or returns the wrong type, ImportSpy fails **before** execution.
 
-If `some_module` **does not meet the required structure**,  
-Pydantic **automatically raises an error**, preventing execution.
+Runtime Failures Are Structured ⚠️
+----------------------------------
 
-**3. Dynamic Validation of Imported Modules** 🔬
-------------------------------------------------
+Pydantic errors are deeply integrated with ImportSpy’s logging and debugging layers:
 
-ImportSpy does not just validate **static module structures**.  
-It also applies **dynamic validation rules**, ensuring that modules **adapt correctly to changing environments**.
-
-✅ **Validating Runtime Constraints**  
-Besides structure, ImportSpy can validate **Python version compatibility** using Pydantic.
-
-📌 **Example: Enforcing Minimum Python Version**
-.. code-block:: python
-
-   from pydantic import BaseModel, Field
-
-   class RuntimeSchema(BaseModel):
-       python_version: str = Field(..., regex=r"^3\.[89]|3\.1[0-9]$")  # Accepts Python 3.8+
-
-   runtime_data = {"python_version": "3.10"}
-   RuntimeSchema(**runtime_data)  # ✅ Passes
-
-   runtime_data = {"python_version": "3.7"}
-   RuntimeSchema(**runtime_data)  # ❌ Raises an error: Incompatible Python version
-
-This approach ensures that **only compatible modules** are executed,  
-preventing errors due to unsupported Python versions.
-
-**4. Handling Validation Failures** ⚠
---------------------------------------
-
-If a module **fails validation**, ImportSpy provides **detailed error messages** using Pydantic’s built-in error reporting.
-
-📌 **Example: Catching Validation Errors**
-.. code-block:: python
-
-   from pydantic import ValidationError
-
-   try:
-       invalid_module = ModuleSchema(name="example", version=1.2, functions="not_a_list")
-   except ValidationError as e:
-       print(e.json())
-
-✅ **Structured Error Messages**  
-Pydantic provides **clear, structured validation errors**, making debugging easier.
-
-📌 **Example Output:**
 .. code-block:: json
 
    [
        {
-           "loc": ["version"],
+           "loc": ["classes", 0, "methods", 0, "return_annotation"],
            "msg": "str type expected",
            "type": "type_error.str"
-       },
-       {
-           "loc": ["functions"],
-           "msg": "value is not a valid list",
-           "type": "type_error.list"
        }
    ]
 
-These messages **immediately identify** where the module structure is incorrect,  
-helping developers **quickly resolve validation issues**.
+This means: no silent failures, no vague logs.  
+You know *exactly* what’s missing, and where.
 
-**5. Why Pydantic is Essential for ImportSpy** 📌 
--------------------------------------------------
+Benefits Beyond Type Checking ✅
+--------------------------------
 
-By integrating **Pydantic**, ImportSpy **ensures** that:
+- 🧩 **Cross-layer schema validation**: classes within modules, methods within classes, etc.
+- 🛡️ **Zero-Trust enforcement**: if something’s missing, execution is blocked.
+- 🔄 **Reusable contract definitions**: models are consistent across embedded and CLI mode.
+- 📖 **Documentation as code**: import contracts double as machine- and human-readable specs.
 
-✅ **Imported modules follow strict structural validation.**  
-✅ **Only compatible Python versions are allowed.**  
-✅ **Invalid modules are blocked before execution.**  
-✅ **Developers receive clear error messages when validation fails.**  
+Advanced Use: Dynamic Constraints
+---------------------------------
 
-Pydantic’s **powerful validation engine** allows ImportSpy to provide **real-time enforcement of module compliance**,  
-making Python’s dynamic import system **more robust, predictable, and secure**.
+Want to block execution in certain Python versions? Or only allow certain interpreters?
 
-**6. Further Resources** 📚
----------------------------
+Pydantic makes it easy to write declarative rules:
 
-Want to learn more about Pydantic? Check out these resources:
+.. code-block:: python
 
-- **Official Pydantic Documentation** → 🔗 `https://docs.pydantic.dev/latest/`
-- **ImportSpy’s Validation System** → :doc:`../overview/understanding_importspy/validation_and_compliance`
-- **Best Practices for Structuring Python Modules** → 🔗 `https://docs.python.org/3/tutorial/modules.html`
+   from pydantic import BaseModel, validator
 
-**Final Thoughts** 🎯 
----------------------
+   class PythonRuntime(BaseModel):
+       version: str
 
-Pydantic plays a **key role in ImportSpy**, enabling **real-time validation**  
-of module structures, runtime configurations, and Python environment constraints.
+       @validator("version")
+       def must_be_310_or_higher(cls, v):
+           if v < "3.10":
+               raise ValueError("Python version must be >= 3.10")
+           return v
 
-By leveraging Pydantic’s **powerful type enforcement and error handling**,  
-ImportSpy ensures that imported modules remain **predictable, secure, and compliant**.
+Conclusion 🎯
+-------------
 
-🚀 **Next Steps:**
-- **Explore ImportSpy’s Reflection System** → :doc:`python_reflection`
+Pydantic is not just a convenience in ImportSpy — it’s the **core engine** behind runtime validation.
+
+It provides a robust layer to define, enforce, and debug structural rules with confidence.
+
+Next steps:
+
+- :doc:`python_reflection` — Learn how ImportSpy introspects code dynamically.
+- https://docs.pydantic.dev/ — Go deeper into advanced Pydantic use cases.

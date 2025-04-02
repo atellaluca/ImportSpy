@@ -1,156 +1,176 @@
-Contract Structure
-==================
+Import Contract Structure
+==========================
 
-Introduction
-------------
+Import contracts are the foundation of how ImportSpy performs validation.
 
-Import contracts are YAML-based files used by **ImportSpy** to describe the **expected structure, dependencies, and runtime requirements** of a Python module.  
-They act as **execution-level contracts**, enabling the system to validate whether a module is being used in a compliant environment — across operating systems, Python interpreters, or deployment platforms.
+They are **YAML-based configuration files** that describe both the **structure** of a Python module and the **execution environments** in which it is valid.
 
-These contracts are evaluated at runtime (in embedded mode) or via CLI (in external mode), and are automatically parsed into Python `SpyModel` objects during validation.
+This page provides a deep dive into the schema, semantics, and flexibility of import contracts — and how they serve as **executable specifications** for modular systems.
 
-This page explains the **structure, hierarchy, and semantics** of import contracts and provides a **complete real-world example**.
+Overview
+--------
 
-Contract Format Overview
-------------------------
+Each contract is made up of two primary blocks:
 
-The import contract is structured as a YAML document with the following **top-level directives**:
+- **Module definition**: describes what the module must contain (e.g., classes, functions, metadata)  
+- **Deployments**: lists the environments (OS, Python, interpreter) in which the module is allowed to run
 
-- `filename`: The main module name.
-- `variables`: Global variables expected in the module.
-- `functions`: Top-level functions.
-- `classes`: Class definitions and their structure.
-- `deployments`: Valid runtime environments that are permitted to execute the module.
+Contracts can define either:
 
-Each directive maps directly to a validation layer in ImportSpy's architecture.  
-The contract can be **partial** (you can specify only what you want to validate), but the **hierarchy must always be respected**.
+- **Global constraints**: structural requirements that apply to all deployments  
+- **Deployment-specific overrides**: context-sensitive rules based on platform or interpreter
 
-Contract Schema
----------------
+Top-Level Schema
+----------------
 
-Below is the full structural hierarchy with explanation:
+Here is a reference of the main fields in a contract:
 
-- `filename` *(str)*: The name of the module file to validate (e.g., `extension.py`).
-- `version` *(optional)*: Expected version of the module.
-- `variables` *(dict)*: Key-value pairs of expected global variables.
-- `functions` *(list)*:
-  - `name`: Name of the function.
-  - `arguments`: Parameters of the function.
-  - `return_annotation`: Expected return type.
+Top-Level Fields
+~~~~~~~~~~~~~~~~
 
-- `classes` *(list)*:
-  - `name`: Name of the class.
-  - `attributes`:
-    - `type`: `"class"` or `"instance"`
-    - `name`: Attribute name.
-    - `value`: Expected default value.
-    - `annotation` *(optional)*: Expected type.
-  - `methods`: Same structure as `functions`.
-  - `superclasses`: Base classes the class should inherit from.
+- ``filename`` *(str)*: The name of the module to validate  
+- ``version`` *(str, optional)*: Expected module version (e.g., `__version__`)  
+- ``variables`` *(dict)*: Top-level variables and their expected values  
+- ``functions`` *(list)*: List of required functions  
+- ``classes`` *(list)*: List of required classes and their details  
+- ``deployments`` *(list)*: Permitted environments in which the module can be loaded  
 
-- `deployments` *(list)*:
-  - `arch`: CPU architecture (`x86_64`, `ARM64`, etc.).
-  - `systems` *(list)*:
-    - `os`: Operating system (`windows`, `linux`, `macos`).
-    - `envs` *(dict, optional)*: Expected environment variables.
-    - `pythons` *(list)*:
-      - `version`: Python version.
-      - `interpreter`: Python interpreter (e.g., `CPython`, `PyPy`, `IronPython`).
-      - `modules` *(list)*: Repeats the module definition (`filename`, `variables`, `functions`, `classes`).
+Function Schema
+~~~~~~~~~~~~~~~
+
+Each function can define:
+
+- ``name``: Function name  
+- ``arguments``: List of parameter names and optional annotations  
+- ``return_annotation``: Optional return type annotation
+
+Class Schema
+~~~~~~~~~~~~
+
+Each class may include:
+
+- ``name``: Class name  
+- ``attributes``:  
+  - ``type``: `"instance"` or `"class"`  
+  - ``name``: Attribute name  
+  - ``value``: Expected value  
+  - ``annotation``: Optional type annotation  
+- ``methods``: Follows the same format as functions  
+- ``superclasses``: List of required base classes
+
+Deployments Block
+------------------
+
+The ``deployments`` section defines runtime compatibility requirements:
+
+- ``arch``: CPU architecture (e.g., `x86_64`, `arm64`)  
+- ``systems``: list of operating systems and environment constraints  
+  - ``os``: `linux`, `windows`, or `macos`  
+  - ``envs``: Required environment variables (`KEY: value`)  
+  - ``pythons``: Supported Python versions and interpreters  
+    - ``version``: Python version (e.g., `3.12.8`)  
+    - ``interpreter``: `CPython`, `PyPy`, etc.  
+    - ``modules``: Nested module definitions required in that context
+
+Global Module Definition (Baseline)
+-----------------------------------
+
+If you define a module structure **outside the `deployments:` section**,  
+it acts as a **global baseline** — a structural requirement that applies to **all environments**.
+
+This section can include:
+
+- ``filename``, ``variables``, ``functions``, ``classes``  
+- Shared interface contracts across platforms  
+- The minimum valid structure for the module to ever be imported
+
+.. note::
+   This is semantically treated as a **lower bound**:  
+   each deployment must satisfy the global structure plus any deployment-specific overrides.
 
 Full Example
 ------------
 
-Below is a real-world contract describing an IoT plugin module:
+Here is a complete import contract:
 
 .. code-block:: yaml
 
-   filename: extension.py
-   variables:
-     engine: docker
-     plugin_name: plugin name
-     plugin_description: plugin description
-   classes:
-     - name: Extension
-       attributes:
-         - type: instance
-           name: extension_instance_name
-           value: extension_instance_value
-         - type: class
-           name: extension_name
-           value: extension_value
-       methods:
-         - name: __init__
-           arguments:
-             - name: self
-         - name: add_extension
-           arguments:
-             - name: self
-             - name: msg
-               annotation: str
-           return_annotation: str
-         - name: remove_extension
-           arguments:
-             - name: self
-         - name: http_get_request
-           arguments:
-             - name: self
-       superclasses:
-         - Plugin
-     - name: Foo
-       methods:
-         - name: get_bar
-           arguments:
-             - name: self
-   deployments:
-     - arch: x86_64
-       systems:
-         - os: windows
-           pythons:
-             - version: 3.12.8
-               interpreter: CPython
-               modules:
-                 - filename: extension.py
-                   variables:
-                     author: Luca Atella
-             - version: 3.12.4
-               modules:
-                 - filename: addons.py
-             - interpreter: IronPython
-               modules:
-                 - filename: addons.py
-         - os: linux
-           pythons:
-             - version: 3.12.8
-               interpreter: CPython
-               modules:
-                 - filename: extension.py
-                   variables:
-                     author: Luca Atella
+    filename: extension.py
+    variables:
+      engine: docker
+      plugin_name: plugin name
+      plugin_description: plugin description
+    classes:
+      - name: Extension
+        attributes:
+          - type: instance
+            name: extension_instance_name
+            value: extension_instance_value
+          - type: class
+            name: extension_name
+            value: extension_value
+        methods:
+          - name: __init__
+            arguments:
+              - name: self
+          - name: add_extension
+            arguments:
+              - name: self
+              - name: msg
+                annotation: str
+            return_annotation: str
+          - name: remove_extension
+            arguments:
+              - name: self
+          - name: http_get_request
+            arguments:
+              - name: self
+        superclasses:
+          - Plugin
+      - name: Foo
+        methods:
+          - name: get_bar
+            arguments:
+              - name: self
+    deployments:
+      - arch: x86_64
+        systems:
+          - os: windows
+            pythons:
+              - version: 3.12.8
+                interpreter: CPython
+                modules:
+                  - filename: extension.py
+                    variables:
+                      author: Luca Atella
+              - version: 3.12.4
+                modules:
+                  - filename: addons.py
+              - interpreter: IronPython
+                modules:
+                  - filename: addons.py
+          - os: linux
+            pythons:
+              - version: 3.12.8
+                interpreter: CPython
+                modules:
+                  - filename: extension.py
+                    variables:
+                      author: Luca Atella
 
-Semantics of Deployment Blocks
-------------------------------
+Validation Behavior
+--------------------
 
-The `deployments` section allows you to describe **different valid environments** for the module.  
-Each combination of `arch` → `os` → `python` defines an **allowed execution context**.
-
-If the top-level module definition exists **outside of `deployments`**, it means:
-- **The module must exist in all environments**.
-- It acts as a **global constraint**, enforced regardless of the architecture.
-
-Usage Notes
------------
-
-- All fields are **optional**, but **hierarchy is mandatory**.
-- Missing fields are not validated.
-- The YAML is parsed into a `SpyModel`, which is then validated via ImportSpy’s internal logic.
-- Contracts can be reused across different modes:
-  - Embedded mode (`from importspy import Spy`)
-  - CLI mode (`importspy -s spymodel.yml extension.py`)
+- All fields are **optional**, but the **hierarchy must be respected**  
+- Missing fields are simply skipped during validation  
+- Order of items in lists (methods, attributes) is **not enforced**  
+- Contracts are parsed into `SpyModel` objects during validation  
+- Validation is consistent across both embedded and CLI modes
 
 Related Topics
 --------------
 
-- :doc:`embedded_mode`
-- :doc:`external_mode`
-- :doc:`defining_import_contracts`
+- :doc:`defining_import_contracts`  
+- :doc:`spy_execution_flow`  
+- :doc:`embedded_mode`  
+- :doc:`external_mode`  

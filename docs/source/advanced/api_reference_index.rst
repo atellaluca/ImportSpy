@@ -1,29 +1,45 @@
-API Reference
-=============
+api_reference_index
+===================
 
-The **API Reference** serves as a comprehensive guide to ImportSpy’s internal components,  
-providing a detailed breakdown of its **core logic, validation models, and utility functions**.  
-Whether you need to extend ImportSpy, integrate it into a larger system, or simply  
-understand how it enforces compliance, this section provides all the necessary details.
+API Reference: Internals & Extensibility
+----------------------------------------
 
-Inside This Reference 📖
-------------------------
+This section provides a **complete reference guide** to ImportSpy's internal API — designed for developers and contributors who want to:
 
-🔹 **Core API** → The foundation of ImportSpy, including validation logic, import hooks,  
-    and compliance enforcement mechanisms.  
+- 🔍 Understand how ImportSpy operates under the hood  
+- 🛠️ Extend its validation logic with custom models and validators  
+- ⚙️ Integrate runtime enforcement into existing architectures  
 
-🔹 **Models API** → The structural representations that ImportSpy uses to define module expectations,  
-    runtime constraints, and system-level requirements.  
+Whether you're writing plugins, debugging structural mismatches, or integrating ImportSpy into a CI/CD pipeline, this reference exposes all the essential **building blocks** behind the framework.
 
-🔹 **Utilities API** → A set of helper functions for reflection, system introspection, and  
-    dynamic module management.  
+🧩 What You'll Find Inside
+---------------------------
 
-This structured reference ensures that **every aspect of ImportSpy’s functionality** is well-documented  
-and accessible for developers looking to extend, debug, or optimize their usage of the framework.
+🔹 **Core API**  
+   The runtime logic powering ImportSpy’s contract enforcement.  
+   Includes import interceptors, validation orchestration, and execution gating.
+
+🔹 **Model Layer**  
+   Formal Pydantic-based representations of everything from modules and attributes  
+   to Python interpreters, environments, and deployment matrices.
+
+🔹 **Utility Layer**  
+   Introspection helpers for analyzing imports, resolving dependencies,  
+   reading metadata, or reflecting on runtime state.
+
+📚 Each module in this section is fully documented with:
+- Class definitions  
+- Method signatures  
+- Expected behavior  
+- Extension guidance  
+- Real-world usage examples  
 
 .. toctree::
    :maxdepth: 2
+   :caption: API Modules
 
    api_reference/api_core
    api_reference/api_models
    api_reference/api_utilities
+
+🧠 Use this reference to go beyond configuration — and shape ImportSpy around your architecture, policies, and execution model.

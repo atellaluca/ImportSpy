@@ -1,89 +1,114 @@
-Utilities & Mixins
-==================
+Utilities & Mixins: Internal Tools for Reflection and Runtime Enforcement
+=========================================================================
 
-ImportSpy includes a set of **utility modules and mixins** designed to support its  
-**runtime validation, contract enforcement, and module inspection capabilities**.
+ImportSpy’s validation engine is powered by a suite of **utility classes** and **mixins**  
+that enable deep introspection of modules, environments, and Python runtimes.  
+These components provide the **mechanical backbone** for runtime analysis, structural extraction,  
+and platform compatibility checks across both **embedded** and **external** validation modes.
 
-These components form the **underlying foundation** of ImportSpy’s validation engine,  
-providing low-level access to system, runtime, and environment information—ensuring  
-that **every validation step is executed with context-aware accuracy**.
+This layer is not typically exposed to end-users—but is invaluable for contributors,  
+integrators, and advanced developers extending ImportSpy’s logic or building custom tooling.
 
 Utility Modules ⚙️
 ------------------
 
-Utility modules are responsible for gathering **system metadata**, **module structure**,  
-and **runtime information**, making it possible to validate whether a module is being  
-executed in a **compliant and compatible environment**.
+Each utility module encapsulates a specific aspect of **runtime introspection**, enabling:
 
-Key capabilities include:
+- 🔍 Extraction of class/function signatures, annotations, and globals  
+- 🧠 Detection of system identity (OS, architecture, interpreter, etc.)  
+- 🔐 Compliance checks for cross-platform and interpreter-specific constraints  
+- ⚙️ Lightweight, cached evaluation of runtime conditions
 
-- 📦 **Dynamic module inspection** – Discover classes, functions, annotations, and variables.  
-- 🧠 **Environment introspection** – Detect the current OS, Python version, and architecture.  
-- 🧩 **Cross-platform compatibility** – Verify whether modules are compatible with the target environment.
+These utilities are **orchestrated automatically** by the validation pipeline but can also  
+be used independently to write tools or perform standalone validations.
 
-ModuleUtil 🏗️
-^^^^^^^^^^^^^
+ModuleUtil – Structural Reflection 🧱
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `ModuleUtil` class offers **reflection-based introspection of Python modules**.  
-It supports dynamic loading, unloading, and deep inspection of classes, functions,  
-variables, inheritance hierarchies, and annotations.
+This utility performs deep reflection on a Python module, extracting:
+
+- Public/private classes  
+- Methods and their argument signatures  
+- Attribute values and types  
+- Class hierarchies and superclasses  
+- Function return annotations
 
 .. autoclass:: importspy.utilities.module_util.ModuleUtil
    :members:
    :undoc-members:
    :show-inheritance:
 
-SystemUtil 🖥️
-^^^^^^^^^^^^^
+SystemUtil – OS & Environment Detection 🌐
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `SystemUtil` class extracts **system-level information**, such as the operating system  
-and environment variables, which are crucial for OS-specific validations.
+Gathers platform metadata such as:
+
+- OS name (`linux`, `windows`, etc.)  
+- Hostname, architecture  
+- Environment variable inspection and resolution
 
 .. autoclass:: importspy.utilities.system_util.SystemUtil
    :members:
    :undoc-members:
    :show-inheritance:
 
-PythonUtil 🐍
-^^^^^^^^^^^^^
+PythonUtil – Interpreter Validation 🐍
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `PythonUtil` class analyzes the **Python runtime environment**.  
-It identifies the interpreter (e.g., CPython, PyPy) and validates version compatibility.
+Identifies the active interpreter and Python version with semantic normalization.  
+Also verifies whether the environment satisfies version-based or interpreter-based constraints  
+declared in the import contract.
 
 .. autoclass:: importspy.utilities.python_util.PythonUtil
    :members:
    :undoc-members:
    :show-inheritance:
 
-RuntimeUtil 🚀
-^^^^^^^^^^^^^^
+RuntimeUtil – Hardware & Architecture Awareness 🧬
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `RuntimeUtil` class provides details about the system’s **hardware architecture**.  
-This is especially useful for enforcing platform-specific constraints in contracts.
+Provides a detailed overview of:
+
+- CPU architecture (`x86_64`, `arm64`, etc.)  
+- Runtime compatibility with deployment targets  
+- Cross-architecture filtering logic for contract enforcement
 
 .. autoclass:: importspy.utilities.runtime_util.RuntimeUtil
    :members:
    :undoc-members:
    :show-inheritance:
 
-Mixins 🔄
----------
+Mixin Components 🔁
+-------------------
 
-Mixins in Python are **modular, reusable behavior components** that can be combined  
-with other classes without full inheritance. ImportSpy leverages mixins to extend  
-its validation logic in a **clean, non-invasive way**.
+ImportSpy also uses **mixins** to modularize logic that applies across validators and inspectors  
+without duplicating functionality or creating deep class hierarchies.
 
-If you're new to Python mixins, check out:  
-`Mixins in Python (Real Python) <https://realpython.com/inheritance-composition-python/#using-mixins-in-python>`_
+These reusable components inject specialized logic into validation classes where needed.
 
 AnnotationValidatorMixin 🏷️
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `AnnotationValidatorMixin` enables **type-safe validation** of annotations  
-used in functions, arguments, and variable declarations.  
-It ensures that all annotations match the types supported by ImportSpy's contract system.
+Ensures that function signatures and variable annotations match the declared expectations.  
+It supports:
+
+- Basic type matching (`str`, `int`, etc.)  
+- Optional and generic annotations  
+- Graceful fallback for missing or untyped values
 
 .. autoclass:: importspy.mixins.annotations_validator_mixin.AnnotationValidatorMixin
    :members:
    :undoc-members:
    :show-inheritance:
+
+📌 Tip:
+-------
+
+While these components are internal, they can be extended or overridden when customizing  
+ImportSpy’s validation strategy for highly specific use cases (e.g., custom deployment platforms,  
+corporate runtime wrappers, or secure import enforcement).
+
+For more on customizing validation behavior, see:
+
+- :doc:`../architecture/architecture_design_decisions`
+- :doc:`api_validators`
