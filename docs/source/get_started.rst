@@ -42,4 +42,3 @@ Ready to dive in? Let’s get started! 🚀
 
    get_started/installation
    get_started/example_overview
-   get_started/import_contracts
