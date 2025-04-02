@@ -153,10 +153,10 @@ ImportSpy addresses this challenge by enforcing a **declarative contract-driven 
 📚 Key Concepts
 ---------------
 
-- **Import Contracts**: YAML files describing structural expectations
-- **Validation Engine**: core component that compares module against contract
-- **Spy Execution Flow**: logic that determines how and when validation occurs
-- **Error Handling**: developer-friendly error messages
+- **Import Contracts**: `YAML files describing structural expectation <https://importspy.readthedocs.io/en/latest/overview/understanding_importspy/contract_structure.html>`_
+- **Validation Engine**: `core component that compares module against contract <https://importspy.readthedocs.io/en/latest/overview/understanding_importspy/validation_and_compliance.html>`_
+- **Spy Execution Flow**: `logic that determines how and when validation occurs <https://importspy.readthedocs.io/en/latest/overview/understanding_importspy/spy_execution_flow.html>`_
+- **Error Handling**: developer-friendly error messages `<https://importspy.readthedocs.io/en/latest/overview/understanding_importspy/error_handling.html>`_
 - **Modes**: Embedded (runtime) and External (CLI)
 
 ⚙ Requirements
