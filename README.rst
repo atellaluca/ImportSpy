@@ -37,9 +37,7 @@ ImportSpy addresses this challenge by enforcing a **declarative contract-driven 
 - ✅ Eliminates debugging headaches by validating environments dynamically.
 - ✅ Gives you full control over how and where your code is used.
 
-.. note::
-
-   "ImportSpy is not just a tool; it's a movement toward secure, auditable Python codebases."
+"**ImportSpy is not just a tool; it's a movement toward secure, auditable Python codebases.**"
 
 🔴 Without vs 🟢 With ImportSpy
 -------------------------------
@@ -145,22 +143,12 @@ ImportSpy addresses this challenge by enforcing a **declarative contract-driven 
 - 🔹 **Security-focused projects** that want to restrict runtime execution contexts
 - 🔹 **Python package maintainers** who need to validate runtime constraints for users
 
-.. tip::
-
-   If your project relies on external modules, ImportSpy is your safeguard against execution chaos. 🔥
-
 📦 Installation
 ---------------
 
 .. code-block:: bash
 
     pip install importspy
-
-Or, if using Poetry:
-
-.. code-block:: bash
-
-    poetry add importspy
 
 📚 Key Concepts
 ---------------
@@ -202,28 +190,23 @@ ImportSpy is built to improve the **resilience, auditability, and safety** of Py
 - 🛠 Developers: Build validators or tooling
 - 🏢 Companies: Enforce contracts at scale
 - 💡 CI engineers: Automate structural compliance
+Ways to Help 🚀
+~~~~~~~~~~~~~~~
 
-💖 Support the Project
-----------------------
+- ⭐ **Star the project** on GitHub → `Give it a star! <https://github.com/atellaluca/ImportSpy>`_  
+- 🛠️ **Contribute** → Open issues, PRs, or improve docs.  
+- 📣 **Share ImportSpy** with developers who need execution control.  
+- 💖 **Sponsor ImportSpy** to support development → `Become a sponsor <https://github.com/sponsors/atellaluca>`_.  
 
-Your sponsorship helps us:
+Every contribution helps make ImportSpy **better, stronger, and more useful**!
 
-- Expand validation features
-- Improve docs and tutorials
-- Develop IDE extensions
+📜 License
+----------
 
-👉 https://github.com/sponsors/atellaluca
+ImportSpy is released under the `MIT License <https://github.com/atellaluca/ImportSpy/blob/main/LICENSE>`_
 
 📚 Learn More
 -------------
-
-- `Installation <https://importspy.readthedocs.io/en/latest/get_started/installation.html>`__
-- `Contract Design <https://importspy.readthedocs.io/en/latest/overview/understanding_importspy/defining_import_contracts.html>`__
-- `Architecture <https://importspy.readthedocs.io/en/latest/advanced/architecture_index.html>`__
-
-📦 Project Status
------------------
-
-Launched in **October 2024**, ImportSpy is actively maintained and ready for production use.
+- 📖 **Documentation**: https://importspy.readthedocs.io/ 
 
 🔥 Take control of your imports. Start using ImportSpy today! 🚀
