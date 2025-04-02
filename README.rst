@@ -15,11 +15,16 @@ Contract-based import validation for Python modules.
 
 ImportSpy is a runtime enforcement engine that protects Python modules from being imported or executed in unauthorized, unverified, or structurally incompatible environments — using declarative **import contracts** defined in YAML.
 
-🧠 ImportSpy ensures:  
-- ✅ Your code is only imported in **verified contexts**  
-- ✅ Module structure matches declared expectations  
-- ✅ Runtime conditions (OS, Python version, architecture) are enforced  
-- ✅ Environments behave predictably across CI, staging, and production  
+🧠 **ImportSpy** ensures:  
+
+   ✅ Your code is only imported in **verified contexts**  
+
+   ✅ Module structure matches declared expectations  
+
+   ✅ Runtime conditions (OS, Python version, architecture) are enforced  
+
+   ✅ Environments behave predictably across CI, staging, and production  
+
 
 .. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/importspy-works.png
    :width: 830
@@ -176,9 +181,9 @@ Supported Python: 3.10+
 📚 Docs
 -------
 
-📘 Full Documentation → https://importspy.readthedocs.io/  
-🧱 Architecture Overview → https://importspy.readthedocs.io/en/latest/advanced/architecture_index.html  
-🧪 Examples & Use Cases → https://importspy.readthedocs.io/en/latest/overview/use_cases_index.html
+- 📘 Full Documentation → https://importspy.readthedocs.io/  
+- 🧱 Architecture Overview → https://importspy.readthedocs.io/en/latest/advanced/architecture_index.html  
+- 🧪 Examples & Use Cases → https://importspy.readthedocs.io/en/latest/overview/use_cases_index.html
 
 ❤️ Contribute, Share, Support
 -----------------------------
