@@ -21,7 +21,7 @@ It enables robust module validation through two powerful modes:
 - **Embedded Mode** – for package-level introspective validation at runtime.
 - **External Mode** – for standalone CLI-based validation in CI/CD workflows.
 
-.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/ImportSpy.png
+.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/importspy-works.png
    :width: 830
    :alt: How ImportSpy Works
 
@@ -217,9 +217,9 @@ Your sponsorship helps us:
 📚 Learn More
 -------------
 
-- Installation: `docs/get_started/installation.rst`
-- Contract Design: `docs/overview/understanding_importspy/contract_structure.rst`
-- Architecture: `docs/advanced/architecture/architecture_overview.rst`
+- `Installation <https://importspy.readthedocs.io/en/latest/get_started/installation.html>`__
+- `Contract Design <https://importspy.readthedocs.io/en/latest/overview/understanding_importspy/defining_import_contracts.html>`__
+- `Architecture <https://importspy.readthedocs.io/en/latest/advanced/architecture_index.html>`__
 
 📦 Project Status
 -----------------
