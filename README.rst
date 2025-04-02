@@ -42,7 +42,7 @@ ImportSpy addresses this challenge by enforcing a **declarative contract-driven 
    "ImportSpy is not just a tool; it's a movement toward secure, auditable Python codebases."
 
 🔴 Without vs 🟢 With ImportSpy
-------------------------------
+-------------------------------
 
 .. list-table:: Comparison of Using and Not Using ImportSpy
    :header-rows: 1
