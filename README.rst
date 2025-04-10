@@ -1,7 +1,9 @@
+.. image:: https://img.shields.io/pypi/pyversions/importspy
 .. image:: https://img.shields.io/pypi/v/importspy
    :target: https://pypi.org/project/importspy/
-.. image:: https://img.shields.io/pypi/dm/importspy
-.. image:: https://img.shields.io/pypi/pyversions/importspy
+.. image:: https://static.pepy.tech/badge/importspy
+   :target: https://pepy.tech/projects/importspy
+   :alt: PyPI Downloads
 .. image:: https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?style=flat-square
    :target: https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml
 .. image:: https://img.shields.io/readthedocs/importspy?style=flat-square
