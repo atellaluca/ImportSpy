@@ -21,6 +21,7 @@ Delegates detailed checks to:
 
 from ..models import Module
 from ..errors import Errors
+from .variable_validator import VariableValidator
 from .attribute_validator import AttributeValidator
 from .function_validator import FunctionValidator
 from .common_validator import CommonValidator
@@ -43,6 +44,7 @@ class ModuleValidator:
         """
         Initialize the validator with attribute and function checkers.
         """
+        self._variable_validator = VariableValidator()
         self._attribute_validator = AttributeValidator()
         self._function_validator = FunctionValidator()
 
@@ -97,13 +99,9 @@ class ModuleValidator:
             if module_1.version and module_1.version != module_2.version:
                 raise ValueError(Errors.VERSION_MISMATCH.format(module_1.version, module_2.version))
 
-            # Validate global variables
-            CommonValidator().dict_validate(
+            self._variable_validator.validate(
                 module_1.variables,
-                module_2.variables,
-                Errors.VAR_MISSING,
-                Errors.VAR_MISMATCH
-            )
+                module_2.variables)
 
             # Validate top-level functions
             self._function_validator.validate(

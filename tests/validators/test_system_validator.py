@@ -45,7 +45,7 @@ class TestSystemValidator:
 
     def test_system_os_invalid(self):
         with pytest.raises(ValueError,
-                           match=re.escape(Errors.INVALID_OS.format("A invalid value", Constants.SUPPORTED_OS))):
+                           match=re.escape(Errors.INVALID_OS.format(Constants.SUPPORTED_OS, "A invalid value"))):
             System(
                 os="A invalid value",
                 pythons=[]

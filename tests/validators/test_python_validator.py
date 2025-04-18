@@ -16,7 +16,7 @@ class TestPythonValidator:
     @pytest.fixture
     def data_1(self):
         return [Python(
-            version="12.0.1",
+            version="3.13.9",
             modules=[]
         )]
     

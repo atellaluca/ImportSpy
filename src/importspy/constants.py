@@ -94,6 +94,14 @@ class Constants:
         Config.OS_MACOS
     ]
 
+    SUPPORTED_PYTHON_VERSION=[
+        Config.PYTHON_VERSION_3_13,
+        Config.PYTHON_VERSION_3_12,
+        Config.PYTHON_VERSION_3_11,
+        Config.PYTHON_VERSION_3_10,
+        Config.PYTHON_VERSION_3_9
+    ]
+
     SUPPORTED_PYTHON_IMPLEMENTATION = [
         Config.INTERPRETER_CPYTHON,
         Config.INTERPRETER_PYPY,

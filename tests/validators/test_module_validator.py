@@ -1,6 +1,7 @@
 import pytest
 from importspy.models import (
-    Module
+    Module,
+    Variable
 )
 from importspy.validators.module_validator import ModuleValidator
 from importspy.errors import Errors
@@ -35,25 +36,33 @@ class TestModuleValidator:
 
     @pytest.fixture
     def variables_setter(self, data_2:List[Module]):
-        data_2[0].variables={
-            "attempt":4,
-            "msg": "Hi!" 
-        }
+        data_2[0].variables=[
+            Variable(
+                name="attempt",
+                value=4
+            ),
+            Variable(
+                name="msg",
+                value="Hi!"
+            )
+        ]
 
     @pytest.fixture
     def data_3(self):
         return [Module(
             filename="package.py",
             version="0.1.0",
-            variables={
-                "attempt":4,
-                "msg": "Hello!" 
-            }
+            variables=[
+                Variable(
+                    name="attempt",
+                    value=4
+                )
+            ]
         )]
     
     @pytest.fixture
     def variables_msg_setter(self, data_3:List[Module]):
-        data_3[0].variables['msg'] = "Hi!"
+        data_3[0].variables.append(Variable(name="msg", value="Hi!"))
 
     @pytest.mark.usefixtures("filename_setter")
     @pytest.mark.usefixtures("version_unsetter")
@@ -75,7 +84,7 @@ class TestModuleValidator:
     def test_module_mismatch_2(self, data_2:List[Module], data_3:List[Module]):
         with pytest.raises(
             ValueError,
-            match=Errors.VAR_MISSING.format(data_3[0].variables)
+            match=re.escape(Errors.ELEMENT_MISSING.format(data_3[0].variables))
         ):
             self.validator.validate(data_3, data_2[0])
     
