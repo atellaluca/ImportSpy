@@ -1,8 +1,11 @@
 filename: extension.py
 variables:
-  engine: docker
-  plugin_name: plugin name
-  plugin_description: plugin description
+  - name: engine
+    value: docker
+  - name: plugin_name
+    value: plugin name
+  - name: plugin_description
+    value: plugin description
 classes:
   - name: Extension
     attributes:
@@ -49,7 +52,8 @@ deployments:
               - filename: extension.py
                 version:
                 variables:
-                  author: Luca Atella
+                  - name: author 
+                    value: Luca Atella
                 functions:
                 classes:
           - version: 3.12.4
@@ -67,4 +71,5 @@ deployments:
               - filename: extension.py
                 version:
                 variables:
-                  author: Luca Atella
+                  - name: author
+                    value: Luca Atella

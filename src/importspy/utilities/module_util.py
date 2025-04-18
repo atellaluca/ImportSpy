@@ -38,6 +38,7 @@ ClassInfo = namedtuple('ClassInfo', ["name", "attributes", "methods", "superclas
 FunctionInfo = namedtuple('FunctionInfo', ["name", "arguments", "return_annotation"])
 ArgumentInfo = namedtuple('ArgumentInfo', ["name", "annotation", "value"])
 AttributeInfo = namedtuple('AttributeInfo', ["type", "name", "annotation", "value"])
+VariableInfo = namedtuple('VariableInfo', ["name", "annotation", "value"])
 
 
 class ModuleUtil:
@@ -158,16 +159,12 @@ class ModuleUtil:
         return str(annotation)
 
     def extract_variables(self, info_module: ModuleType) -> dict:
-        """
-        Extracts top-level variables from the module.
-        """
-        return {
-            name: obj
-            for name, obj in inspect.getmembers(info_module)
-            if not callable(obj)
-            and not isinstance(obj, ModuleType)
-            and not (name.startswith("__") and name.endswith("__"))
-        }
+        variables_info:List[VariableInfo] = []
+        for name, value in inspect.getmembers(info_module):
+            if not name.startswith('__') and not inspect.ismodule(value) and not inspect.isfunction(value) and not inspect.isclass(value):
+                annotation = self.extract_annotation(type(value))
+                variables_info.append(VariableInfo(name=name, annotation=annotation, value=value))
+        return variables_info
 
     def extract_functions(self, info_module: ModuleType) -> List[FunctionInfo]:
         """

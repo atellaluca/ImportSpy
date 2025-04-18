@@ -20,11 +20,11 @@ import contracts (usually defined in `.yml` files).
 
 Categories covered:
 -------------------
-- 🔁 General Warnings (e.g., recursion detection)
-- 📦 Module & Variable Validation
-- 🧩 Function, Class & Inheritance Validation
-- ⚙️  Runtime Context Validation (OS, architecture, version)
-- 🧪 Annotation and Type Constraints
+- General Warnings (e.g., recursion detection)
+- Module & Variable Validation
+- Function, Class & Inheritance Validation
+- Runtime Context Validation (OS, architecture, version)
+- Annotation and Type Constraints
 
 Usage:
 ------
@@ -59,6 +59,8 @@ class Errors:
     FUNCTION_RETURN_ANNOTATION_MISMATCH = (
         "Return annotation mismatch for {0} '{1}': expected '{2}', found '{3}'."
     )
+    VARIABLE_MISMATCH = "Variable mismatch'{1}': expected '{2}', found '{3}'."
+    VARIABLE_MISSING = "Missing variable '{0}'"
     ARGUMENT_MISMATCH = "Argument mismatch for {0} '{1}': expected '{2}', found '{3}'."
     ARGUMENT_MISSING = "Missing argument '{0}' in {1}."
     
@@ -75,6 +77,10 @@ class Errors:
     # Runtime Validation Errors
     INVALID_ARCHITECTURE = "Invalid architecture: expected '{0}', found '{1}'."
     INVALID_OS = "Invalid Operating System: expected one of {0}, but found '{1}'."
+
+    # Python Valitation Errors
+    INVALID_PYTHON_VERSION = "Invalid python version: expected one of '{0}', but found '{1}'."
+    INVALID_PYTHON_INTERPRETER = "Invalid python interpreter: expected one of '{0}', but found '{1}'."
 
     # Annotation Validation
     INVALID_ANNOTATION = "Invalid annotation: expected one of {0}, but found '{1}'."
