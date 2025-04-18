@@ -36,11 +36,11 @@ rules about where, how, and by whom they can be safely imported — and blocks a
 🔍 Key Benefits
 ---------------
 
-✅ Prevent import from unsupported environments  
-✅ Enforce structural expectations (classes, attributes, arguments)  
-✅ Control who can use your module and how  
-✅ Reduce runtime surprises across CI, staging, and production  
-✅ Define everything in readable `.yml` contracts
+- ✅ Prevent import from unsupported environments
+- ✅ Enforce structural expectations (classes, attributes, arguments)  
+- ✅ Control who can use your module and how  
+- ✅ Reduce runtime surprises across CI, staging, and production  
+- ✅ Define everything in readable `.yml` contracts
 
 💡 Why ImportSpy?
 -----------------
