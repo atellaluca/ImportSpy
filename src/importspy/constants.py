@@ -1,80 +1,59 @@
-"""
-importspy.constants
-====================
-
-Central repository of internal constants for ImportSpy.
-
-This module defines the `Constants` class, which provides all hardcoded values
-used throughout the validation engine. These include supported architectures,
-operating systems, annotation types, and structural metadata keys.
-
-Unlike the `Config` class — which is dynamic and environment-aware —  
-`Constants` acts as a fixed baseline of what ImportSpy considers valid and supported.
-
-By consolidating these values in one place:
-- Validation becomes more consistent and predictable.
-- Runtime errors due to unsupported types are easier to detect and debug.
-- Import contracts can be matched against a known, canonical source of truth.
-
-These constants are particularly useful when defining or validating `.yml` import contracts.
-"""
-
 from .config import Config
 
 
 class Constants:
     """
-    Constants used internally by ImportSpy’s validation engine.
+    Constants used internally by ImportSpy's runtime validation engine.
 
-    This class includes:
-    - Lists of supported architectures, OS, and Python interpreters.
-    - Types of class attributes ImportSpy recognizes.
-    - Allowed annotations for arguments, functions, and variables.
-    - Metadata keys used during model extraction and comparison.
+    This class defines the canonical reference values used during import contract
+    validation, including supported architectures, operating systems, Python
+    interpreters, annotation types, and structural metadata keys.
+
+    Unlike `Config`, which defines values dynamically from the runtime or user
+    environment, `Constants` serves as the fixed baseline for what ImportSpy
+    considers valid and contract-compliant.
 
     Attributes:
-    -----------
-    KNOWN_ARCHITECTURES : list[str]
-        Architectures supported in the `deployments` section of import contracts.
+        KNOWN_ARCHITECTURES (List[str]):
+            List of CPU architectures supported in runtime validation,
+            including 'x86_64', 'arm64', 'i386', and others.
 
-    SUPPORTED_OS : list[str]
-        Operating systems considered valid during runtime validation.
+        SUPPORTED_OS (List[str]):
+            List of supported operating systems: 'linux', 'windows', and 'darwin'.
 
-    SUPPORTED_PYTHON_IMPLEMENTATION : list[str]
-        Accepted Python interpreters (e.g., CPython, PyPy, Jython).
+        SUPPORTED_PYTHON_VERSION (List[str]):
+            List of supported Python versions, e.g. '3.9', '3.10', '3.11', etc.
 
-    SUPPORTED_CLASS_ATTRIBUTE_TYPES : list[str]
-        Distinguishes between `class` and `instance` attribute levels.
+        SUPPORTED_PYTHON_IMPLEMENTATION (List[str]):
+            Python interpreter implementations recognized by ImportSpy,
+            such as 'CPython', 'PyPy', 'IronPython', and others.
 
-    SUPPORTED_ANNOTATIONS : list[str]
-        Set of annotation types supported by ImportSpy.
+        SUPPORTED_CLASS_ATTRIBUTE_TYPES (List[str]):
+            Allowed attribute type classifications: 'class' and 'instance'.
 
-    NAME : str
-        Metadata key for a named entity (e.g., class name, function name).
+        SUPPORTED_ANNOTATIONS (List[str]):
+            Allowed annotation types used for validating variables,
+            arguments, and return values. Includes types such as
+            'int', 'str', 'Optional', 'Union', 'Callable', etc.
 
-    VALUE : str
-        Metadata key representing a literal value in import contracts.
+        NAME (str):
+            Metadata key used for referencing object names in the model.
 
-    CLASS_TYPE : str
-        String identifier for class-level attributes (`class`).
+        VALUE (str):
+            Metadata key used to represent literal values in contracts.
 
-    INSTANCE_TYPE : str
-        String identifier for instance-level attributes (`instance`).
+        ANNOTATION (str):
+            Metadata key used to refer to a declared annotation in contracts.
 
-    LOG_MESSAGE_TEMPLATE : str
-        Template used to standardize logging output.
+        CLASS_TYPE (str):
+            String literal used to label a class-level attribute type.
 
-    Example:
-    --------
-    .. code-block:: python
+        INSTANCE_TYPE (str):
+            String literal used to label an instance-level attribute type.
 
-        from importspy.constants import Constants
-
-        if arch not in Constants.KNOWN_ARCHITECTURES:
-            raise ValueError(f"Unsupported architecture: {arch}")
-
-        if annotation not in Constants.SUPPORTED_ANNOTATIONS:
-            raise ValueError(f"Unsupported type: {annotation}")
+        LOG_MESSAGE_TEMPLATE (str):
+            Template string for standardized log message formatting
+            during contract evaluation and model parsing.
     """
 
     KNOWN_ARCHITECTURES = [

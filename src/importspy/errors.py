@@ -1,44 +1,91 @@
-"""
-importspy.errors
-=================
-
-Centralized error messaging for ImportSpy's validation system.
-
-The `Errors` class collects all exceptions and warning messages raised during 
-ImportSpy's inspection and validation process. This includes structural mismatches, 
-runtime violations, and argument inconsistencies found during contract enforcement.
-
-By consolidating these messages into a single location:
-
-- Developers can reuse consistent, human-readable phrasing across the codebase.
-- Error strings are easier to update and internationalize.
-- Each message includes placeholders (`{0}`, `{1}`, etc.) to inject context-specific
-  information at runtime, making diagnostics more informative.
-
-These messages are primarily raised when validating Python modules against their
-import contracts (usually defined in `.yml` files).
-
-Categories covered:
--------------------
-- General Warnings (e.g., recursion detection)
-- Module & Variable Validation
-- Function, Class & Inheritance Validation
-- Runtime Context Validation (OS, architecture, version)
-- Annotation and Type Constraints
-
-Usage:
-------
-
-.. code-block:: python
-
-    from importspy.errors import Errors
-
-    raise ValueError(
-        Errors.CLASS_ATTRIBUTE_MISSING.format("extension_name", "Extension")
-    )
-"""
-
 class Errors:
+
+    """
+    Central repository for error messages used in ImportSpy’s validation engine.
+
+    This class contains formatted string constants for every type of structural,
+    semantic, and runtime validation error that can be raised during contract
+    evaluation. These error messages provide actionable feedback and are used
+    throughout ImportSpy's exception handling system.
+
+    The format strings typically include placeholders for contextual details,
+    such as expected and actual values, function names, class names, or
+    annotation types. Grouped by category, these constants help keep the
+    validation engine consistent and maintainable.
+
+    Attributes:
+        ANALYSIS_RECURSION_WARNING (str):
+            General warning when the validation process detects recursive self-analysis.
+
+        FILENAME_MISMATCH (str):
+            Raised when the module filename does not match the expected contract.
+
+        VERSION_MISMATCH (str):
+            Triggered when the module version deviates from the one declared in the contract.
+
+        ENV_VAR_MISSING (str):
+            Raised when a required environment variable is not found in the system.
+
+        ENV_VAR_MISMATCH (str):
+            Indicates a mismatch between the expected and actual values of an environment variable.
+
+        VAR_MISSING (str):
+            Raised when a required variable is not present in the importing module.
+
+        VAR_MISMATCH (str):
+            Raised when a variable is present but its value does not match what the contract expects.
+
+        FUNCTIONS_MISSING (str):
+            Used when one or more expected functions are missing from the module.
+
+        FUNCTION_RETURN_ANNOTATION_MISMATCH (str):
+            Indicates a mismatch in the return type annotation of a function.
+
+        VARIABLE_MISMATCH (str):
+            Raised when a declared variable's value does not match the expected value.
+
+        VARIABLE_MISSING (str):
+            Raised when a declared variable is not found.
+
+        ARGUMENT_MISMATCH (str):
+            Raised when a function argument has an unexpected name or annotation.
+
+        ARGUMENT_MISSING (str):
+            Raised when a required argument is missing in the function signature.
+
+        CLASS_MISSING (str):
+            Triggered when a required class is not defined in the importing module.
+
+        CLASS_ATTRIBUTE_MISSING (str):
+            Raised when an expected attribute is not found in a class definition.
+
+        CLASS_ATTRIBUTE_MISMATCH (str):
+            Raised when an attribute exists but its value does not match what the contract expects.
+
+        CLASS_SUPERCLASS_MISSING (str):
+            Triggered when a required superclass is missing from a class declaration.
+
+        INVALID_ATTRIBUTE_TYPE (str):
+            Raised when an attribute has an unsupported type.
+
+        INVALID_ARCHITECTURE (str):
+            Triggered when the system architecture does not match any of the allowed values.
+
+        INVALID_OS (str):
+            Triggered when the operating system is not among those supported.
+
+        INVALID_PYTHON_VERSION (str):
+            Raised when the current Python version is not one of the accepted versions.
+
+        INVALID_PYTHON_INTERPRETER (str):
+            Raised when the Python interpreter is not among the supported ones.
+
+        INVALID_ANNOTATION (str):
+            Raised when a variable, argument, or return annotation is unsupported.
+
+        ELEMENT_MISSING (str):
+            Generic error for any expected element missing from the system or module context.
+    """
     
     # General Warnings
     ANALYSIS_RECURSION_WARNING = (
