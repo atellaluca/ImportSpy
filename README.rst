@@ -29,10 +29,6 @@ Runtime-safe. Structure-aware. Declarative.
 ImportSpy allows your Python modules to define explicit **import contracts**:  
 rules about where, how, and by whom they can be safely imported — and blocks any import that doesn’t comply.
 
-.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/importspy-works.png
-   :alt: How ImportSpy Works
-   :width: 830
-
 🔍 Key Benefits
 ---------------
 
@@ -56,6 +52,10 @@ ImportSpy offers you **runtime import governance** — clearly defined, enforced
 
 📐 Architecture Highlight
 -------------------------
+
+.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/importspy-spy-model-architecture.png
+   :alt: ImportSpy, SpyModel Architecture
+   :width: 830
 
 ImportSpy uses a layered model (`SpyModel`) that mirrors your execution context and module structure:
 
@@ -111,6 +111,10 @@ Each element is introspected and validated dynamically, at runtime or via CLI.
    importer.Plugin().run()
 
 **CLI Mode** – validate externally in CI/CD:
+
+.. image:: https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/assets/importspy-works.png
+   :alt: How ImportSpy CLI Mode Works
+   :width: 830
 
 .. code-block:: bash
 
