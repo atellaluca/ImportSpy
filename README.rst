@@ -20,6 +20,10 @@
    :target: https://github.com/atellaluca/ImportSpy
    :alt: GitHub Stars
 
+.. image:: https://img.shields.io/github/sponsors/atellaluca?style=social
+   :target: https://github.com/sponsors/atellaluca
+   :alt: Sponsor atellaluca
+
 ImportSpy
 =========
 
