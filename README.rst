@@ -16,6 +16,10 @@
    :target: https://importspy.readthedocs.io/
    :alt: Documentation Status
 
+.. image:: ./assets/importspy-banner.png
+   :alt: ImportSpy – Runtime Contract Validation for Python
+   :width: 500px
+
 ImportSpy
 =========
 
@@ -170,10 +174,17 @@ Each element is introspected and validated dynamically, at runtime or via CLI.
 - 🛠 Contribute via issues or PRs  
 - 💖 Sponsor → https://github.com/sponsors/atellaluca  
 
+🔥 **Let your modules enforce their own rules.**  
+Start importing with structure.
+
 📜 License
 ----------
 
 MIT © 2024 – Luca Atella
 
-🔥 **Let your modules enforce their own rules.**  
-Start importing with structure.
+.. image:: ./assets/importspy-logo.png
+   :alt: ImportSpy Logo
+   :width: 100px
+   :align: center
+
+**ImportSpy** is an open-source project maintained with ❤️ by `Luca Atella <https://www.linkedin.com/in/luca-atella/>`_.
