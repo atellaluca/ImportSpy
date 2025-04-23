@@ -1,3 +1,6 @@
+.. image:: https://img.shields.io/github/license/atellaluca/importspy
+   :alt: License
+
 .. image:: https://img.shields.io/pypi/v/importspy
    :target: https://pypi.org/project/importspy/
    :alt: PyPI Version
@@ -5,16 +8,13 @@
 .. image:: https://img.shields.io/pypi/pyversions/importspy
    :alt: Supported Python Versions
 
-.. image:: https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?style=flat-square
+.. image:: https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml
    :target: https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml
    :alt: Build Status
 
-.. image:: https://img.shields.io/readthedocs/importspy?style=flat-square
+.. image:: https://img.shields.io/readthedocs/importspy
    :target: https://importspy.readthedocs.io/
    :alt: Documentation Status
-
-.. image:: https://img.shields.io/github/license/atellaluca/importspy
-   :alt: License
 
 .. image:: https://img.shields.io/github/stars/atellaluca/ImportSpy?style=social
    :target: https://github.com/atellaluca/ImportSpy
