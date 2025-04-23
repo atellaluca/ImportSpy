@@ -19,8 +19,9 @@
 ImportSpy
 =========
 
-Contract-based import validation for Python modules.  
-Runtime-safe. Structure-aware. Declarative.
+Contract-based import validation for Python modules.
+
+*Runtime-safe, structure-aware, declarative.*
 
 ImportSpy allows your Python modules to define explicit **import contracts**:  
 rules about where, how, and by whom they can be safely imported — and blocks any import that doesn’t comply.
