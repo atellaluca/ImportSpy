@@ -89,5 +89,3 @@ class VariableValidator:
                         vars_2.value
                     )
                 )
-
-        return True

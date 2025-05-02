@@ -56,6 +56,13 @@ class Python(BaseModel):
             raise ValueError(Errors.INVALID_PYTHON_INTERPRETER.format(Constants.SUPPORTED_PYTHON_IMPLEMENTATION, value))
         return value
 
+class Environment(BaseModel):
+    """
+    Represents a set of environment variables and secret keys
+    defined for the system or application runtime.
+    """
+    variables: Optional[List['Variable']] = None
+    secrets: Optional[List[str]] = None
 
 class System(BaseModel):
     """
@@ -63,7 +70,7 @@ class System(BaseModel):
     and Python runtimes configured within the system.
     """
     os: str
-    envs: Optional[dict] = Field(default=None, repr=False)
+    environment: Optional[Environment] = None
     pythons: List[Python]
 
     @field_validator('os')
@@ -284,7 +291,9 @@ class SpyModel(Module):
                     systems=[
                         System(
                             os=os,
-                            envs=envs,
+                            environment=Environment(
+                                variables=envs
+                            ),
                             pythons=[
                                 Python(
                                     version=python_version,
