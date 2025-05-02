@@ -26,9 +26,13 @@ Example:
 import os
 import logging
 import platform
+from collections import namedtuple
+from typing import List
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+
+VariableInfo = namedtuple('VariableInfo', ["name", "value"])
 
 class SystemUtil:
     """
@@ -63,18 +67,22 @@ class SystemUtil:
         """
         return platform.system().lower()
 
-    def extract_envs(self) -> dict:
+    def extract_envs(self) -> List[VariableInfo]:
         """
-        Retrieve all current environment variables.
+        Return a list of environment variables available in the current process.
+
+        Uses `os.environ.items()` to collect all key-value pairs.
 
         Returns
         -------
-        dict
-            Dictionary of key-value environment variables.
+        List[VariableInfo]
+
+            A list of VariableInfo instances, each representing an environment variable.
 
         Example
         -------
         >>> SystemUtil().extract_envs()
-        {'PATH': '/usr/bin:/bin', 'HOME': '/home/user', ...}
+        [VariableInfo(name='PATH', value='/usr/bin'), VariableInfo(name='HOME', value='/home/user'), ...]
         """
-        return dict(os.environ)
+        return [VariableInfo(name, value) for name, value in os.environ.items()]
+

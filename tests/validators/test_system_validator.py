@@ -1,6 +1,8 @@
 import pytest
 from importspy.models import (
-    System
+    System,
+    Environment,
+    Variable
 )
 from importspy.config import Config
 from importspy.constants import Constants
@@ -17,7 +19,12 @@ class TestSystemValidator:
     def data_1(self):
         return [System(
             os=Config.OS_LINUX,
-            envs={"CI": "true"},
+            environment=Environment(
+                variables=[Variable(
+                    name="CI",
+                    value="true"
+                )]
+            ),
             pythons=[]
         )]
     
@@ -34,7 +41,7 @@ class TestSystemValidator:
     
     @pytest.fixture
     def envs_setter(self, data_2):
-        data_2[0].envs = {"CI": "true"}
+        data_2[0].environment = Environment(variables=[(Variable(name="CI", value="true"))])
 
     @pytest.mark.usefixtures("envs_setter")
     def test_system_os_match(self, data_1:List[System], data_2:List[System]):
@@ -55,7 +62,7 @@ class TestSystemValidator:
         with pytest.raises(
             ValueError,
             match=re.escape(
-                Errors.ENV_VAR_MISSING.format(data_1[0].envs)
+                Errors.ELEMENT_MISSING.format(data_1[0].environment)
             )
         ):
             self.validator.validate(data_1, data_2)

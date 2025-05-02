@@ -14,10 +14,13 @@ Delegates:
 """
 
 from typing import List
-from ..models import System
+from ..models import (
+    System,
+    Environment
+)
 from ..errors import Errors
-from .common_validator import CommonValidator
 from .python_validator import PythonValidator
+from .variable_validator import VariableValidator
 
 
 class SystemValidator:
@@ -40,6 +43,7 @@ class SystemValidator:
         Initialize the system validator and prepare supporting validators.
         """
         self._python_validator = PythonValidator()
+        self._environment_validator = SystemValidator.EnvironmentValidator()
 
     def validate(
         self,
@@ -81,19 +85,35 @@ class SystemValidator:
 
         if not systems_2:
             raise ValueError(Errors.ELEMENT_MISSING.format(systems_1))
-
-        cv = CommonValidator()
+        
         system_2 = systems_2[0]
 
         for system_1 in systems_1:
             if system_1.os == system_2.os:
-                if system_1.envs:
-                    cv.dict_validate(
-                        system_1.envs,
-                        system_2.envs,
-                        Errors.ENV_VAR_MISSING,
-                        Errors.ENV_VAR_MISMATCH
-                    )
+                if system_1.environment:
+                    self._environment_validator.validate(system_1.environment, system_2.environment)
                 if system_1.pythons:
                     self._python_validator.validate(system_1.pythons, system_2.pythons)
+                return
+
+    class EnvironmentValidator:
+
+        def __init__(self):
+            self._variable_validator = VariableValidator()
+        
+        def validate(self,
+                    environment_1:Environment,
+                    environment_2: Environment):
+            
+            if not environment_1:
+                return
+
+            if not environment_2:
+                raise ValueError(Errors.ELEMENT_MISSING.format(environment_1))
+            
+            variables_2 = environment_2.variables
+
+            if environment_1.variables:
+                variables_1 = environment_1.variables
+                self._variable_validator.validate(variables_1, variables_2)
                 return
