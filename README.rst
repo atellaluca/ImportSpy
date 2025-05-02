@@ -16,7 +16,7 @@
    :target: https://importspy.readthedocs.io/
    :alt: Documentation Status
 
-.. image:: ./assets/importspy-banner.png
+.. image:: https://github.com/atellaluca/ImportSpy/blob/main/assets/importspy-banner.png
    :alt: ImportSpy – Runtime Contract Validation for Python
    :width: 500px
 
