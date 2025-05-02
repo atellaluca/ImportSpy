@@ -129,3 +129,12 @@ class Constants:
         "[Operation: {operation}] [Status: {status}] "
         "[Details: {details}]"
     )
+
+class Scope:
+
+    SCOPE_VARIABLE = "variable"
+    SCOPE_ENVIRONMENT = "environment"
+    SCOPE_FUNCTION_ARG = "function_arg"
+    SCOPE_METHOD_ARG_IN_CLASS = "method_arg_in_class"
+    SCOPE_CLASS_ATTRIBUTE = "class_attribute"
+    SCOPE_INSTANCE_ATTRIBUTE = "instance_attribute"

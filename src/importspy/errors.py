@@ -1,139 +1,123 @@
-class Errors:
+from .constants import Scope
 
+class Errors:
     """
     Central repository for error messages used in ImportSpy’s validation engine.
 
-    This class contains formatted string constants for every type of structural,
-    semantic, and runtime validation error that can be raised during contract
-    evaluation. These error messages provide actionable feedback and are used
-    throughout ImportSpy's exception handling system.
-
-    The format strings typically include placeholders for contextual details,
-    such as expected and actual values, function names, class names, or
-    annotation types. Grouped by category, these constants help keep the
-    validation engine consistent and maintainable.
-
-    Attributes:
-        ANALYSIS_RECURSION_WARNING (str):
-            General warning when the validation process detects recursive self-analysis.
-
-        FILENAME_MISMATCH (str):
-            Raised when the module filename does not match the expected contract.
-
-        VERSION_MISMATCH (str):
-            Triggered when the module version deviates from the one declared in the contract.
-
-        ENV_VAR_MISSING (str):
-            Raised when a required environment variable is not found in the system.
-
-        ENV_VAR_MISMATCH (str):
-            Indicates a mismatch between the expected and actual values of an environment variable.
-
-        VAR_MISSING (str):
-            Raised when a required variable is not present in the importing module.
-
-        VAR_MISMATCH (str):
-            Raised when a variable is present but its value does not match what the contract expects.
-
-        FUNCTIONS_MISSING (str):
-            Used when one or more expected functions are missing from the module.
-
-        FUNCTION_RETURN_ANNOTATION_MISMATCH (str):
-            Indicates a mismatch in the return type annotation of a function.
-
-        VARIABLE_MISMATCH (str):
-            Raised when a declared variable's value does not match the expected value.
-
-        VARIABLE_MISSING (str):
-            Raised when a declared variable is not found.
-
-        ARGUMENT_MISMATCH (str):
-            Raised when a function argument has an unexpected name or annotation.
-
-        ARGUMENT_MISSING (str):
-            Raised when a required argument is missing in the function signature.
-
-        CLASS_MISSING (str):
-            Triggered when a required class is not defined in the importing module.
-
-        CLASS_ATTRIBUTE_MISSING (str):
-            Raised when an expected attribute is not found in a class definition.
-
-        CLASS_ATTRIBUTE_MISMATCH (str):
-            Raised when an attribute exists but its value does not match what the contract expects.
-
-        CLASS_SUPERCLASS_MISSING (str):
-            Triggered when a required superclass is missing from a class declaration.
-
-        INVALID_ATTRIBUTE_TYPE (str):
-            Raised when an attribute has an unsupported type.
-
-        INVALID_ARCHITECTURE (str):
-            Triggered when the system architecture does not match any of the allowed values.
-
-        INVALID_OS (str):
-            Triggered when the operating system is not among those supported.
-
-        INVALID_PYTHON_VERSION (str):
-            Raised when the current Python version is not one of the accepted versions.
-
-        INVALID_PYTHON_INTERPRETER (str):
-            Raised when the Python interpreter is not among the supported ones.
-
-        INVALID_ANNOTATION (str):
-            Raised when a variable, argument, or return annotation is unsupported.
-
-        ELEMENT_MISSING (str):
-            Generic error for any expected element missing from the system or module context.
+    All validation errors extend one of three generic templates:
+    - ELEMENT_MISSING: expected but not found
+    - ELEMENT_MISMATCH: found but does not match the declared contract
+    - ELEMENT_INVALID: found but not allowed (invalid value from limited set)
     """
-    
+
     # General Warnings
     ANALYSIS_RECURSION_WARNING = (
         "Warning: Analysis recursion detected. Avoid analyzing code that itself handles analysis, "
         "to prevent stack overflow or performance issues."
     )
 
-    # Module Validation Errors
-    FILENAME_MISMATCH = "Filename mismatch: expected '{0}', found '{1}'."
-    VERSION_MISMATCH = "Version mismatch: expected '{0}', found '{1}'."
-    ENV_VAR_MISSING = "Missing environment variable: '{0}'. Ensure it is defined in the system."
-    ENV_VAR_MISMATCH = "Environment variable value mismatch: expected '{0}', found '{1}'."
-    VAR_MISSING = "Missing variable: '{0}'. Ensure it is defined."
-    VAR_MISMATCH = "Variable value mismatch: expected '{0}', found '{1}'."
-    FUNCTIONS_MISSING = "Missing {0}: '{1}'. Ensure it is defined."
-
-    # Function and Class Validation Errors
-    FUNCTION_RETURN_ANNOTATION_MISMATCH = (
-        "Return annotation mismatch for {0} '{1}': expected '{2}', found '{3}'."
-    )
-    VARIABLE_MISMATCH = "Variable mismatch'{1}': expected '{2}', found '{3}'."
-    VARIABLE_MISSING = "Missing variable '{0}'"
-    ARGUMENT_MISMATCH = "Argument mismatch for {0} '{1}': expected '{2}', found '{3}'."
-    ARGUMENT_MISSING = "Missing argument '{0}' in {1}."
-    
-    CLASS_MISSING = "Missing class: '{0}'. Ensure it is defined."
-    CLASS_ATTRIBUTE_MISSING = "Missing attribute '{0}' in class '{1}'."
-    CLASS_ATTRIBUTE_MISMATCH = (
-        "Attribute value mismatch for '{0}' in class '{1}': expected '{2}', found '{3}'."
-    )
-    CLASS_SUPERCLASS_MISSING = (
-        "Missing superclass '{0}' in class '{1}'. Ensure that '{1}' extends '{0}'."
-    )
-    INVALID_ATTRIBUTE_TYPE = "Invalid attribute type: '{0}'. Supported types are: {1}."
-
-    # Runtime Validation Errors
-    INVALID_ARCHITECTURE = "Invalid architecture: expected '{0}', found '{1}'."
-    INVALID_OS = "Invalid Operating System: expected one of {0}, but found '{1}'."
-
-    # Python Valitation Errors
-    INVALID_PYTHON_VERSION = "Invalid python version: expected one of '{0}', but found '{1}'."
-    INVALID_PYTHON_INTERPRETER = "Invalid python interpreter: expected one of '{0}', but found '{1}'."
-
-    # Annotation Validation
-    INVALID_ANNOTATION = "Invalid annotation: expected one of {0}, but found '{1}'."
-
-    # Generic Element Missing
+    # Generic Templates
     ELEMENT_MISSING = (
         "{0} is declared but missing in the system. "
         "Ensure it is properly defined and implemented."
     )
+
+    ELEMENT_MISMATCH = (
+        "{0} is defined but its value does not match the expected one. "
+        "Expected: {1!r}, Found: {2!r}. "
+        "Check the implementation and update the contract or the code accordingly."
+    )
+
+    ELEMENT_INVALID = (
+        "{0} has an invalid value. "
+        "Allowed values: {1}. Found: {2!r}. "
+        "Update the environment or contract accordingly."
+    )
+
+    # Module Validation Errors
+    FILENAME_MISMATCH = ELEMENT_MISMATCH.format(
+        "The module filename", "{0}", "{1}"
+    )
+    VERSION_MISMATCH = ELEMENT_MISMATCH.format(
+        "The module version", "{0}", "{1}"
+    )
+
+    # Function and Class Validation
+    FUNCTION_RETURN_ANNOTATION_MISMATCH = ELEMENT_MISMATCH.format(
+        "The return annotation of {0} '{1}'", "{2}", "{3}"
+    )
+
+    CLASS_MISSING = ELEMENT_MISSING.format('The class "{0}"')
+    CLASS_SUPERCLASS_MISSING = ELEMENT_MISSING.format(
+        'The superclass "{0}" in class "{1}"'
+    )
+
+    # Annotation and Runtime Validation
+    INVALID_ANNOTATION = ELEMENT_INVALID.format(
+        "The annotation", "{allowed}", "{found}"
+    )
+    INVALID_ATTRIBUTE_TYPE = ELEMENT_INVALID.format(
+        "The attribute type", "{allowed}", "{found}"
+    )
+    INVALID_ARCHITECTURE = ELEMENT_INVALID.format(
+        "The system architecture", "{allowed}", "{found}"
+    )
+    INVALID_OS = ELEMENT_INVALID.format(
+        "The operating system", "{allowed}", "{found}"
+    )
+    INVALID_PYTHON_VERSION = ELEMENT_INVALID.format(
+        "The Python version", "{allowed}", "{found}"
+    )
+    INVALID_PYTHON_INTERPRETER = ELEMENT_INVALID.format(
+        "The Python interpreter", "{allowed}", "{found}"
+    )
+
+    # Scoped MISSING Errors
+    VARIABLE_MISSING_ERROR = ELEMENT_MISSING.format('The variable "{name}"')
+    ENV_VAR_MISSING_ERROR = ELEMENT_MISSING.format('The environment variable "{name}"')
+    FUNCTION_ARG_MISSING_ERROR = ELEMENT_MISSING.format('The argument "{name}" of function "{function}"')
+    METHOD_ARG_IN_CLASS_MISSING_ERROR = ELEMENT_MISSING.format(
+        'The argument "{name}" of method "{method}" of class "{class_name}"'
+    )
+    CLASS_ATTRIBUTE_MISSING_ERROR = ELEMENT_MISSING.format(
+        'The class attribute "{name}" of class "{class_name}"'
+    )
+    INSTANCE_ATTRIBUTE_MISSING_ERROR = ELEMENT_MISSING.format(
+        'The instance attribute "{name}" of class "{class_name}"'
+    )
+
+    # Scoped MISMATCH Errors
+    VARIABLE_MISMATCH_ERROR = ELEMENT_MISMATCH.format('The variable "{name}"', "{expected}", "{actual}")
+    ENV_VAR_MISMATCH_ERROR = ELEMENT_MISMATCH.format('The environment variable "{name}"', "{expected}", "{actual}")
+    FUNCTION_ARG_MISMATCH_ERROR = ELEMENT_MISMATCH.format(
+        'The argument "{name}" of function "{function}"', "{expected}", "{actual}"
+    )
+    METHOD_ARG_IN_CLASS_MISMATCH_ERROR = ELEMENT_MISMATCH.format(
+        'The argument "{name}" of method "{method}" of class "{class_name}"',
+        "{expected}", "{actual}"
+    )
+    CLASS_ATTRIBUTE_MISMATCH_ERROR = ELEMENT_MISMATCH.format(
+        'The class attribute "{name}" of class "{class_name}"', "{expected}", "{actual}"
+    )
+    INSTANCE_ATTRIBUTE_MISMATCH_ERROR = ELEMENT_MISMATCH.format(
+        'The instance attribute "{name}" of class "{class_name}"', "{expected}", "{actual}"
+    )
+
+    # Scope-to-message mapping
+    SCOPE_ELEMENT_MISSING_ERRORS = {
+        Scope.SCOPE_VARIABLE: VARIABLE_MISSING_ERROR,
+        Scope.SCOPE_ENVIRONMENT: ENV_VAR_MISSING_ERROR,
+        Scope.SCOPE_FUNCTION_ARG: FUNCTION_ARG_MISSING_ERROR,
+        Scope.SCOPE_METHOD_ARG_IN_CLASS: METHOD_ARG_IN_CLASS_MISSING_ERROR,
+        Scope.SCOPE_CLASS_ATTRIBUTE: CLASS_ATTRIBUTE_MISSING_ERROR,
+        Scope.SCOPE_INSTANCE_ATTRIBUTE: INSTANCE_ATTRIBUTE_MISSING_ERROR,
+    }
+
+    SCOPE_ELEMENT_MISMATCH_ERRORS = {
+        Scope.SCOPE_VARIABLE: VARIABLE_MISMATCH_ERROR,
+        Scope.SCOPE_ENVIRONMENT: ENV_VAR_MISMATCH_ERROR,
+        Scope.SCOPE_FUNCTION_ARG: FUNCTION_ARG_MISMATCH_ERROR,
+        Scope.SCOPE_METHOD_ARG_IN_CLASS: METHOD_ARG_IN_CLASS_MISMATCH_ERROR,
+        Scope.SCOPE_CLASS_ATTRIBUTE: CLASS_ATTRIBUTE_MISMATCH_ERROR,
+        Scope.SCOPE_INSTANCE_ATTRIBUTE: INSTANCE_ATTRIBUTE_MISMATCH_ERROR,
+    }

@@ -76,7 +76,6 @@ class FunctionValidator:
         -------
         >>> validator = FunctionValidator()
         >>> validator.validate(expected_functions, actual_functions, classname="MyService")
-        True
         """
         context_name = f"method in class {classname}" if classname else "function"
 
@@ -157,4 +156,3 @@ class FunctionValidator:
                 details="Validation successful."
             )
         )
-        return True

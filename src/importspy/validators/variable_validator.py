@@ -6,7 +6,8 @@ from typing import List
 
 class VariableValidator:
 
-    def __init__(self):
+    def __init__(self, scope: str):
+        self.scope = scope
         self.logger = LogManager().get_logger(self.__class__.__name__)
 
     def validate(
@@ -14,12 +15,13 @@ class VariableValidator:
         variables_1: List[Variable],
         variables_2: List[Variable],
     ):
+        self.logger.debug(f"Scope of valitadion: {self.scope}")
         self.logger.debug(f"Type of variables_1: {type(variables_1)}")
         self.logger.debug(
             Constants.LOG_MESSAGE_TEMPLATE.format(
                 operation="Variable validating",
                 status="Starting",
-                details=f"Expected Variables: {variables_1} ; Current Variables: {variables_2}"
+                details=f"Expected Variables: {variables_1} in {self.scope} scope ; Current Variables: {variables_2} in {self.scope} scope"
             )
         )
 
@@ -28,7 +30,7 @@ class VariableValidator:
                 Constants.LOG_MESSAGE_TEMPLATE.format(
                     operation="Check if variables_1 is not none",
                     status="Finished",
-                    details=f"No expected Variables; variables_1: {variables_1}"
+                    details=f"No expected Variables in {self.scope} scope; variables_1: {variables_1} in {self.scope} scope"
                 )
             )
             return
@@ -38,10 +40,10 @@ class VariableValidator:
                 Constants.LOG_MESSAGE_TEMPLATE.format(
                     operation="Checking variables_2 when variables_1 is missing",
                     status="Finished",
-                    details=f"No actual Variables found; variables_2: {variables_2}"
+                    details=f"No actual Variables in found in {self.scope} scope; variables_2: {variables_2} in {self.scope} scope"
                 )
             )
-            raise ValueError(Errors.ELEMENT_MISSING.format(variables_1))
+            raise ValueError(Errors.ELEMENT_MISSING.format(f"{variables_1}"))
 
         for vars_1 in variables_1:
             self.logger.debug(
