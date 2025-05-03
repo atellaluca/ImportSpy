@@ -20,8 +20,9 @@ from ..models import (
 )
 from ..errors import Errors
 from .python_validator import PythonValidator
+from ..constants import Constants
 from .variable_validator import VariableValidator
-
+from ..contexts import SimpleVariableContext
 
 class SystemValidator:
     """
@@ -99,7 +100,7 @@ class SystemValidator:
     class EnvironmentValidator:
 
         def __init__(self):
-            self._variable_validator = VariableValidator()
+            self._variable_validator = VariableValidator(context=SimpleVariableContext(Constants.SCOPE_ENVIRONMENT))
         
         def validate(self,
                     environment_1:Environment,
