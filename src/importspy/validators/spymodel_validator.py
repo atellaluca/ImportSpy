@@ -81,10 +81,8 @@ class SpyModelValidator:
         >>> validator = SpyModelValidator()
         >>> validator.validate(spy_model_contract, spy_model_live)
         """
-        # Validate runtime deployments
         self._runtime_validator.validate(spy_model_1.deployments, spy_model_2.deployments)
-
-        # Navigate through the resolved runtime > system > python > module
+        
         self._module_validator.validate(
             [spy_model_1],
             spy_model_2

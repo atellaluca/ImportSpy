@@ -1,4 +1,5 @@
 from .config import Config
+from enum import Enum
 
 
 class Constants:
@@ -130,8 +131,65 @@ class Constants:
         "[Details: {details}]"
     )
 
+class Contexts(str, Enum):
+
+    RUNTIME_CONTEXT = "runtime"
+    ENVIRONMENT_CONTEXT = "environment"
+    MODULE_CONTEXT = "module"
+    CLASS_CONTEXT = "class"
+
+class Errors:
+    """
+    Defines reusable templates for error generation.
+    """
+
+    TEMPLATE_KEY = "template"
+    SOLUTION_KEY = "solution"
     SCOPE_VARIABLE = "variable"
-    SCOPE_ENVIRONMENT = "environment"
-    SCOPE_FUNCTION_ARG = "function_arg"
-    SCOPE_METHOD_ARG_IN_CLASS = "method_arg_in_class"
-    SCOPE_CLASS_ATTRIBUTE = "class_attribute"
+    SCOPE_ARGUMENT = "argument"
+
+    CONTEXT_INTRO = {
+        Contexts.RUNTIME_CONTEXT: "Runtime constraint violation",
+        Contexts.ENVIRONMENT_CONTEXT: "Environment validation failure",
+        Contexts.MODULE_CONTEXT: "Module structural inconsistency",
+        Contexts.CLASS_CONTEXT: "Class contract violation"
+    }
+
+    class Category(str, Enum):
+
+        MISSING = "missing"
+        MISMATCH = "mismatch"
+        INVALID = "invalid"
+
+    VARIABLES_TEMPLATE = {
+        
+        SCOPE_VARIABLE: {
+            Contexts.ENVIRONMENT_CONTEXT: 'The environment variable "{name}"',
+            Contexts.MODULE_CONTEXT: 'The variable "{name}" in module "{module}"',
+            Contexts.CLASS_CONTEXT: 'The {attribute_type} attribute "{name}" in class "{class_name}"'
+        },
+        SCOPE_ARGUMENT: {
+            Contexts.MODULE_CONTEXT: 'The argument "{name}" of function "{function_name}"',
+            Contexts.CLASS_CONTEXT: 'The argument "{name}" of method "{method_name}" in class "{class_name}"',
+        }
+    }
+
+    FUNCTIONS_TEMPLATE = {
+        Contexts.MODULE_CONTEXT: 'The function "{name}" in module "{module}"',
+        Contexts.CLASS_CONTEXT: 'The method "{name}" in class "{class_name}"'
+    }
+
+    ERROR_MESSAGE_TEMPLATES = {
+        Category.MISSING: {
+            TEMPLATE_KEY: "{label} is declared but missing.",
+            SOLUTION_KEY: "Ensure it is properly defined and implemented."
+        },
+        Category.MISMATCH: {
+            TEMPLATE_KEY: "{label} does not match the expected value. Expected: {expected!r}, Found: {actual!r}.",
+            SOLUTION_KEY: "Check the implementation or update the contract accordingly."
+        },
+        Category.INVALID: {
+            TEMPLATE_KEY: "{label} has an invalid value. Allowed values: {allowed}. Found: {found!r}.",
+            SOLUTION_KEY: "Update the environment or contract accordingly."
+        }
+    }
