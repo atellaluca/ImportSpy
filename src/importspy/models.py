@@ -8,8 +8,16 @@ of variables, functions, classes, and full modules, as well as runtime and
 system-level metadata required to enforce import contracts across execution contexts.
 """
 
-from pydantic import BaseModel, field_validator, Field
-from typing import Optional, List, Union
+from pydantic import (
+    BaseModel,
+    field_validator
+)
+
+from typing import (
+    Optional,
+    Union
+)
+
 from types import ModuleType
 
 from .utilities.module_util import (
@@ -19,8 +27,11 @@ from .utilities.module_util import (
 from .utilities.runtime_util import RuntimeUtil
 from .utilities.system_util import SystemUtil
 from .utilities.python_util import PythonUtil
-from .constants import Constants
-from .errors import Errors
+from .constants import (
+    Constants,
+    Contexts,
+    Errors
+)
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -36,7 +47,7 @@ class Python(BaseModel):
     """
     version: Optional[str] = None
     interpreter: Optional[str] = None
-    modules: List['Module']
+    modules: list['Module']
 
     @field_validator('version')
     def validate_version(cls, value: str):
@@ -61,8 +72,8 @@ class Environment(BaseModel):
     Represents a set of environment variables and secret keys
     defined for the system or application runtime.
     """
-    variables: Optional[List['Variable']] = None
-    secrets: Optional[List[str]] = None
+    variables: Optional[list['Variable']] = None
+    secrets: Optional[list[str]] = None
 
 class System(BaseModel):
     """
@@ -71,7 +82,7 @@ class System(BaseModel):
     """
     os: str
     environment: Optional[Environment] = None
-    pythons: List[Python]
+    pythons: list[Python]
 
     @field_validator('os')
     def validate_os(cls, value: str):
@@ -89,7 +100,7 @@ class Runtime(BaseModel):
     the list of supported systems associated with that architecture.
     """
     arch: str
-    systems: List[System]
+    systems: list[System]
 
     @field_validator('arch')
     def validate_arch(cls, value: str):
@@ -125,7 +136,7 @@ class Variable(BaseModel):
         return value
 
     @classmethod
-    def from_variable_info(cls, variables_info: List[VariableInfo]):
+    def from_variable_info(cls, variables_info: list[VariableInfo]):
         """
         Convert a list of extracted VariableInfo into Variable instances.
         """
@@ -153,7 +164,7 @@ class Attribute(Variable):
         return value
 
     @classmethod
-    def from_attributes_info(cls, attributes_info: List[AttributeInfo]):
+    def from_attributes_info(cls, attributes_info: list[AttributeInfo]):
         """
         Convert a list of AttributeInfo objects into Attribute instances.
         """
@@ -171,7 +182,7 @@ class Argument(Variable, BaseModel):
     Used to validate callable structures and type consistency.
     """
     @classmethod
-    def from_arguments_info(cls, arguments_info: List[ArgumentInfo]):
+    def from_arguments_info(cls, arguments_info: list[ArgumentInfo]):
         """
         Convert a list of ArgumentInfo into Argument instances.
         """
@@ -188,7 +199,7 @@ class Function(BaseModel):
     and return type annotation.
     """
     name: str
-    arguments: Optional[List[Argument]] = None
+    arguments: Optional[list[Argument]] = None
     return_annotation: Optional[str] = None
 
     @field_validator("return_annotation")
@@ -199,7 +210,7 @@ class Function(BaseModel):
         return CommonValidator.validate_annotation(value)
 
     @classmethod
-    def from_functions_info(cls, functions_info: List[FunctionInfo]):
+    def from_functions_info(cls, functions_info: list[FunctionInfo]):
         """
         Convert a list of FunctionInfo into Function instances.
         """
@@ -216,12 +227,12 @@ class Class(BaseModel):
     Used to enforce object-level validation rules in contracts.
     """
     name: str
-    attributes: Optional[List[Attribute]] = None
-    methods: Optional[List[Function]] = None
-    superclasses: Optional[List[str]] = None
+    attributes: Optional[list[Attribute]] = None
+    methods: Optional[list[Function]] = None
+    superclasses: Optional[list[str]] = None
 
     @classmethod
-    def from_class_info(cls, extracted_classes: List[ClassInfo]):
+    def from_class_info(cls, extracted_classes: list[ClassInfo]):
         """
         Convert a list of extracted class definitions into Class instances.
         """
@@ -240,9 +251,9 @@ class Module(BaseModel):
     """
     filename: Optional[str] = None
     version: Optional[str] = None
-    variables: Optional[List[Variable]] = None
-    functions: Optional[List[Function]] = None
-    classes: Optional[List[Class]] = None
+    variables: Optional[list[Variable]] = None
+    functions: Optional[list[Function]] = None
+    classes: Optional[list[Class]] = None
 
 
 class SpyModel(Module):
@@ -252,7 +263,7 @@ class SpyModel(Module):
     SpyModel is the top-level object representing a module's structure and its
     runtime/environment constraints. This is the core of ImportSpy's contract model.
     """
-    deployments: Optional[List[Runtime]] = None
+    deployments: Optional[list[Runtime]] = None
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
@@ -315,22 +326,28 @@ class SpyModel(Module):
             ]
         )
 
+class Error:
 
-class CommonValidator:
-    """
-    Provides shared validation utilities for type annotations and other structural elements.
-    """
+    context: Contexts
+    title: str = Errors.CONTEXT_INTRO.get(context)
+    category: Errors.Category
+    description: str
+    solution: str
 
     @classmethod
-    def validate_annotation(cls, value):
-        """
-        Validate a type annotation against the supported base annotations.
-        """
-        if not value:
-            return None
-        base = value.split("[")[0]
-        if base not in Constants.SUPPORTED_ANNOTATIONS:
-            raise ValueError(
-                Errors.INVALID_ANNOTATION.format(value, Constants.SUPPORTED_ANNOTATIONS)
-            )
-        return value
+    def from_template(cls, *, context: str, category: str, label: str, **kwargs):
+        tpl = Errors.ERROR_MESSAGE_TEMPLATES.get(category)
+        description = tpl[Errors.TEMPLATE_KEY].format(label=label, **kwargs)
+        solution = tpl[Errors.SOLUTION_KEY]
+        return cls(
+            context=context,
+            category=category,
+            description=description,
+            solution=solution
+        )
+
+    def render_message(self) -> str:
+        return f"[{self.title}] {self.description} {self.solution}"
+
+
+

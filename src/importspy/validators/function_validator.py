@@ -12,12 +12,8 @@ from ..contexts import (
 
 class FunctionValidator:
 
-    def __init__(self, context: Optional[Context]):
+    def __init__(self):
 
-        self.logger = LogManager().get_logger(self.__class__.__name__)
-        current_context = Context(Constants.SCOPE_FUNCTION_ARG)
-        if context:
-            current_context = context(MethodArgumentContext)
         self._variable_validator = VariableValidator(context=current_context)
 
     def validate(
@@ -25,7 +21,7 @@ class FunctionValidator:
         functions_1: List[Function],
         functions_2: List[Function],
     ) -> Optional[bool]:
-
+ 
         self.logger.debug(
             Constants.LOG_MESSAGE_TEMPLATE.format(
                 operation="Function validating",

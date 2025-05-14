@@ -16,7 +16,6 @@ from typing import List
 from importspy.log_manager import LogManager
 from importspy.models import Variable
 from importspy.constants import Constants
-from importspy.contexts import Context
 
 
 class VariableValidator:
@@ -27,24 +26,10 @@ class VariableValidator:
     - Presence (missing variables)
     - Value equality
     - Annotation correctness (for typed contexts)
-
-    Attributes
-    ----------
-    context : Context
-        A `Context` subclass instance that defines how to format errors and describe the scope.
-    logger : logging.Logger
-        Logger used for structured debug output.
     """
 
     def __init__(self, context: Context):
-        """
-        Initialize the validator with a context.
-
-        Parameters
-        ----------
-        context : Context
-            A context object that encapsulates the validation scope and error message logic.
-        """
+        
         self.context = context
         self.logger = LogManager().get_logger(self.__class__.__name__)
 
