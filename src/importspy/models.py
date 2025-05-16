@@ -18,6 +18,8 @@ from typing import (
     Union
 )
 
+from abc import ABC
+
 from types import ModuleType
 
 from .utilities.module_util import (
@@ -335,7 +337,8 @@ class Error:
     solution: str
 
     @classmethod
-    def from_template(cls, *, context: str, category: str, label: str, **kwargs):
+    def from_template(cls, *, context: str, category: str, **kwargs):
+        label = ""
         tpl = Errors.ERROR_MESSAGE_TEMPLATES.get(category)
         description = tpl[Errors.TEMPLATE_KEY].format(label=label, **kwargs)
         solution = tpl[Errors.SOLUTION_KEY]

@@ -20,12 +20,26 @@ This module is typically used as the entry point for programmatic validation wor
 """
 
 from types import ModuleType
-from .models import SpyModel
+from .models import (
+    SpyModel,
+    Runtime,
+    Python,
+    Module
+)
 from .utilities.module_util import ModuleUtil
-from .validators.spymodel_validator import SpyModelValidator
+from .validators import (
+    RuntimeValidator,
+    SystemValidator,
+    PythonValidator,
+    ModuleValidator
+
+)
 from .log_manager import LogManager
 from .persistences import Parser, YamlParser
-from typing import Optional
+from typing import (
+    Optional,
+    List
+)
 import logging
 
 
@@ -134,38 +148,17 @@ class Spy:
             log_manager.configure(level=log_level or system_log_level)
 
     def _validate_module(self, spymodel: SpyModel, info_module: ModuleType) -> ModuleType:
-        """
-        Compares a module's structure against the loaded import contract.
-
-        This includes checking for:
-        - required classes and methods
-        - expected variable names and values
-        - inheritance and method signatures
-
-        Parameters:
-        -----------
-        spymodel : SpyModel
-            Parsed import contract used as the validation baseline.
-
-        info_module : ModuleType
-            The actual module being validated.
-
-        Returns:
-        --------
-        ModuleType
-            The validated module.
-
-        Raises:
-        -------
-        ValueError
-            If the module does not conform to the expected structure.
-        """
         self.logger.debug(f"info_module: {info_module}")
         if spymodel:
+            module_validator:ModuleValidator = ModuleValidator()
             self.logger.debug(f"Import contract detected: {spymodel}")
             spy_module = SpyModel.from_module(info_module)
             self.logger.debug(f"Extracted module structure: {spy_module}")
-            SpyModelValidator().validate(spymodel, spy_module)
+            module_validator.validate([spymodel],spy_module.deployments[0].systems[0].pythons[0].modules[0])
+            runtime:Runtime = RuntimeValidator().validate(spymodel.deployments, spy_module.deployments)
+            pythons:List[Python] = SystemValidator().validate(runtime.systems, spy_module.deployments[0].systems)
+            modules: List[Module] = PythonValidator().validate(pythons, spy_module.deployments[0].systems[0].pythons)
+            module_validator.validate(modules, spy_module.deployments[0].systems[0].pythons[0].modules[0])
         return ModuleUtil().load_module(info_module)
 
     def _inspect_module(self) -> ModuleType:
@@ -190,7 +183,6 @@ class Spy:
         current_frame, caller_frame = module_util.inspect_module()
         if current_frame.filename == caller_frame.filename:
             raise ValueError("Recursion detected during module analysis.")
-
         info_module = module_util.get_info_module(caller_frame)
         self.logger.debug(f"Inferred caller module: {info_module}")
         return info_module
