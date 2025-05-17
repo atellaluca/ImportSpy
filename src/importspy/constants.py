@@ -161,22 +161,22 @@ class Errors:
         MISMATCH = "mismatch"
         INVALID = "invalid"
 
-    VARIABLES_TEMPLATE = {
+    VARIABLES_LABEL_TEMPLATE = {
         
         SCOPE_VARIABLE: {
-            Contexts.ENVIRONMENT_CONTEXT: 'The environment variable "{name}"',
-            Contexts.MODULE_CONTEXT: 'The variable "{name}" in module "{module}"',
-            Contexts.CLASS_CONTEXT: 'The {attribute_type} attribute "{name}" in class "{class_name}"'
+            Contexts.ENVIRONMENT_CONTEXT: 'The environment variable "{environment_variable_name}"',
+            Contexts.MODULE_CONTEXT: 'The variable "{variable_name}" in module "{module_name}"',
+            Contexts.CLASS_CONTEXT: 'The {attribute_type} attribute "{attribute_name}" in class "{class_name}"'
         },
         SCOPE_ARGUMENT: {
-            Contexts.MODULE_CONTEXT: 'The argument "{name}" of function "{function_name}"',
-            Contexts.CLASS_CONTEXT: 'The argument "{name}" of method "{method_name}" in class "{class_name}"',
+            Contexts.MODULE_CONTEXT: 'The argument "{argument_name}" of function "{function_name}"',
+            Contexts.CLASS_CONTEXT: 'The argument "{argument_name}" of method "{method_name}" in class "{class_name}"',
         }
     }
 
-    FUNCTIONS_TEMPLATE = {
-        Contexts.MODULE_CONTEXT: 'The function "{name}" in module "{module}"',
-        Contexts.CLASS_CONTEXT: 'The method "{name}" in class "{class_name}"'
+    FUNCTIONS_LABEL_TEMPLATE = {
+        Contexts.MODULE_CONTEXT: 'The function "{function_name}" in module "{module_name}"',
+        Contexts.CLASS_CONTEXT: 'The method "{method_name}" in class "{class_name}"'
     }
 
     ERROR_MESSAGE_TEMPLATES = {

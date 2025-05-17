@@ -18,7 +18,12 @@ from typing import (
     Union
 )
 
-from abc import ABC
+from abc import (
+    ABC,
+    abstractmethod
+)
+
+from dataclasses import dataclass, asdict
 
 from types import ModuleType
 
@@ -328,29 +333,106 @@ class SpyModel(Module):
             ]
         )
 
-class Error:
+class Error(BaseModel):
 
     context: Contexts
-    title: str = Errors.CONTEXT_INTRO.get(context)
+    title: str
     category: Errors.Category
     description: str
     solution: str
 
     @classmethod
-    def from_template(cls, *, context: str, category: str, **kwargs):
-        label = ""
-        tpl = Errors.ERROR_MESSAGE_TEMPLATES.get(category)
-        description = tpl[Errors.TEMPLATE_KEY].format(label=label, **kwargs)
+    def from_contract_violation(cls, contract_violation: 'ContractViolation'):
+        tpl = Errors.ERROR_MESSAGE_TEMPLATES.get(contract_violation.category)
+        title = Errors.CONTEXT_INTRO.get(contract_violation.context)
+        description = tpl[Errors.TEMPLATE_KEY].format(label=contract_violation.label)
         solution = tpl[Errors.SOLUTION_KEY]
         return cls(
-            context=context,
-            category=category,
+            context=contract_violation.context,
+            title=title,
+            category=contract_violation.category,
             description=description,
             solution=solution
         )
 
     def render_message(self) -> str:
         return f"[{self.title}] {self.description} {self.solution}"
+
+class ContractViolation(ABC):
+
+    @abstractmethod
+    @property
+    def context(self) -> str:
+        pass
+
+    @abstractmethod
+    @property
+    def category(self) -> str:
+        pass
+
+    @abstractmethod
+    @property
+    def label(self) -> str:
+        pass
+
+class BaseContractViolation(ContractViolation):
+
+    def __init__(self, context, category):
+        
+        self.context = context
+        self.category = category
+        super().__init__()
+
+    @property
+    def context(self) -> str:
+        return self.context
+    
+    @property
+    def category(self) -> str:
+        return self.category
+
+class VariableContractViolation(BaseContractViolation):
+
+    def __init__(self, scope:str, context:str, category:str, bundle:Union['ModuleBundle' ,'ClassBundle', 'EnvironmentBundle']):
+        super().__init__(context, category)
+        self.scope = scope
+        self.bundle = bundle
+    
+    @property
+    def label(self) -> str:
+        return Errors.VARIABLES_LABEL_TEMPLATE[self.scope][self.context].format(**asdict(self.bundle))
+
+class FunctionContractViolation(BaseContractViolation):
+
+    def __init__(self, context:str, category:str, bundle:Union['ClassBundle']):
+        super().__init__(context, category)
+        self.bundle = bundle
+    
+    @property
+    def label(self) -> str:
+        return Errors.FUNCTIONS_LABEL_TEMPLATE[self.context].format(**asdict(self.bundle))
+
+@dataclass
+class ClassBundle:
+
+    class_name: Optional[str] = None
+    attribute_type: Optional[str] = None
+    attribute_name: Optional[str] = None
+    argument_name: Optional[str] = None
+    method_name: Optional[str] = None
+
+@dataclass
+class ModuleBundle:
+
+    variable_name: Optional[str] = None
+    module_name: Optional[str] = None
+    argument_name: Optional[str] = None
+    function_name: Optional[str] = None
+
+@dataclass
+class EnvironmentBundle:
+
+    environment_variable_name: Optional[str] = None
 
 
 
