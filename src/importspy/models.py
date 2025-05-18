@@ -13,7 +13,8 @@ from pydantic import BaseModel
 from typing import (
     Optional,
     Union,
-    Any
+    Any,
+    List
 )
 
 from abc import (
@@ -289,7 +290,7 @@ class Error(BaseModel):
 
     def render_message(self) -> str:
         return f"[{self.title}] {self.description} {self.solution}"
-
+        
 class ContractViolation(ABC):
 
     @property
@@ -357,7 +358,7 @@ class VariableContractViolation(BaseContractViolation):
 
 class FunctionContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, category:str, bundle:Union['ClassBundle']):
+    def __init__(self, context:str, category:str, bundle:Union['ClassBundle', 'ModuleBundle']):
         super().__init__(context, category)
         self.bundle = bundle
     
@@ -365,6 +366,16 @@ class FunctionContractViolation(BaseContractViolation):
     def label(self) -> str:
         return Errors.FUNCTIONS_LABEL_TEMPLATE[self.context].format(**asdict(self.bundle))
 
+class RuntimeContractViolation(BaseContractViolation):
+
+    def __init__(self, context:str, category:str, bundle:'RuntimeBundle'):
+        super().__init__(context, category)
+        self.bundle = bundle
+    
+    @property
+    def label(self) -> str:
+        return self.bundle.runtimes_1
+    
 @dataclass
 class ClassBundle:
 
@@ -386,6 +397,10 @@ class ModuleBundle:
 class EnvironmentBundle:
 
     environment_variable_name: Optional[str] = None
+
+class RuntimeBundle:
+
+    runtimes_1: Optional[List[Runtime]] = None
 
 
 
