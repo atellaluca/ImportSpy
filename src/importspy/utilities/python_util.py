@@ -50,9 +50,10 @@ class PythonUtil:
         Example
         -------
         >>> PythonUtil().extract_python_version()
-        '3.11.2'
+        '3.11'
         """
-        return platform.python_version()
+        python_version = platform.python_version()
+        return ".".join(python_version.split(".")[:2])
 
     def extract_python_implementation(self) -> str:
         """

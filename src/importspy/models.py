@@ -8,14 +8,12 @@ of variables, functions, classes, and full modules, as well as runtime and
 system-level metadata required to enforce import contracts across execution contexts.
 """
 
-from pydantic import (
-    BaseModel,
-    field_validator
-)
+from pydantic import BaseModel
 
 from typing import (
     Optional,
-    Union
+    Union,
+    Any
 )
 
 from abc import (
@@ -52,27 +50,9 @@ class Python(BaseModel):
     Includes the Python version, interpreter type, and the list of loaded modules.
     Used to validate compatibility between caller and callee environments.
     """
-    version: Optional[str] = None
-    interpreter: Optional[str] = None
+    version: Optional[Constants.SupportedPythonVersions] = None
+    interpreter: Optional[Constants.SupportedPythonImplementations] = None
     modules: list['Module']
-
-    @field_validator('version')
-    def validate_version(cls, value: str):
-        """
-        Validate that the Python version is within supported versions.
-        """
-        if ".".join(value.split(".")[:2]) not in Constants.SUPPORTED_PYTHON_VERSION:
-            raise ValueError(Errors.INVALID_PYTHON_VERSION.format(Constants.SUPPORTED_PYTHON_VERSION, value))
-        return value
-
-    @field_validator('interpreter')
-    def validate_interpreter(cls, value: str):
-        """
-        Validate that the interpreter is among the supported Python implementations.
-        """
-        if value not in Constants.SUPPORTED_PYTHON_IMPLEMENTATION:
-            raise ValueError(Errors.INVALID_PYTHON_INTERPRETER.format(Constants.SUPPORTED_PYTHON_IMPLEMENTATION, value))
-        return value
 
 class Environment(BaseModel):
     """
@@ -87,18 +67,9 @@ class System(BaseModel):
     Represents the system environment, including OS, environment variables,
     and Python runtimes configured within the system.
     """
-    os: str
+    os: Constants.SupportedOS
     environment: Optional[Environment] = None
     pythons: list[Python]
-
-    @field_validator('os')
-    def validate_os(cls, value: str):
-        """
-        Validate that the provided OS is among the supported platforms.
-        """
-        if value not in Constants.SUPPORTED_OS:
-            raise ValueError(Errors.INVALID_OS.format(Constants.SUPPORTED_OS, value))
-        return value
 
 
 class Runtime(BaseModel):
@@ -106,17 +77,8 @@ class Runtime(BaseModel):
     Represents the deployment runtime, identified by CPU architecture and
     the list of supported systems associated with that architecture.
     """
-    arch: str
+    arch: Constants.SupportedArchitectures
     systems: list[System]
-
-    @field_validator('arch')
-    def validate_arch(cls, value: str):
-        """
-        Validate that the CPU architecture is known and supported.
-        """
-        if value not in Constants.KNOWN_ARCHITECTURES:
-            raise ValueError(Errors.INVALID_ARCHITECTURE.format(value, Constants.KNOWN_ARCHITECTURES))
-        return value
 
 
 class Variable(BaseModel):
@@ -125,22 +87,8 @@ class Variable(BaseModel):
     annotation and value. Used for structural validation of the importing module.
     """
     name: str
-    annotation: Optional[str] = None
+    annotation: Optional[Constants.SupportedAnnotations] = None
     value: Optional[Union[int, str, float, bool, None]] = None
-
-    @field_validator("annotation")
-    def validate_annotation(cls, value):
-        """
-        Validate that the annotation is supported by the current contract.
-        """
-        if not value:
-            return None
-        base = value.split("[")[0]
-        if base not in Constants.SUPPORTED_ANNOTATIONS:
-            raise ValueError(
-                Errors.INVALID_ANNOTATION.format(value, Constants.SUPPORTED_ANNOTATIONS)
-            )
-        return value
 
     @classmethod
     def from_variable_info(cls, variables_info: list[VariableInfo]):
@@ -159,16 +107,7 @@ class Attribute(Variable):
     Represents a class attribute, extending Variable with a 'type' indicator
     (e.g., 'class', 'instance'). Used in class-level contract validation.
     """
-    type: str
-
-    @field_validator('type')
-    def validate_type(cls, value: str):
-        """
-        Validate that the attribute type is among supported class attribute types.
-        """
-        if value not in Constants.SUPPORTED_CLASS_ATTRIBUTE_TYPES:
-            raise ValueError(Errors.INVALID_ATTRIBUTE_TYPE.format(value, Constants.SUPPORTED_CLASS_ATTRIBUTE_TYPES))
-        return value
+    type: Constants.SupportedClassAttributeTypes
 
     @classmethod
     def from_attributes_info(cls, attributes_info: list[AttributeInfo]):
@@ -207,14 +146,7 @@ class Function(BaseModel):
     """
     name: str
     arguments: Optional[list[Argument]] = None
-    return_annotation: Optional[str] = None
-
-    @field_validator("return_annotation")
-    def validate_annotation(cls, value):
-        """
-        Validate that the return annotation is supported.
-        """
-        return CommonValidator.validate_annotation(value)
+    return_annotation: Optional[Constants.SupportedAnnotations] = None
 
     @classmethod
     def from_functions_info(cls, functions_info: list[FunctionInfo]):
@@ -360,36 +292,57 @@ class Error(BaseModel):
 
 class ContractViolation(ABC):
 
-    @abstractmethod
     @property
+    @abstractmethod
     def context(self) -> str:
         pass
-
-    @abstractmethod
+    
     @property
+    @abstractmethod
     def category(self) -> str:
+        pass
+    
+    @property
+    @abstractmethod
+    def label(self) -> str:
+        pass
+    
+    @abstractmethod
+    def missing_error_handler(self) -> str:
         pass
 
     @abstractmethod
-    @property
-    def label(self) -> str:
+    def mismatch_error_handler(self) -> str:
+        pass
+
+    @abstractmethod
+    def invalid_error_handler(self) -> str:
         pass
 
 class BaseContractViolation(ContractViolation):
 
     def __init__(self, context, category):
         
-        self.context = context
-        self.category = category
+        self._context = context
+        self._category = category
         super().__init__()
 
     @property
     def context(self) -> str:
-        return self.context
+        return self._context
     
     @property
     def category(self) -> str:
-        return self.category
+        return self._category
+    
+    def missing_error_handler(self) -> str:
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label).capitalize()}'
+
+    def mismatch_error_handler(self, expected:Any, actual:Any) -> str:
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=expected, actual=actual).capitalize()}'
+
+    def invalid_error_handler(self, allowed:Any, found:Any) -> str:
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=allowed, actual=found).capitalize()}'
 
 class VariableContractViolation(BaseContractViolation):
 
