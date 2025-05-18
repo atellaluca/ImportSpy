@@ -6,6 +6,7 @@ from .models import (
     Python,
     Module,
     Variable,
+    Function,
     RuntimeContractViolation,
     RuntimeBundle,
     SystemContractViolation,
@@ -15,7 +16,10 @@ from .models import (
     PythonContractViolation,
     PythonBundle,
     ModuleContractViolation,
-    ModuleBundle
+    ModuleBundle,
+    BaseContractViolation,
+    FunctionContractViolation,
+    ClassBundle
 )
 
 from .constants import (
@@ -23,6 +27,8 @@ from .constants import (
     Contexts,
     Errors
 )
+
+from .log_manager import LogManager
 
 class RuntimeValidator:
 
@@ -38,7 +44,6 @@ class RuntimeValidator:
             raise ValueError(
                 RuntimeContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    Errors.Category.MISSING,
                     RuntimeBundle(runtimes_1)
                 ).missing_error_handler())
 
@@ -68,7 +73,6 @@ class SystemValidator:
             raise ValueError(
                 SystemContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    Errors.Category.MISSING,
                     SystemBundle(systems_1)
                 ).missing_error_handler())
         
@@ -93,7 +97,6 @@ class SystemValidator:
                 raise ValueError(
                 VariableContractViolation(
                     Contexts.ENVIRONMENT_CONTEXT,
-                    Errors.Category.MISSING,
                     EnvironmentBundle(environment_1)
                 ).missing_error_handler())
             
@@ -118,7 +121,6 @@ class PythonValidator:
             raise ValueError(
                 PythonContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    Errors.Category.MISSING,
                     PythonBundle(python_1)
                 ).missing_error_handler())
 
@@ -172,6 +174,10 @@ class PythonValidator:
 
 class ModuleValidator:
 
+    def __init__(self):
+        self.variable_validator:VariableValidator = VariableValidator()
+        self.function_validator:FunctionValidator = FunctionValidator()
+
     def validate(
         self,
         modules_1: List[Module],
@@ -184,25 +190,42 @@ class ModuleValidator:
             raise ValueError(
                 ModuleContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    Errors.Category.MISSING,
-                    PythonBundle(python_1)
+                    ModuleBundle(module_1)
                 ).missing_error_handler())
 
         for module_1 in modules_1:
 
             if module_1.filename and module_1.filename != module_2.filename:
-                raise ValueError(Errors.FILENAME_MISMATCH.format(module_1.filename, module_2.filename))
+                raise ValueError(
+                ModuleContractViolation(
+                    Contexts.RUNTIME_CONTEXT,
+                    ModuleBundle(module_1)
+                ).mismatch_error_handler(module_1.filename, module_2.filename))
 
             if module_1.version and module_1.version != module_2.version:
-                raise ValueError(Errors.VERSION_MISMATCH.format(module_1.version, module_2.version))
+                raise ValueError(
+                ModuleContractViolation(
+                    Contexts.RUNTIME_CONTEXT,
+                    ModuleBundle(module_1)
+                ).mismatch_error_handler(module_1.version, module_2.version))
 
-            self._variable_validator.validate(
+            self.variable_validator.validate(
                 module_1.variables,
-                module_2.variables)
+                module_2.variables,
+                VariableContractViolation(
+                    Errors.SCOPE_VARIABLE,
+                    Contexts.MODULE_CONTEXT,
+                    ModuleBundle(module_1)
+                )
+            )
 
-            self._function_validator.validate(
+            self.function_validator.validate(
                 module_1.functions,
-                module_2.functions
+                module_2.functions,
+                FunctionContractViolation(
+                    Contexts.MODULE_CONTEXT,
+                    ModuleBundle(module_1)
+                )
             )
 
             if module_1.classes:
@@ -211,10 +234,11 @@ class ModuleValidator:
                     if not class_2:
                         raise ValueError(Errors.CLASS_MISSING.format(class_1.name))
 
-                    self._attribute_validator.validate(
+                    self.variable_validator.validate(
                         class_1.attributes,
                         class_2.attributes,
-                        class_1.name
+                        VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle())
+                        ### Warning: can't known attribute type at this time
                     )
 
                     self._function_validator.validate(
@@ -241,22 +265,9 @@ class VariableValidator:
         self,
         variables_1: List[Variable],
         variables_2: List[Variable],
+        contract_violation: BaseContractViolation
     ):
-        """
-        Validate two sets of variables for presence, value match, and type annotations.
-
-        Parameters
-        ----------
-        variables_1 : List[Variable]
-            The list of expected variables (from the contract).
-        variables_2 : List[Variable]
-            The list of actual variables (from the module/system).
-
-        Raises
-        ------
-        ValueError
-            If a variable is missing, has a mismatched value, or fails type annotation validation.
-        """
+        
         self.logger.debug(f"Type of variables_1: {type(variables_1)}")
         self.logger.debug(
             Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -284,7 +295,7 @@ class VariableValidator:
                     details="No actual Variables found for validation"
                 )
             )
-            raise ValueError(self.context.format_missing_error())
+            raise ValueError(contract_violation.missing_error_handler(variables_1))
 
         for vars_1 in variables_1:
             self.logger.debug(
@@ -295,33 +306,31 @@ class VariableValidator:
                 )
             )
             if vars_1.name not in {var.name for var in variables_2}:
-                raise ValueError(self.context.format_missing_error())
+                raise ValueError(contract_violation.missing_error_handler(vars_1.name))
 
         for vars_1 in variables_1:
             vars_2 = next((var for var in variables_2 if var.name == vars_1.name), None)
             if not vars_2:
-                raise ValueError(self.context.format_missing_error())
+                raise ValueError(contract_violation.missing_error_handler(vars_1.name))
 
             if vars_1.annotation and vars_1.annotation != vars_2.annotation:
-                raise ValueError(
-                    self.context.format_mismatch_error(vars_1.annotation, vars_2.annotation)
-                )
+                raise ValueError(contract_violation.mismatch_error_handler(vars_1.annotation, vars_2.annotation))
 
             if vars_1.value != vars_2.value:
-                raise ValueError(
-                    self.context.format_mismatch_error(vars_1.value, vars_2.value)
-                )
+                raise ValueError(contract_violation.mismatch_error_handler(vars_1.value, vars_2.value))
 
 class FunctionValidator:
 
     def __init__(self):
 
+        self.argument_validator:VariableValidator = VariableValidator()
         self.logger = LogManager().get_logger(self.__class__.__name__)
 
     def validate(
         self,
         functions_1: List[Function],
         functions_2: List[Function],
+        contract_violation: BaseContractViolation
     ):
  
         self.logger.debug(
@@ -340,7 +349,7 @@ class FunctionValidator:
                     details="No functions to validate"
                 )
             )
-            return None
+            return
 
         if not functions_2:
             self.logger.debug(
@@ -350,7 +359,7 @@ class FunctionValidator:
                     details="No actual functions found"
                 )
             )
-            raise ValueError(Errors.ELEMENT_MISSING.format(functions_1))
+            raise ValueError(contract_violation.missing_error_handler(functions_1))
 
         for function_1 in functions_1:
             self.logger.debug(
@@ -368,20 +377,18 @@ class FunctionValidator:
                         details=f"function_1: {function_1}; functions_2: {functions_2}"
                     )
                 )
-                raise ValueError(
-                    Errors.ELEMENT_MISMATCH.format(context_name, function_1.name)
-                )
+                raise ValueError(contract_violation.missing_error_handler(function_1))
 
         for function_1 in functions_1:
             function_2 = next((f for f in functions_2 if f.name == function_1.name), None)
             if not function_2:
-                raise ValueError(Errors.ELEMENT_MISSING.format(function_1))
+                raise ValueError(contract_violation.missing_error_handler/function_1)
 
-            self._argument_validator.validate(
+            self.argument_validator.validate(
                 function_1.arguments,
                 function_2.arguments,
-                function_1.name,
-                classname
+                VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.MODULE_CONTEXT)
+                
             )
 
             if function_1.return_annotation and function_1.return_annotation != function_2.return_annotation:

@@ -137,7 +137,7 @@ class Errors:
     }
 
     MODULE_LABEL_TEMPLATE = {
-        Contexts.RUNTIME_CONTEXT: 'The filename "{filename}"',
+        Contexts.RUNTIME_CONTEXT: 'The module "{filename}"',
         Contexts.ENVIRONMENT_CONTEXT: 'The version "{version}" of module "{filename}"'
     }
 
