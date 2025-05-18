@@ -375,6 +375,37 @@ class RuntimeContractViolation(BaseContractViolation):
     @property
     def label(self) -> str:
         return self.bundle.runtimes_1
+
+class SystemContractViolation(BaseContractViolation):
+
+    def __init__(self, context:str, category:str, bundle:'SystemBundle'):
+        super().__init__(context, category)
+        self.bundle = bundle
+    
+    @property
+    def label(self) -> str:
+        return self.bundle.systems_1
+
+class PythonContractViolation(BaseContractViolation):
+
+    def __init__(self, context:str, category:str, bundle:'PythonBundle'):
+        super().__init__(context, category)
+        self.bundle = bundle
+    
+    @property
+    def label(self) -> str:
+        return self.bundle.python_1
+
+
+class ModuleContractViolation(BaseContractViolation):
+
+    def __init__(self, context:str, category:str, bundle:'ModuleBundle'):
+        super().__init__(context, category)
+        self.bundle = bundle
+    
+    @property
+    def label(self) -> str:
+        return Errors.MODULE_LABEL_TEMPLATE[self.context].format(**asdict(self.bundle))
     
 @dataclass
 class ClassBundle:
@@ -389,9 +420,10 @@ class ClassBundle:
 class ModuleBundle:
 
     variable_name: Optional[str] = None
-    module_name: Optional[str] = None
+    filename: Optional[str] = None
     argument_name: Optional[str] = None
     function_name: Optional[str] = None
+    version: Optional[str] = None
 
 @dataclass
 class EnvironmentBundle:
@@ -401,6 +433,14 @@ class EnvironmentBundle:
 class RuntimeBundle:
 
     runtimes_1: Optional[List[Runtime]] = None
+
+class SystemBundle:
+
+    systems_1: Optional[List[System]] = None
+
+class PythonBundle:
+
+    python_1: Optional[Python] = None
 
 
 

@@ -7,7 +7,15 @@ from .models import (
     Module,
     Variable,
     RuntimeContractViolation,
-    RuntimeBundle
+    RuntimeBundle,
+    SystemContractViolation,
+    SystemBundle,
+    EnvironmentBundle,
+    VariableContractViolation,
+    PythonContractViolation,
+    PythonBundle,
+    ModuleContractViolation,
+    ModuleBundle
 )
 
 from .constants import (
@@ -57,7 +65,12 @@ class SystemValidator:
             return
 
         if not systems_2:
-            raise ValueError(Errors.ELEMENT_MISSING.format(systems_1))
+            raise ValueError(
+                SystemContractViolation(
+                    Contexts.RUNTIME_CONTEXT,
+                    Errors.Category.MISSING,
+                    SystemBundle(systems_1)
+                ).missing_error_handler())
         
         system_2 = systems_2[0]
 
@@ -77,7 +90,12 @@ class SystemValidator:
                 return
 
             if not environment_2:
-                raise ValueError(Errors.ELEMENT_MISSING.format(environment_1))
+                raise ValueError(
+                VariableContractViolation(
+                    Contexts.ENVIRONMENT_CONTEXT,
+                    Errors.Category.MISSING,
+                    EnvironmentBundle(environment_1)
+                ).missing_error_handler())
             
             variables_2 = environment_2.variables
 
@@ -97,7 +115,12 @@ class PythonValidator:
             return
 
         if not pythons_2:
-            raise ValueError(Errors.ELEMENT_MISSING.format(pythons_1))
+            raise ValueError(
+                PythonContractViolation(
+                    Contexts.RUNTIME_CONTEXT,
+                    Errors.Category.MISSING,
+                    PythonBundle(python_1)
+                ).missing_error_handler())
 
         python_2 = pythons_2[0]
         for python_1 in pythons_1:
@@ -158,7 +181,12 @@ class ModuleValidator:
             return
 
         if not module_2:
-            raise ValueError(Errors.ELEMENT_MISSING.format(modules_1))
+            raise ValueError(
+                ModuleContractViolation(
+                    Contexts.RUNTIME_CONTEXT,
+                    Errors.Category.MISSING,
+                    PythonBundle(python_1)
+                ).missing_error_handler())
 
         for module_1 in modules_1:
 

@@ -132,8 +132,13 @@ class Errors:
     }
 
     FUNCTIONS_LABEL_TEMPLATE = {
-        Contexts.MODULE_CONTEXT: 'The function "{function_name}" in module "{module_name}"',
+        Contexts.MODULE_CONTEXT: 'The function "{function_name}" in module "{filename}"',
         Contexts.CLASS_CONTEXT: 'The method "{method_name}" in class "{class_name}"'
+    }
+
+    MODULE_LABEL_TEMPLATE = {
+        Contexts.RUNTIME_CONTEXT: 'The filename "{filename}"',
+        Contexts.ENVIRONMENT_CONTEXT: 'The version "{version}" of module "{filename}"'
     }
 
     ERROR_MESSAGE_TEMPLATES = {
