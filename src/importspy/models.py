@@ -322,33 +322,28 @@ class ContractViolation(ABC):
 
 class BaseContractViolation(ContractViolation):
 
-    def __init__(self, context, category):
+    def __init__(self, context):
         
         self._context = context
-        self._category = category
         super().__init__()
 
     @property
     def context(self) -> str:
         return self._context
     
-    @property
-    def category(self) -> str:
-        return self._category
-    
     def missing_error_handler(self) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label).capitalize()}'
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISSING][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label).capitalize()}'
 
     def mismatch_error_handler(self, expected:Any, actual:Any) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=expected, actual=actual).capitalize()}'
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=expected, actual=actual).capitalize()}'
 
     def invalid_error_handler(self, allowed:Any, found:Any) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=allowed, actual=found).capitalize()}'
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=allowed, actual=found).capitalize()}'
 
 class VariableContractViolation(BaseContractViolation):
 
-    def __init__(self, scope:str, context:str, category:str, bundle:Union['ModuleBundle' ,'ClassBundle', 'EnvironmentBundle']):
-        super().__init__(context, category)
+    def __init__(self, scope:str, context:str, bundle:Union['ModuleBundle' ,'ClassBundle', 'EnvironmentBundle']):
+        super().__init__(context)
         self.scope = scope
         self.bundle = bundle
     
@@ -358,8 +353,8 @@ class VariableContractViolation(BaseContractViolation):
 
 class FunctionContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, category:str, bundle:Union['ClassBundle', 'ModuleBundle']):
-        super().__init__(context, category)
+    def __init__(self, context:str, bundle:Union['ClassBundle', 'ModuleBundle']):
+        super().__init__(context)
         self.bundle = bundle
     
     @property
@@ -368,8 +363,8 @@ class FunctionContractViolation(BaseContractViolation):
 
 class RuntimeContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, category:str, bundle:'RuntimeBundle'):
-        super().__init__(context, category)
+    def __init__(self, context:str, bundle:'RuntimeBundle'):
+        super().__init__(context)
         self.bundle = bundle
     
     @property
@@ -378,8 +373,8 @@ class RuntimeContractViolation(BaseContractViolation):
 
 class SystemContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, category:str, bundle:'SystemBundle'):
-        super().__init__(context, category)
+    def __init__(self, context:str, bundle:'SystemBundle'):
+        super().__init__(context)
         self.bundle = bundle
     
     @property
@@ -388,8 +383,8 @@ class SystemContractViolation(BaseContractViolation):
 
 class PythonContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, category:str, bundle:'PythonBundle'):
-        super().__init__(context, category)
+    def __init__(self, context:str, bundle:'PythonBundle'):
+        super().__init__(context)
         self.bundle = bundle
     
     @property
@@ -399,8 +394,8 @@ class PythonContractViolation(BaseContractViolation):
 
 class ModuleContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, category:str, bundle:'ModuleBundle'):
-        super().__init__(context, category)
+    def __init__(self, context:str, bundle:'ModuleBundle'):
+        super().__init__(context)
         self.bundle = bundle
     
     @property
@@ -420,10 +415,9 @@ class ClassBundle:
 class ModuleBundle:
 
     variable_name: Optional[str] = None
-    filename: Optional[str] = None
+    module_1: Optional[Module] = None
     argument_name: Optional[str] = None
     function_name: Optional[str] = None
-    version: Optional[str] = None
 
 @dataclass
 class EnvironmentBundle:
