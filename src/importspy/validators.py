@@ -4,11 +4,17 @@ from .models import (
     System,
     Environment,
     Python,
-    Module
+    Module,
+    Variable,
+    RuntimeContractViolation,
+    RuntimeBundle
 )
 
-from .constants import Constants
-
+from .constants import (
+    Constants, 
+    Contexts,
+    Errors
+)
 
 class RuntimeValidator:
 
@@ -21,7 +27,12 @@ class RuntimeValidator:
             return
 
         if not runtimes_2:
-            raise ValueError(Errors.ELEMENT_MISSING.format(runtimes_1))
+            raise ValueError(
+                RuntimeContractViolation(
+                    Contexts.RUNTIME_CONTEXT,
+                    Errors.Category.MISSING,
+                    RuntimeBundle(runtimes_1)
+                ).missing_error_handler())
 
         runtime_2 = runtimes_2[0]
 
