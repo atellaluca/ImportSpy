@@ -235,10 +235,9 @@ class ModuleValidator:
                         raise ValueError(Errors.CLASS_MISSING.format(class_1.name))
 
                     self.variable_validator.validate(
-                        class_1.attributes,
-                        class_2.attributes,
-                        VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle())
-                        ### Warning: can't known attribute type at this time
+                        class_1.get_class_attributes(),
+                        class_2.get_class_attributes(),
+                        VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle(attribute_type="class", class_name=class_1.name))
                     )
 
                     self._function_validator.validate(
