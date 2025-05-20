@@ -38,6 +38,9 @@ from .constants import (
     Contexts,
     Errors
 )
+
+from .config import Config
+
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -182,6 +185,12 @@ class Class(BaseModel):
             methods=Function.from_functions_info(methods),
             superclasses=superclasses
         ) for name, attributes, methods, superclasses in extracted_classes]
+    
+    def get_class_attributes(self) -> List[Attribute]:
+        return [attr for attr in self.attributes if attr.type == Config.CLASS_TYPE]
+    
+    def get_instance_attributes(self) -> List[Attribute]:
+        return [attr for attr in self.attributes if attr.type == Config.INSTANCE_TYPE]
 
 
 class Module(BaseModel):
@@ -407,7 +416,6 @@ class ClassBundle:
 
     class_name: Optional[str] = None
     attribute_type: Optional[str] = None
-    attribute_name: Optional[str] = None
     argument_name: Optional[str] = None
     method_name: Optional[str] = None
 
