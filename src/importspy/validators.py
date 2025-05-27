@@ -7,6 +7,10 @@ from .models import (
     Module,
     Variable,
     Function,
+    Class
+)
+
+from .violation_systems import (
     RuntimeContractViolation,
     RuntimeBundle,
     SystemContractViolation,
@@ -177,6 +181,7 @@ class ModuleValidator:
     def __init__(self):
         self.variable_validator:VariableValidator = VariableValidator()
         self.function_validator:FunctionValidator = FunctionValidator()
+        self.class_validator:ClassValidator = ClassValidator()
 
     def validate(
         self,
@@ -228,31 +233,66 @@ class ModuleValidator:
                 )
             )
 
-            if module_1.classes:
-                for class_1 in module_1.classes:
-                    class_2 = next((cls for cls in module_2.classes if cls.name == class_1.name), None)
-                    if not class_2:
-                        raise ValueError(Errors.CLASS_MISSING.format(class_1.name))
+            self.class_validator.validate(
+                module_1.classes,
+                module_2.classes
+            )
 
-                    self.variable_validator.validate(
-                        class_1.get_class_attributes(),
-                        class_2.get_class_attributes(),
-                        VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle(attribute_type="class", class_name=class_1.name))
-                    )
 
-                    self._function_validator.validate(
-                        class_1.methods,
-                        class_2.methods,
-                        classname=class_1.name
-                    )
+class ClassValidator:
 
-                    CommonValidator().list_validate(
-                        class_1.superclasses,
-                        class_2.superclasses,
-                        Errors.CLASS_SUPERCLASS_MISSING,
-                        class_2.name
+    def __init__(self):
+        
+        self.variable_validator:VariableValidator = VariableValidator()
+        self.function_validator:FunctionValidator = FunctionValidator()
+
+    def validate(
+            self,
+            classes_1: List[Class],
+            classes_2: List[Class]
+    ):
+        if classes_1:
+            for class_1 in classes_1:
+                class_2 = next((cls for cls in classes_2 if cls.name == class_1.name), None)
+                if not class_2:
+                    raise ValueError(Errors.CLASS_MISSING.format(class_1.name))
+
+                self.variable_validator.validate(
+                    class_1.get_class_attributes(),
+                    class_2.get_class_attributes(),
+                    VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle(attribute_type="class", class_name=class_1.name))
+                )
+
+                self.variable_validator.validate(
+                    class_1.get_instance_attributes(),
+                    class_2.get_instance_attributes(),
+                    VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle(attribute_type="instance", class_name=class_1.name))
+                )
+
+                self.function_validator.validate(
+                    class_1.methods,
+                    class_2.methods,
+                    FunctionContractViolation(
+                        Contexts.CLASS_CONTEXT,
+                        ClassBundle(
+                            class_name=class_1.name
+                        )
                     )
-            return
+                )
+
+                self._function_validator.validate(
+                    class_1.methods,
+                    class_2.methods,
+                    classname=class_1.name
+                )
+
+                CommonValidator().list_validate(
+                    class_1.superclasses,
+                    class_2.superclasses,
+                    Errors.CLASS_SUPERCLASS_MISSING,
+                    class_2.name
+                )
+        return
 
 class VariableValidator:
 
