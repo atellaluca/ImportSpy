@@ -3,21 +3,17 @@ from abc import (
     abstractmethod
 )
 
-from dataclasses import dataclass, asdict
+from dataclasses import (
+    dataclass,
+    field
+)
 
 from typing import (
     Optional,
-    Union,
     Any
 )
 
 from .constants import Errors
-from .models import (
-    System,
-    Runtime,
-    Module,
-    Python
-)
 
 class ContractViolation(ABC):
 
@@ -70,94 +66,66 @@ class BaseContractViolation(ContractViolation):
 
 class VariableContractViolation(BaseContractViolation):
 
-    def __init__(self, scope:str, context:str, bundle:Union['ModuleBundle' ,'ClassBundle', 'EnvironmentBundle']):
+    def __init__(self, scope:str, context:str, bundle:'Bundle'):
         super().__init__(context)
         self.scope = scope
         self.bundle = bundle
     
     @property
     def label(self) -> str:
-        return Errors.VARIABLES_LABEL_TEMPLATE[self.scope][self.context].format(**asdict(self.bundle))
+        return Errors.VARIABLES_LABEL_TEMPLATE[self.scope][self.context].format(**self.bundle.state)
 
 class FunctionContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, bundle:Union['ClassBundle', 'ModuleBundle']):
+    def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context)
         self.bundle = bundle
     
     @property
     def label(self) -> str:
-        return Errors.FUNCTIONS_LABEL_TEMPLATE[self.context].format(**asdict(self.bundle))
+        return Errors.FUNCTIONS_LABEL_TEMPLATE[self.context].format(**self.bundle.state)
 
 class RuntimeContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, bundle:'RuntimeBundle'):
+    def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context)
         self.bundle = bundle
     
     @property
     def label(self) -> str:
-        return self.bundle.runtimes_1
+        return self.bundle.state[Errors.KEY_RUNTIMES_1]
 
 class SystemContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, bundle:'SystemBundle'):
+    def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context)
         self.bundle = bundle
     
     @property
     def label(self) -> str:
-        return self.bundle.systems_1
+        return self.bundle.state[Errors.KEY_SYSTEMS_1]
 
 class PythonContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, bundle:'PythonBundle'):
+    def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context)
         self.bundle = bundle
     
     @property
     def label(self) -> str:
-        return self.bundle.python_1
-
+        return self.bundle.state[Errors.KEY_PYTHON_1]
 
 class ModuleContractViolation(BaseContractViolation):
 
-    def __init__(self, context:str, bundle:'ModuleBundle'):
+    def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context)
         self.bundle = bundle
     
     @property
     def label(self) -> str:
-        return Errors.MODULE_LABEL_TEMPLATE[self.context].format(**asdict(self.bundle))
-    
-@dataclass
-class ClassBundle:
-
-    class_name: Optional[str] = None
-    attribute_type: Optional[str] = None
-    method_name: Optional[str] = None
+        return Errors.MODULE_LABEL_TEMPLATE[self.context].format(**self.bundle.state)
 
 @dataclass
-class ModuleBundle:
+class Bundle:
 
-    variable_name: Optional[str] = None
-    module_1: Optional[Module] = None
-    argument_name: Optional[str] = None
-    function_name: Optional[str] = None
-
-@dataclass
-class EnvironmentBundle:
-
-    environment_variable_name: Optional[str] = None
-
-class RuntimeBundle:
-
-    runtimes_1: Optional[list[Runtime]] = None
-
-class SystemBundle:
-
-    systems_1: Optional[list[System]] = None
-
-class PythonBundle:
-
-    python_1: Optional[Python] = None
+    state: Optional[dict[str, Any]] = field(default_factory=dict)
