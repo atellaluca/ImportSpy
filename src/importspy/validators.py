@@ -12,18 +12,13 @@ from .models import (
 
 from .violation_systems import (
     RuntimeContractViolation,
-    RuntimeBundle,
     SystemContractViolation,
-    SystemBundle,
-    EnvironmentBundle,
     VariableContractViolation,
     PythonContractViolation,
-    PythonBundle,
     ModuleContractViolation,
-    ModuleBundle,
     BaseContractViolation,
     FunctionContractViolation,
-    ClassBundle
+    Bundle
 )
 
 from .constants import (
@@ -36,6 +31,9 @@ from .log_manager import LogManager
 
 class RuntimeValidator:
 
+    def __init__(self, bundle:Bundle):
+        self.bundle = bundle
+
     def validate(
         self,
         runtimes_1: List[Runtime],
@@ -43,12 +41,14 @@ class RuntimeValidator:
     ):
         if not runtimes_1:
             return
+        
+        self.bundle.state[Errors.KEY_RUNTIMES_1] = runtimes_1
 
         if not runtimes_2:
             raise ValueError(
                 RuntimeContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    RuntimeBundle(runtimes_1)
+                    self.bundle
                 ).missing_error_handler())
 
         runtime_2 = runtimes_2[0]
@@ -60,8 +60,9 @@ class RuntimeValidator:
 class SystemValidator:
 
 
-    def __init__(self):
-        
+    def __init__(self, bundle:Bundle):
+
+        self.bundle = bundle
         self._environment_validator = SystemValidator.EnvironmentValidator()
 
     def validate(
@@ -72,12 +73,14 @@ class SystemValidator:
         
         if not systems_1:
             return
+        
+        self.bundle.state[Errors.KEY_SYSTEMS_1] = systems_1
 
         if not systems_2:
             raise ValueError(
                 SystemContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    SystemBundle(systems_1)
+                    self.bundle
                 ).missing_error_handler())
         
         system_2 = systems_2[0]
@@ -89,19 +92,25 @@ class SystemValidator:
                 return system_1.pythons
 
     class EnvironmentValidator:
+
+        def __init__(self, bundle:Bundle):
+            self.bundle = bundle
         
         def validate(self,
                     environment_1: Environment,
-                    environment_2: Environment):
+                    environment_2: Environment
+            ):
             
             if not environment_1:
                 return
+            
+            self.bundle.state[Errors.KEY_ENVIRONMENT_VARIABLE] = environment_1
 
             if not environment_2:
                 raise ValueError(
                 VariableContractViolation(
                     Contexts.ENVIRONMENT_CONTEXT,
-                    EnvironmentBundle(environment_1)
+                    self.bundle
                 ).missing_error_handler())
             
             variables_2 = environment_2.variables
@@ -113,6 +122,9 @@ class SystemValidator:
 
 class PythonValidator:
 
+    def __init__(self, bundle:Bundle):
+        self.bundle = bundle
+
     def validate(
         self,
         pythons_1: List[Python],
@@ -120,12 +132,14 @@ class PythonValidator:
     ):
         if not pythons_1:
             return
+        
+        self.bundle.state[Errors.KEY_PYTHON_1] = python_1
 
         if not pythons_2:
             raise ValueError(
                 PythonContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    PythonBundle(python_1)
+                    self.bundle
                 ).missing_error_handler())
 
         python_2 = pythons_2[0]
@@ -178,7 +192,8 @@ class PythonValidator:
 
 class ModuleValidator:
 
-    def __init__(self):
+    def __init__(self, bundle:Bundle):
+        self.bundle = bundle
         self.variable_validator:VariableValidator = VariableValidator()
         self.function_validator:FunctionValidator = FunctionValidator()
         self.class_validator:ClassValidator = ClassValidator()
@@ -190,28 +205,33 @@ class ModuleValidator:
     ):
         if not modules_1:
             return
+        
+        self.bundle.state[Errors.KEY_MODULES_1] = modules_1
 
         if not module_2:
             raise ValueError(
                 ModuleContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    ModuleBundle(module_1)
+                    self.bundle
                 ).missing_error_handler())
 
         for module_1 in modules_1:
+
+            self.bundle.state[Errors.KEY_MODULE_NAME] = module_1.filename
+            self.bundle.state[Errors.KEY_MODULE_VERSION] = module_1.version
 
             if module_1.filename and module_1.filename != module_2.filename:
                 raise ValueError(
                 ModuleContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    ModuleBundle(module_1)
+                    self.bundle
                 ).mismatch_error_handler(module_1.filename, module_2.filename))
 
             if module_1.version and module_1.version != module_2.version:
                 raise ValueError(
                 ModuleContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    ModuleBundle(module_1)
+                    self.bundle
                 ).mismatch_error_handler(module_1.version, module_2.version))
 
             self.variable_validator.validate(
@@ -220,7 +240,7 @@ class ModuleValidator:
                 VariableContractViolation(
                     Errors.SCOPE_VARIABLE,
                     Contexts.MODULE_CONTEXT,
-                    ModuleBundle(module_1)
+                    self.bundle
                 )
             )
 
@@ -229,7 +249,7 @@ class ModuleValidator:
                 module_2.functions,
                 FunctionContractViolation(
                     Contexts.MODULE_CONTEXT,
-                    ModuleBundle(module_1)
+                    self.bundle
                 )
             )
 

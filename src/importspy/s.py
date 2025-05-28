@@ -42,6 +42,8 @@ from typing import (
 )
 import logging
 
+from .violation_systems import Bundle
+
 
 class Spy:
     """
@@ -150,14 +152,15 @@ class Spy:
     def _validate_module(self, spymodel: SpyModel, info_module: ModuleType) -> ModuleType:
         self.logger.debug(f"info_module: {info_module}")
         if spymodel:
-            module_validator:ModuleValidator = ModuleValidator()
+            bundle = Bundle()
+            module_validator:ModuleValidator = ModuleValidator(bundle)
             self.logger.debug(f"Import contract detected: {spymodel}")
             spy_module = SpyModel.from_module(info_module)
             self.logger.debug(f"Extracted module structure: {spy_module}")
             module_validator.validate([spymodel],spy_module.deployments[0].systems[0].pythons[0].modules[0])
-            runtime:Runtime = RuntimeValidator().validate(spymodel.deployments, spy_module.deployments)
-            pythons:List[Python] = SystemValidator().validate(runtime.systems, spy_module.deployments[0].systems)
-            modules: List[Module] = PythonValidator().validate(pythons, spy_module.deployments[0].systems[0].pythons)
+            runtime:Runtime = RuntimeValidator(bundle).validate(spymodel.deployments, spy_module.deployments)
+            pythons:List[Python] = SystemValidator(bundle).validate(runtime.systems, spy_module.deployments[0].systems)
+            modules: List[Module] = PythonValidator(bundle).validate(pythons, spy_module.deployments[0].systems[0].pythons)
             module_validator.validate(modules, spy_module.deployments[0].systems[0].pythons[0].modules[0])
         return ModuleUtil().load_module(info_module)
 

@@ -131,6 +131,42 @@ class Errors:
         }
     }
 
+    KEY_RUNTIMES_1 = "runtimes_1"
+    KEY_SYSTEMS_1 = "runtimes_1"
+    KEY_PYTHON_1 = "python_1"
+    KEY_ENVIRONMENT_1 = "environment_1"
+    KEY_ENVIRONMENT_VARIABLE = "environment_variable_name"
+    KEY_MODULES_1 = "modules_1"
+    KEY_VARIABLE_NAME = "variable_name"
+    KEY_ARGUMENT_NAME = "argument_name"
+    KEY_FUNCTION_NAME = "function_name"
+    KEY_METHOD_NAME = "method_name"
+    KEY_MODULE_NAME = "module_name"
+    KEY_ATTRIBUTE_TYPE = "attribute_type"
+    KEY_ATTRIBUTE_NAME = "attribute_name"
+    KEY_CLASS_NAME = "class_name"
+    KEY_MODULE_VERSION = "version"
+    KEY_FILE_NAME = "filename"
+
+    VARIABLES_DINAMIC_PAYLOAD = {
+
+        SCOPE_VARIABLE: {
+            Contexts.ENVIRONMENT_CONTEXT: KEY_ENVIRONMENT_VARIABLE,
+            Contexts.MODULE_CONTEXT: KEY_VARIABLE_NAME,
+            Contexts.CLASS_CONTEXT: KEY_ATTRIBUTE_NAME
+        },
+        SCOPE_ARGUMENT: {
+            Contexts.MODULE_CONTEXT: KEY_ARGUMENT_NAME,
+            Contexts.CLASS_CONTEXT: KEY_ARGUMENT_NAME
+        }
+
+    }
+
+    FUNCTIONS_DINAMIC_PAYLOAD = {
+        Contexts.MODULE_CONTEXT: KEY_FUNCTION_NAME,
+        Contexts.CLASS_CONTEXT: KEY_METHOD_NAME
+    }
+
     FUNCTIONS_LABEL_TEMPLATE = {
         Contexts.MODULE_CONTEXT: 'The function "{function_name}" in module "{filename}"',
         Contexts.CLASS_CONTEXT: 'The method "{method_name}" in class "{class_name}"'
