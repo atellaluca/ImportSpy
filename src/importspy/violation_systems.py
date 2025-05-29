@@ -8,6 +8,8 @@ from dataclasses import (
     field
 )
 
+from .violation_systems import Bundle
+
 from typing import (
     Optional,
     Any
@@ -46,9 +48,10 @@ class ContractViolation(ABC):
 
 class BaseContractViolation(ContractViolation):
 
-    def __init__(self, context):
+    def __init__(self, context, bundle:Bundle):
         
         self._context = context
+        self.bundle = bundle
         super().__init__()
 
     @property
@@ -67,65 +70,71 @@ class BaseContractViolation(ContractViolation):
 class VariableContractViolation(BaseContractViolation):
 
     def __init__(self, scope:str, context:str, bundle:'Bundle'):
-        super().__init__(context)
+        super().__init__(context, bundle)
         self.scope = scope
-        self.bundle = bundle
     
     @property
     def label(self) -> str:
-        return Errors.VARIABLES_LABEL_TEMPLATE[self.scope][self.context].format(**self.bundle.state)
+        return Errors.VARIABLES_LABEL_TEMPLATE[self.scope][self.context].format(**self.bundle)
 
 class FunctionContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
-        super().__init__(context)
-        self.bundle = bundle
+        super().__init__(context, bundle)
     
     @property
     def label(self) -> str:
-        return Errors.FUNCTIONS_LABEL_TEMPLATE[self.context].format(**self.bundle.state)
+        return Errors.FUNCTIONS_LABEL_TEMPLATE[self.context].format(**self.bundle)
 
 class RuntimeContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
-        super().__init__(context)
-        self.bundle = bundle
+        super().__init__(context, bundle)
     
     @property
     def label(self) -> str:
-        return self.bundle.state[Errors.KEY_RUNTIMES_1]
+        return self.bundle[Errors.KEY_RUNTIMES_1]
 
 class SystemContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
-        super().__init__(context)
-        self.bundle = bundle
+        super().__init__(context, bundle)
     
     @property
     def label(self) -> str:
-        return self.bundle.state[Errors.KEY_SYSTEMS_1]
+        return self.bundle[Errors.KEY_SYSTEMS_1]
 
 class PythonContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
-        super().__init__(context)
-        self.bundle = bundle
+        super().__init__(context, bundle)
     
     @property
     def label(self) -> str:
-        return self.bundle.state[Errors.KEY_PYTHON_1]
+        return self.bundle[Errors.KEY_PYTHON_1]
 
 class ModuleContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
-        super().__init__(context)
-        self.bundle = bundle
+        super().__init__(context, bundle)
     
     @property
     def label(self) -> str:
-        return Errors.MODULE_LABEL_TEMPLATE[self.context].format(**self.bundle.state)
+        return Errors.MODULE_LABEL_TEMPLATE[self.context].format(**self.bundle)
 
 @dataclass
 class Bundle:
 
     state: Optional[dict[str, Any]] = field(default_factory=dict)
+
+    def __getitem__(self, key):
+        return self.state[key]
+    
+    def __len__(self):
+        return len(self.state)
+    
+    def __setitem__(self, key, value):
+        self.state[key] = value
+    
+    def __repr__(self):
+        return repr(self.state)

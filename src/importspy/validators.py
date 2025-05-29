@@ -42,7 +42,7 @@ class RuntimeValidator:
         if not runtimes_1:
             return
         
-        self.bundle.state[Errors.KEY_RUNTIMES_1] = runtimes_1
+        self.bundle[Errors.KEY_RUNTIMES_1] = runtimes_1
 
         if not runtimes_2:
             raise ValueError(
@@ -74,7 +74,7 @@ class SystemValidator:
         if not systems_1:
             return
         
-        self.bundle.state[Errors.KEY_SYSTEMS_1] = systems_1
+        self.bundle[Errors.KEY_SYSTEMS_1] = systems_1
 
         if not systems_2:
             raise ValueError(
@@ -104,7 +104,7 @@ class SystemValidator:
             if not environment_1:
                 return
             
-            self.bundle.state[Errors.KEY_ENVIRONMENT_VARIABLE] = environment_1
+            self.bundle[Errors.KEY_ENVIRONMENT_VARIABLE] = environment_1
 
             if not environment_2:
                 raise ValueError(
@@ -133,7 +133,7 @@ class PythonValidator:
         if not pythons_1:
             return
         
-        self.bundle.state[Errors.KEY_PYTHON_1] = python_1
+        self.bundle[Errors.KEY_PYTHON_1] = python_1
 
         if not pythons_2:
             raise ValueError(
@@ -206,7 +206,7 @@ class ModuleValidator:
         if not modules_1:
             return
         
-        self.bundle.state[Errors.KEY_MODULES_1] = modules_1
+        self.bundle[Errors.KEY_MODULES_1] = modules_1
 
         if not module_2:
             raise ValueError(
@@ -217,8 +217,8 @@ class ModuleValidator:
 
         for module_1 in modules_1:
 
-            self.bundle.state[Errors.KEY_MODULE_NAME] = module_1.filename
-            self.bundle.state[Errors.KEY_MODULE_VERSION] = module_1.version
+            self.bundle[Errors.KEY_MODULE_NAME] = module_1.filename
+            self.bundle[Errors.KEY_MODULE_VERSION] = module_1.version
 
             if module_1.filename and module_1.filename != module_2.filename:
                 raise ValueError(
@@ -317,7 +317,7 @@ class ClassValidator:
 class VariableValidator:
 
     def __init__(self):
-        
+
         self.logger = LogManager().get_logger(self.__class__.__name__)
 
     def validate(
@@ -326,7 +326,7 @@ class VariableValidator:
         variables_2: List[Variable],
         contract_violation: BaseContractViolation
     ):
-        
+        bundle: Bundle = contract_violation.bundle
         self.logger.debug(f"Type of variables_1: {type(variables_1)}")
         self.logger.debug(
             Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -345,6 +345,8 @@ class VariableValidator:
                 )
             )
             return
+        
+        bundle[Errors.KEY_VARIABLES_1] = variables_1
 
         if not variables_2:
             self.logger.debug(
@@ -354,29 +356,30 @@ class VariableValidator:
                     details="No actual Variables found for validation"
                 )
             )
-            raise ValueError(contract_violation.missing_error_handler(variables_1))
+            raise ValueError(contract_violation.missing_error_handler())
 
-        for vars_1 in variables_1:
+        for var_1 in variables_1:
             self.logger.debug(
                 Constants.LOG_MESSAGE_TEMPLATE.format(
                     operation="Variable validating",
                     status="Progress",
-                    details=f"Current vars_1: {vars_1}"
+                    details=f"Current var_1: {var_1}"
                 )
             )
-            if vars_1.name not in {var.name for var in variables_2}:
-                raise ValueError(contract_violation.missing_error_handler(vars_1.name))
+            bundle[Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.context]] = var_1.name
+            if var_1.name not in {var.name for var in variables_2}:
+                raise ValueError(contract_violation.missing_error_handler(var_1.name))
 
-        for vars_1 in variables_1:
-            vars_2 = next((var for var in variables_2 if var.name == vars_1.name), None)
-            if not vars_2:
-                raise ValueError(contract_violation.missing_error_handler(vars_1.name))
+        for var_1 in variables_1:
+            var_2 = next((var for var in variables_2 if var.name == var_1.name), None)
+            if not var_2:
+                raise ValueError(contract_violation.missing_error_handler())
 
-            if vars_1.annotation and vars_1.annotation != vars_2.annotation:
-                raise ValueError(contract_violation.mismatch_error_handler(vars_1.annotation, vars_2.annotation))
+            if var_1.annotation and var_1.annotation != var_2.annotation:
+                raise ValueError(contract_violation.mismatch_error_handler(var_1.annotation, var_2.annotation))
 
-            if vars_1.value != vars_2.value:
-                raise ValueError(contract_violation.mismatch_error_handler(vars_1.value, vars_2.value))
+            if var_1.value != var_2.value:
+                raise ValueError(contract_violation.mismatch_error_handler(var_1.value, var_2.value))
 
 class FunctionValidator:
 
