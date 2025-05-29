@@ -135,8 +135,9 @@ class Errors:
     KEY_SYSTEMS_1 = "runtimes_1"
     KEY_PYTHON_1 = "python_1"
     KEY_ENVIRONMENT_1 = "environment_1"
-    KEY_ENVIRONMENT_VARIABLE = "environment_variable_name"
+    KEY_ENVIRONMENT_VARIABLE_NAME = "environment_variable_name"
     KEY_MODULES_1 = "modules_1"
+    KEY_VARIABLES_1 = "variables_1"
     KEY_VARIABLE_NAME = "variable_name"
     KEY_ARGUMENT_NAME = "argument_name"
     KEY_FUNCTION_NAME = "function_name"
@@ -151,7 +152,7 @@ class Errors:
     VARIABLES_DINAMIC_PAYLOAD = {
 
         SCOPE_VARIABLE: {
-            Contexts.ENVIRONMENT_CONTEXT: KEY_ENVIRONMENT_VARIABLE,
+            Contexts.ENVIRONMENT_CONTEXT: KEY_ENVIRONMENT_VARIABLE_NAME,
             Contexts.MODULE_CONTEXT: KEY_VARIABLE_NAME,
             Contexts.CLASS_CONTEXT: KEY_ATTRIBUTE_NAME
         },
