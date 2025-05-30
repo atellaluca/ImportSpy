@@ -29,21 +29,20 @@ class ContractViolation(ABC):
     def category(self) -> str:
         pass
     
-    @property
     @abstractmethod
-    def label(self) -> str:
+    def label(self, spec:str) -> str:
         pass
     
     @abstractmethod
-    def missing_error_handler(self) -> str:
+    def missing_error_handler(self, spec:str) -> str:
         pass
 
     @abstractmethod
-    def mismatch_error_handler(self) -> str:
+    def mismatch_error_handler(self, spec:str) -> str:
         pass
 
     @abstractmethod
-    def invalid_error_handler(self) -> str:
+    def invalid_error_handler(self, spec:str) -> str:
         pass
 
 class BaseContractViolation(ContractViolation):
@@ -58,14 +57,14 @@ class BaseContractViolation(ContractViolation):
     def context(self) -> str:
         return self._context
     
-    def missing_error_handler(self) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISSING][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label).capitalize()}'
+    def missing_error_handler(self, spec:str) -> str:
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISSING][Errors.TEMPLATE_KEY].format(label=self.label(spec))} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label(spec)).capitalize()}'
 
-    def mismatch_error_handler(self, expected:Any, actual:Any) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=expected, actual=actual).capitalize()}'
+    def mismatch_error_handler(self, expected:Any, actual:Any, spec:str) -> str:
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][Errors.TEMPLATE_KEY].format(label=self.label(spec))} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label(spec), expected=expected, actual=actual).capitalize()}'
 
-    def invalid_error_handler(self, allowed:Any, found:Any) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][Errors.TEMPLATE_KEY].format(label=self.label)} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label, expected=allowed, actual=found).capitalize()}'
+    def invalid_error_handler(self, allowed:Any, found:Any, spec:str) -> str:
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][Errors.TEMPLATE_KEY].format(label=self.label(spec))} - {Errors.ERROR_MESSAGE_TEMPLATES[self.category][Errors.SOLUTION_KEY].format(label=self.label(spec), expected=allowed, actual=found).capitalize()}'
 
 class VariableContractViolation(BaseContractViolation):
 
@@ -82,27 +81,24 @@ class FunctionContractViolation(BaseContractViolation):
     def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context, bundle)
     
-    @property
-    def label(self) -> str:
-        return Errors.FUNCTIONS_LABEL_TEMPLATE[self.context].format(**self.bundle)
+    def label(self, spec:str) -> str:
+        return Errors.FUNCTIONS_LABEL_TEMPLATE[spec][self.context].format(**self.bundle)
 
 class RuntimeContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context, bundle)
     
-    @property
-    def label(self) -> str:
-        return self.bundle[Errors.KEY_RUNTIMES_1]
+    def label(self, spec:str) -> str:
+        return Errors.RUNTIME_LABEL_TEMPLATE[spec]
 
 class SystemContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context, bundle)
     
-    @property
-    def label(self) -> str:
-        return self.bundle[Errors.KEY_SYSTEMS_1]
+    def label(self, spec:str) -> str:
+        return Errors.SYSTEM_LABEL_TEMPLATE[spec]
 
 class PythonContractViolation(BaseContractViolation):
 
@@ -110,8 +106,8 @@ class PythonContractViolation(BaseContractViolation):
         super().__init__(context, bundle)
     
     @property
-    def label(self) -> str:
-        return self.bundle[Errors.KEY_PYTHON_1]
+    def label(self, spec:str) -> str:
+        return Errors.PYTHON_LABEL_TEMPLATE[spec]
 
 class ModuleContractViolation(BaseContractViolation):
 
@@ -119,8 +115,8 @@ class ModuleContractViolation(BaseContractViolation):
         super().__init__(context, bundle)
     
     @property
-    def label(self) -> str:
-        return Errors.MODULE_LABEL_TEMPLATE[self.context].format(**self.bundle)
+    def label(self, spec:str) -> str:
+        return Errors.MODULE_LABEL_TEMPLATE[spec][self.context].format(**self.bundle)
 
 @dataclass
 class Bundle:
