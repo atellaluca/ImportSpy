@@ -105,6 +105,9 @@ class Errors:
     SCOPE_VARIABLE = "variable"
     SCOPE_ARGUMENT = "argument"
 
+    ENTITY_MESSAGES = "entity"
+    COLLECTIONS_MESSAGES = "collections"
+
     CONTEXT_INTRO = {
         Contexts.RUNTIME_CONTEXT: "Runtime constraint violation",
         Contexts.ENVIRONMENT_CONTEXT: "Environment validation failure",
@@ -118,26 +121,101 @@ class Errors:
         MISMATCH = "mismatch"
         INVALID = "invalid"
 
+    RUNTIME_LABEL_TEMPLATE = {
+
+        ENTITY_MESSAGES: 'The runtime "{runtime_1}"',
+        COLLECTIONS_MESSAGES: 'The runtimes "{runtimes_1}"'
+
+    }
+
+    SYSTEM_LABEL_TEMPLATE = {
+
+        ENTITY_MESSAGES: 'The system "{system_1}"',
+        COLLECTIONS_MESSAGES: 'The systems "{systems_1}"'
+
+    }
+
+    PYTHON_LABEL_TEMPLATE = {
+
+        ENTITY_MESSAGES: 'The python "{python_1}"',
+        COLLECTIONS_MESSAGES: 'The pythons "{pythons_1}"'
+
+    }
+
     VARIABLES_LABEL_TEMPLATE = {
         
         SCOPE_VARIABLE: {
-            Contexts.ENVIRONMENT_CONTEXT: 'The environment variable "{environment_variable_name}"',
-            Contexts.MODULE_CONTEXT: 'The variable "{variable_name}" in module "{module_name}"',
-            Contexts.CLASS_CONTEXT: 'The {attribute_type} attribute "{attribute_name}" in class "{class_name}"'
+
+            ENTITY_MESSAGES: {
+
+                Contexts.ENVIRONMENT_CONTEXT: 'The environment variable "{environment_variable_name}"',
+                Contexts.MODULE_CONTEXT: 'The variable "{variable_name}" in module "{module_name}"',
+                Contexts.CLASS_CONTEXT: 'The {attribute_type} attribute "{attribute_name}" in class "{class_name}"'
+
+            },
+
+            COLLECTIONS_MESSAGES: {
+
+                Contexts.ENVIRONMENT_CONTEXT: 'The environment "{environment_1}"',
+                Contexts.MODULE_CONTEXT: 'The variables "{variables_1}"',
+                Contexts.CLASS_CONTEXT: 'The attributes "{attrs_1}"'
+
+            }
         },
-        SCOPE_ARGUMENT: {
-            Contexts.MODULE_CONTEXT: 'The argument "{argument_name}" of function "{function_name}"',
-            Contexts.CLASS_CONTEXT: 'The argument "{argument_name}" of method "{method_name}" in class "{class_name}"',
+
+        ENTITY_MESSAGES: {
+
+            SCOPE_ARGUMENT: {
+
+                Contexts.MODULE_CONTEXT: 'The argument "{argument_name}" of function "{function_name}"',
+                Contexts.CLASS_CONTEXT: 'The argument "{argument_name}" of method "{method_name}" in class "{class_name}"',
+
+            },
+
+            COLLECTIONS_MESSAGES: {
+
+                Contexts.MODULE_CONTEXT: 'The arguments "{arguments_1}" of function "{function_name}"',
+                Contexts.CLASS_CONTEXT: 'The arguments "{arguments_1}" of method "{method_name}", in class "{class_name}"'
+
+            }
+
         }
+        
+    }
+
+    FUNCTIONS_LABEL_TEMPLATE = {
+
+        ENTITY_MESSAGES: {
+
+            Contexts.MODULE_CONTEXT: 'The function "{function_name}" in module "{filename}"',
+            Contexts.CLASS_CONTEXT: 'The method "{method_name}" in class "{class_name}"'
+
+        },
+
+        COLLECTIONS_MESSAGES: {
+
+            Contexts.MODULE_CONTEXT: 'The functions "{functions_1}" in module "{filename}"',
+            Contexts.CLASS_CONTEXT: 'The methods "{methods_1}" in class "{class_name}"'
+
+        }
+
+    }
+
+    MODULE_LABEL_TEMPLATE = {
+        Contexts.RUNTIME_CONTEXT: 'The module "{filename}"',
+        Contexts.ENVIRONMENT_CONTEXT: 'The version "{version}" of module "{filename}"'
     }
 
     KEY_RUNTIMES_1 = "runtimes_1"
     KEY_SYSTEMS_1 = "runtimes_1"
+    KEY_PYTHONS_1 = "pythons_1"
     KEY_PYTHON_1 = "python_1"
     KEY_ENVIRONMENT_1 = "environment_1"
     KEY_ENVIRONMENT_VARIABLE_NAME = "environment_variable_name"
     KEY_MODULES_1 = "modules_1"
     KEY_VARIABLES_1 = "variables_1"
+    KEY_FUNCTIONS_1 = "functions_1"
+
     KEY_VARIABLE_NAME = "variable_name"
     KEY_ARGUMENT_NAME = "argument_name"
     KEY_FUNCTION_NAME = "function_name"
@@ -166,16 +244,6 @@ class Errors:
     FUNCTIONS_DINAMIC_PAYLOAD = {
         Contexts.MODULE_CONTEXT: KEY_FUNCTION_NAME,
         Contexts.CLASS_CONTEXT: KEY_METHOD_NAME
-    }
-
-    FUNCTIONS_LABEL_TEMPLATE = {
-        Contexts.MODULE_CONTEXT: 'The function "{function_name}" in module "{filename}"',
-        Contexts.CLASS_CONTEXT: 'The method "{method_name}" in class "{class_name}"'
-    }
-
-    MODULE_LABEL_TEMPLATE = {
-        Contexts.RUNTIME_CONTEXT: 'The module "{filename}"',
-        Contexts.ENVIRONMENT_CONTEXT: 'The version "{version}" of module "{filename}"'
     }
 
     ERROR_MESSAGE_TEMPLATES = {
