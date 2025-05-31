@@ -27,6 +27,8 @@ from .constants import (
     Errors
 )
 
+from .config import Config
+
 from .log_manager import LogManager
 
 class RuntimeValidator:
@@ -270,7 +272,11 @@ class ModuleValidator:
 
             self.class_validator.validate(
                 module_1.classes,
-                module_2.classes
+                module_2.classes,
+                ModuleContractViolation(
+                    Contexts.CLASS_CONTEXT,
+                    self.bundle
+                )
             )
 
 
@@ -284,50 +290,73 @@ class ClassValidator:
     def validate(
             self,
             classes_1: List[Class],
-            classes_2: List[Class]
-    ):
-        if classes_1:
-            for class_1 in classes_1:
-                class_2 = next((cls for cls in classes_2 if cls.name == class_1.name), None)
-                if not class_2:
-                    raise ValueError(Errors.CLASS_MISSING.format(class_1.name))
+            classes_2: List[Class],
+            contract_violation: BaseContractViolation
+    ):  
+        if not classes_1:
+            return
+        
+        bundle: Bundle = contract_violation.bundle
+        bundle[Errors.KEY_CLASSES_1] = classes_1
 
-                self.variable_validator.validate(
-                    class_1.get_class_attributes(),
-                    class_2.get_class_attributes(),
-                    VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle(attribute_type="class", class_name=class_1.name))
-                )
+        if not classes_2:
+            raise ValueError(
+                ModuleContractViolation(
+                    Contexts.CLASS_CONTEXT,
+                    bundle
+                ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+        
+        for class_1 in classes_1:
+            class_2 = next((cls for cls in classes_2 if cls.name == class_1.name), None)
+            
+            bundle[Errors.KEY_CLASS_NAME] = class_1.name
 
-                self.variable_validator.validate(
-                    class_1.get_instance_attributes(),
-                    class_2.get_instance_attributes(),
-                    VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, ClassBundle(attribute_type="instance", class_name=class_1.name))
-                )
-
-                self.function_validator.validate(
-                    class_1.methods,
-                    class_2.methods,
-                    FunctionContractViolation(
+            if not class_2:
+                raise ValueError(
+                    ModuleContractViolation(
                         Contexts.CLASS_CONTEXT,
-                        ClassBundle(
-                            class_name=class_1.name
-                        )
-                    )
+                        bundle
+                    ).missing_error_handler(Errors.ENTITY_MESSAGES)
                 )
+            
+            bundle[Errors.KEY_ATTRIBUTE_TYPE] = Config.CLASS_TYPE
 
-                self._function_validator.validate(
-                    class_1.methods,
-                    class_2.methods,
-                    classname=class_1.name
-                )
+            self.variable_validator.validate(
+                class_1.get_class_attributes(),
+                class_2.get_class_attributes(),
+                VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, bundle)
+            )
 
-                CommonValidator().list_validate(
-                    class_1.superclasses,
-                    class_2.superclasses,
-                    Errors.CLASS_SUPERCLASS_MISSING,
-                    class_2.name
+            bundle[Errors.KEY_ATTRIBUTE_TYPE] = Config.INSTANCE_TYPE
+
+            self.variable_validator.validate(
+                class_1.get_instance_attributes(),
+                class_2.get_instance_attributes(),
+                VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, bundle)
+            )
+
+            self.function_validator.validate(
+                class_1.methods,
+                class_2.methods,
+                FunctionContractViolation(
+                    Contexts.CLASS_CONTEXT,
+                    bundle
                 )
-        return
+            )
+
+            self.function_validator.validate(
+                class_1.methods,
+                class_2.methods,
+                classname=class_1.name
+            )
+
+            self.validate(class_1.superclasses,
+                          class_2.superclasses,
+                          ModuleContractViolation(
+                              Contexts.CLASS_CONTEXT,
+                              bundle
+                          )
+            )
 
 class VariableValidator:
 
@@ -428,7 +457,9 @@ class FunctionValidator:
                 )
             )
             return
+        
         bundle[Errors.KEY_FUNCTIONS_1] = functions_1
+
         if not functions_2:
             self.logger.debug(
                 Constants.LOG_MESSAGE_TEMPLATE.format(
@@ -467,15 +498,13 @@ class FunctionValidator:
                 function_1.arguments,
                 function_2.arguments,
                 VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.MODULE_CONTEXT)
-                
             )
 
             if function_1.return_annotation and function_1.return_annotation != function_2.return_annotation:
-                raise ValueError(
-                    Errors.FUNCTION_RETURN_ANNOTATION_MISMATCH.format(
-                        function_1.name,
-                        function_1.return_annotation,
-                        function_2.return_annotation
+                raise ValueError(contract_violation.mismatch_error_handler(
+                    function_1.return_annotation, 
+                    function_2.return_annotation, 
+                    Errors.ENTITY_MESSAGES
                     )
                 )
 

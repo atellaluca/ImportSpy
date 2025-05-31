@@ -202,8 +202,21 @@ class Errors:
     }
 
     MODULE_LABEL_TEMPLATE = {
-        Contexts.RUNTIME_CONTEXT: 'The module "{filename}"',
-        Contexts.ENVIRONMENT_CONTEXT: 'The version "{version}" of module "{filename}"'
+        
+        ENTITY_MESSAGES: {
+
+            Contexts.CLASS_CONTEXT: 'The class "{class_name}"',
+            Contexts.RUNTIME_CONTEXT: 'The module "{filename}"',
+            Contexts.ENVIRONMENT_CONTEXT: 'The version "{version}" of module "{filename}"'
+
+        },
+
+        COLLECTIONS_MESSAGES: {
+
+            Contexts.CLASS_CONTEXT: 'The classes "{classes_1}" in module "{filename}"'
+
+        }
+
     }
 
     KEY_RUNTIMES_1 = "runtimes_1"
@@ -215,6 +228,7 @@ class Errors:
     KEY_MODULES_1 = "modules_1"
     KEY_VARIABLES_1 = "variables_1"
     KEY_FUNCTIONS_1 = "functions_1"
+    KEY_CLASSES_1 = "classes_1"
 
     KEY_VARIABLE_NAME = "variable_name"
     KEY_ARGUMENT_NAME = "argument_name"
