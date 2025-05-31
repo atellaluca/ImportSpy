@@ -165,7 +165,7 @@ class Class(BaseModel):
     name: str
     attributes: Optional[list[Attribute]] = None
     methods: Optional[list[Function]] = None
-    superclasses: Optional[list[str]] = None
+    superclasses: Optional[list['Class']] = None
 
     @classmethod
     def from_class_info(cls, extracted_classes: list[ClassInfo]):
@@ -276,8 +276,9 @@ class Error(BaseModel):
     description: str
     solution: str
 
+"""
     @classmethod
-    def from_contract_violation(cls, contract_violation: 'ContractViolation'):
+    def from_contract_violation(cls, contract_violation: BaseContractViolation):
         tpl = Errors.ERROR_MESSAGE_TEMPLATES.get(contract_violation.category)
         title = Errors.CONTEXT_INTRO.get(contract_violation.context)
         description = tpl[Errors.TEMPLATE_KEY].format(label=contract_violation.label)
@@ -292,6 +293,7 @@ class Error(BaseModel):
 
     def render_message(self) -> str:
         return f"[{self.title}] {self.description} {self.solution}"
+"""
 
 
 

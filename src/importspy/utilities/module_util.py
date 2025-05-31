@@ -253,21 +253,25 @@ class ModuleUtil:
         for name, cls in inspect.getmembers(info_module, inspect.isclass):
             attributes = self.extract_attributes(cls, info_module)
             methods = self.extract_methods(cls)
-            superclasses = [base.__name__ for base in cls.__bases__ if base.__name__ != "object"]
+            superclasses = self.extract_superclasses(cls)
             classes.append(ClassInfo(name, attributes, methods, superclasses))
         return classes
 
-    def extract_superclasses(self, module: ModuleType) -> List[str]:
-        """
-        Extracts unique superclass names from all classes.
 
-        Returns:
-        --------
-        List[str]
-        """
-        superclasses = set()
-        for name, cls in inspect.getmembers(module, inspect.isclass):
-            if cls.__module__ == module.__name__:
-                for base in cls.__bases__:
-                    superclasses.add(base.__name__)
-        return list(superclasses)
+    def extract_superclasses(self, cls) -> List[ClassInfo]:
+        superclasses = []
+        for base in cls.__bases__:
+            if base.__name__ == "object":
+                continue
+            module = sys.modules.get(base.__module__)
+            if not module:
+                continue
+            superclasses.append(ClassInfo(
+                base.__name__,
+                self.extract_attributes(base, module),
+                self.extract_methods(base),
+                []
+            ))
+        return superclasses
+
+
