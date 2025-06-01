@@ -368,7 +368,7 @@ class VariableValidator:
         self,
         variables_1: List[Variable],
         variables_2: List[Variable],
-        contract_violation: BaseContractViolation
+        contract_violation: VariableContractViolation
     ):
         bundle: Bundle = contract_violation.bundle
         self.logger.debug(f"Type of variables_1: {type(variables_1)}")
@@ -390,7 +390,7 @@ class VariableValidator:
             )
             return
         
-        bundle[Errors.KEY_VARIABLES_1] = variables_1
+        bundle[Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.scope][Errors.COLLECTIONS_MESSAGES][contract_violation.context]] = variables_1
 
         if not variables_2:
             self.logger.debug(
@@ -410,7 +410,8 @@ class VariableValidator:
                     details=f"Current var_1: {var_1}"
                 )
             )
-            bundle[Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.context]] = var_1.name
+            bundle[Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.scope][Errors.ENTITY_MESSAGES][contract_violation.context]] = var_1.name
+            self.logger.debug(bundle)
             if var_1.name not in {var.name for var in variables_2}:
                 raise ValueError(contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES))
 
