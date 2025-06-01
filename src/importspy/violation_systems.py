@@ -8,8 +8,6 @@ from dataclasses import (
     field
 )
 
-from .violation_systems import Bundle
-
 from typing import (
     Optional,
     Any
@@ -47,7 +45,7 @@ class ContractViolation(ABC):
 
 class BaseContractViolation(ContractViolation):
 
-    def __init__(self, context, bundle:Bundle):
+    def __init__(self, context, bundle:'Bundle'):
         
         self._context = context
         self.bundle = bundle

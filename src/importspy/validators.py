@@ -497,7 +497,10 @@ class FunctionValidator:
             self.argument_validator.validate(
                 function_1.arguments,
                 function_2.arguments,
-                VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.MODULE_CONTEXT)
+                VariableContractViolation(
+                    Errors.SCOPE_ARGUMENT,
+                    Contexts.MODULE_CONTEXT,
+                    bundle)
             )
 
             if function_1.return_annotation and function_1.return_annotation != function_2.return_annotation:
