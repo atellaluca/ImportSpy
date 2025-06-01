@@ -67,21 +67,21 @@ class Constants:
     INSTANCE_TYPE = Config.INSTANCE_TYPE
 
     class SupportedAnnotations(str, Enum):
-        Config.ANNOTATION_INT,
-        Config.ANNOTATION_FLOAT,
-        Config.ANNOTATION_STR,
-        Config.ANNOTATION_BOOL,
-        Config.ANNOTATION_LIST,
-        Config.ANNOTATION_DICT,
-        Config.ANNOTATION_TUPLE,
-        Config.ANNOTATION_SET,
-        Config.ANNOTATION_OPTIONAL,
-        Config.ANNOTATION_UNION,
-        Config.ANNOTATION_ANY,
-        Config.ANNOTATION_CALLABLE,
-        Config.ANNOTATION_LIST,
-        Config.ANNOTATION_DICT,
-        Config.ANNOTATION_TUPLE
+        INT = Config.ANNOTATION_INT
+        FLOAT = Config.ANNOTATION_FLOAT
+        STR = Config.ANNOTATION_STR
+        BOOL = Config.ANNOTATION_BOOL
+        LIST = Config.ANNOTATION_LIST
+        DICT = Config.ANNOTATION_DICT
+        TUPLE = Config.ANNOTATION_TUPLE
+        SET = Config.ANNOTATION_SET
+        OPTIONAL = Config.ANNOTATION_OPTIONAL
+        UNION = Config.ANNOTATION_UNION
+        ANY = Config.ANNOTATION_ANY
+        CALLABLE = Config.ANNOTATION_CALLABLE
+        LIST_TYPING = Config.ANNOTATION_LIST_TYPING
+        DICT_TYPING = Config.ANNOTATION_DICT_TYPING
+        TUPLE_TYPING = Config.ANNOTATION_TUPLE_TYPING
 
     LOG_MESSAGE_TEMPLATE = (
         "[Operation: {operation}] [Status: {status}] "
@@ -158,14 +158,14 @@ class Errors:
 
                 Contexts.ENVIRONMENT_CONTEXT: 'The environment "{environment_1}"',
                 Contexts.MODULE_CONTEXT: 'The variables "{variables_1}"',
-                Contexts.CLASS_CONTEXT: 'The attributes "{attrs_1}"'
+                Contexts.CLASS_CONTEXT: 'The attributes "{attributes_1}"'
 
             }
         },
 
-        ENTITY_MESSAGES: {
+        SCOPE_ARGUMENT: {
 
-            SCOPE_ARGUMENT: {
+            ENTITY_MESSAGES: {
 
                 Contexts.MODULE_CONTEXT: 'The argument "{argument_name}" of function "{function_name}"',
                 Contexts.CLASS_CONTEXT: 'The argument "{argument_name}" of method "{method_name}" in class "{class_name}"',
@@ -227,6 +227,8 @@ class Errors:
     KEY_ENVIRONMENT_VARIABLE_NAME = "environment_variable_name"
     KEY_MODULES_1 = "modules_1"
     KEY_VARIABLES_1 = "variables_1"
+    KEY_ATTRIBUTES_1 = "attributes_1"
+    KEY_ARGUMENTS_1 = "arguments_1"
     KEY_FUNCTIONS_1 = "functions_1"
     KEY_CLASSES_1 = "classes_1"
 
@@ -244,13 +246,39 @@ class Errors:
     VARIABLES_DINAMIC_PAYLOAD = {
 
         SCOPE_VARIABLE: {
-            Contexts.ENVIRONMENT_CONTEXT: KEY_ENVIRONMENT_VARIABLE_NAME,
-            Contexts.MODULE_CONTEXT: KEY_VARIABLE_NAME,
-            Contexts.CLASS_CONTEXT: KEY_ATTRIBUTE_NAME
+
+            ENTITY_MESSAGES: {
+
+                Contexts.ENVIRONMENT_CONTEXT: KEY_ENVIRONMENT_VARIABLE_NAME,
+                Contexts.MODULE_CONTEXT: KEY_VARIABLE_NAME,
+                Contexts.CLASS_CONTEXT: KEY_ATTRIBUTE_NAME
+
+            },
+
+            COLLECTIONS_MESSAGES: {
+                
+                Contexts.ENVIRONMENT_CONTEXT: KEY_ENVIRONMENT_1,
+                Contexts.MODULE_CONTEXT: KEY_VARIABLES_1,
+                Contexts.CLASS_CONTEXT: KEY_ATTRIBUTES_1
+
+            }
         },
         SCOPE_ARGUMENT: {
-            Contexts.MODULE_CONTEXT: KEY_ARGUMENT_NAME,
-            Contexts.CLASS_CONTEXT: KEY_ARGUMENT_NAME
+
+            ENTITY_MESSAGES: {
+                
+                Contexts.MODULE_CONTEXT: KEY_ARGUMENT_NAME,
+                Contexts.CLASS_CONTEXT: KEY_ARGUMENT_NAME
+
+            },
+
+            COLLECTIONS_MESSAGES: {
+
+                Contexts.MODULE_CONTEXT: KEY_ARGUMENTS_1,
+                Contexts.CLASS_CONTEXT: KEY_ARGUMENTS_1
+
+            }
+            
         }
 
     }

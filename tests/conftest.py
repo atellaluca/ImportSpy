@@ -22,3 +22,4 @@ def classbundle(modulebundle) -> Bundle:
 @pytest.fixture
 def functionbundle(modulebundle) -> Bundle:
     modulebundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Contexts.MODULE_CONTEXT]] = "test_function"
+    return modulebundle
