@@ -2,16 +2,30 @@ import pytest
 from importspy.models import (
     Attribute
 )
-from importspy.config import Config
+
+from importspy.validators import VariableValidator
+
 from typing import List
-from importspy.validators.attribute_validator import AttributeValidator
-from importspy.errors import Errors
+
 import re
-from importspy.constants import Constants
+
+from importspy.constants import (
+    Constants,
+    Errors,
+    Contexts
+)
+
+from importspy.violation_systems import (
+    VariableContractViolation, 
+    Bundle
+)
+
+from importspy.config import Config
+
 
 class TestAttributeValidator:
 
-    validator = AttributeValidator()
+    validator = VariableValidator()
 
     @pytest.fixture
     def data_1(self):
@@ -44,6 +58,25 @@ class TestAttributeValidator:
             name="class_attribute",
             value=4
         )]
+    
+    @pytest.fixture
+    def class_type_bundle(self, classbundle) -> Bundle:
+        classbundle[Errors.KEY_ATTRIBUTE_TYPE] = Config.CLASS_TYPE
+        return classbundle
+    
+    @pytest.fixture
+    def instance_type_bundle(self, classbundle) -> Bundle:
+        classbundle[Errors.KEY_ATTRIBUTE_TYPE] = Config.INSTANCE_TYPE
+        return classbundle
+    
+    @pytest.fixture
+    def class_type_contract(self, class_type_bundle):
+        return VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, class_type_bundle)
+    
+    @pytest.fixture
+    def instance_type_contract(self, instance_type_bundle):
+        return VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, instance_type_bundle)
+
     
     @pytest.fixture
     def attribute_value_setter(self, data_3:Attribute):

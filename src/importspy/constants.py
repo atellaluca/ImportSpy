@@ -15,7 +15,7 @@ class Constants:
     considers valid and contract-compliant.
     """
 
-    class SupportedArchitectures:
+    class SupportedArchitectures(str, Enum):
 
         Config.ARCH_x86_64 
         Config.ARCH_AARCH64 
@@ -26,7 +26,7 @@ class Constants:
         Config.ARCH_PPC64LE 
         Config.ARCH_S390X
 
-    class SupportedOS:
+    class SupportedOS(str, Enum):
 
         Config.OS_WINDOWS
         Config.OS_LINUX 
