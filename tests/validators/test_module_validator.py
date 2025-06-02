@@ -3,8 +3,8 @@ from importspy.models import (
     Module,
     Variable
 )
-from importspy.validators.module_validator import ModuleValidator
-from importspy.errors import Errors
+from importspy.validators import ModuleValidator
+from importspy.constants import Errors
 import re
 from typing import List
 

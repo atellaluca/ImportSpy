@@ -3,8 +3,8 @@ from importspy.models import (
     Function
 )
 from typing import List
-from importspy.validators.function_validator import FunctionValidator
-from importspy.errors import Errors
+from importspy.validators import FunctionValidator
+from importspy.constants import Errors
 import re
 
 class TestFunctionValidator:
@@ -37,6 +37,10 @@ class TestFunctionValidator:
             name="function",
             return_annotation="str"
         )]
+    
+    @pytest.fixture
+    def class_type_contract(self, class_type_bundle):
+        return VariableContractViolation(Errors.SCOPE_VARIABLE, Contexts.CLASS_CONTEXT, class_type_bundle)
     
     @pytest.fixture
     def function_return_annotation_setter(self, data_3:Function):

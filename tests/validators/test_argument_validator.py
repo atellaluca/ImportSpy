@@ -7,7 +7,6 @@ from importspy.validators import VariableValidator
 import re
 
 from importspy.constants import (
-    Constants,
     Errors,
     Contexts
 )
