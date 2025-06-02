@@ -4,8 +4,8 @@ from importspy.models import (
 )
 from importspy.config import Config
 from importspy.constants import Constants
-from importspy.validators.runtime_validator import RuntimeValidator
-from importspy.errors import Errors
+from importspy.validators import RuntimeValidator
+from importspy.constants import Errors
 import re
 from typing import List
 

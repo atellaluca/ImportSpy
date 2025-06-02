@@ -56,8 +56,8 @@ class Constants:
     
     class SupportedClassAttributeTypes(str, Enum):
 
-        Config.CLASS_TYPE
-        Config.INSTANCE_TYPE
+        CLASS = Config.CLASS_TYPE
+        INSTANCE = Config.INSTANCE_TYPE
 
     NAME = "Name"
     VALUE = "Value"

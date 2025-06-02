@@ -6,8 +6,8 @@ from importspy.models import (
 )
 from importspy.config import Config
 from importspy.constants import Constants
-from importspy.validators.system_validator import SystemValidator
-from importspy.errors import Errors
+from importspy.validators import SystemValidator
+from importspy.constants import Errors
 import re
 from typing import List
 
