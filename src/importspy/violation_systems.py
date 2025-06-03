@@ -109,7 +109,6 @@ class ModuleContractViolation(BaseContractViolation):
     def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context, bundle)
     
-    @property
     def label(self, spec:str) -> str:
         return Errors.MODULE_LABEL_TEMPLATE[spec][self.context].format(**self.bundle)
 
