@@ -10,7 +10,7 @@ from importspy.constants import (
 @pytest.fixture
 def modulebundle() -> Bundle:
     bundle = Bundle()
-    bundle[Errors.KEY_MODULE_NAME] = "testmodule.py"
+    bundle[Errors.KEY_FILE_NAME] = "testmodule.py"
     bundle[Errors.KEY_MODULE_VERSION] = "0.1.0"
     return bundle
 
@@ -21,5 +21,10 @@ def classbundle(modulebundle) -> Bundle:
 
 @pytest.fixture
 def functionbundle(modulebundle) -> Bundle:
-    modulebundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Contexts.MODULE_CONTEXT]] = "test_function"
+    modulebundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.ENTITY_MESSAGES][Contexts.MODULE_CONTEXT]] = "test_function"
     return modulebundle
+
+@pytest.fixture
+def methodbundle(classbundle) -> Bundle:
+    classbundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.ENTITY_MESSAGES][Contexts.CLASS_CONTEXT]] = "test_method"
+    return classbundle

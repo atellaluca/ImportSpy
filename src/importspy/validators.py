@@ -458,8 +458,8 @@ class FunctionValidator:
                 )
             )
             return
-        
-        bundle[Errors.KEY_FUNCTIONS_1] = functions_1
+
+        bundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.COLLECTIONS_MESSAGES][contract_violation.context]] = functions_1
 
         if not functions_2:
             self.logger.debug(
@@ -472,7 +472,7 @@ class FunctionValidator:
             raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
 
         for function_1 in functions_1:
-            bundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[contract_violation.context]] = function_1.name
+            bundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.ENTITY_MESSAGES][contract_violation.context]] = function_1.name
             self.logger.debug(
                 Constants.LOG_MESSAGE_TEMPLATE.format(
                     operation="Function validating",

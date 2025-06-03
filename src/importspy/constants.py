@@ -231,6 +231,7 @@ class Errors:
     KEY_ARGUMENTS_1 = "arguments_1"
     KEY_FUNCTIONS_1 = "functions_1"
     KEY_CLASSES_1 = "classes_1"
+    KEY_METHODS_1 = "methods_1"
 
     KEY_VARIABLE_NAME = "variable_name"
     KEY_ARGUMENT_NAME = "argument_name"
@@ -284,8 +285,20 @@ class Errors:
     }
 
     FUNCTIONS_DINAMIC_PAYLOAD = {
-        Contexts.MODULE_CONTEXT: KEY_FUNCTION_NAME,
-        Contexts.CLASS_CONTEXT: KEY_METHOD_NAME
+
+        ENTITY_MESSAGES: {
+
+            Contexts.MODULE_CONTEXT: KEY_FUNCTION_NAME,
+            Contexts.CLASS_CONTEXT: KEY_METHOD_NAME
+
+        },
+
+        COLLECTIONS_MESSAGES: {
+
+            Contexts.MODULE_CONTEXT: KEY_FUNCTIONS_1,
+            Contexts.CLASS_CONTEXT: KEY_METHODS_1
+            
+        }
     }
 
     ERROR_MESSAGE_TEMPLATES = {
