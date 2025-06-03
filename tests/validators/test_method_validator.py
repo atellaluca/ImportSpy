@@ -22,7 +22,7 @@ class TestFunctionValidator:
     @pytest.fixture
     def data_1(self):
         return [Function(
-            name="function",
+            name="method",
         )]
     
     @pytest.fixture
@@ -35,20 +35,20 @@ class TestFunctionValidator:
     @pytest.fixture
     def data_3(self):
         return [Function(
-            name="function",
+            name="method",
             return_annotation="int"
         )]
     
     @pytest.fixture
     def data_4(self):
         return [Function(
-            name="function",
+            name="method",
             return_annotation="str"
         )]
     
     @pytest.fixture
-    def function_contract(self, functionbundle:Bundle):
-        return FunctionContractViolation(Contexts.MODULE_CONTEXT, functionbundle)
+    def function_contract(self, methodbundle:Bundle):
+        return FunctionContractViolation(Contexts.CLASS_CONTEXT, methodbundle)
     
     @pytest.fixture
     def function_return_annotation_setter(self, data_3:Function):
@@ -73,8 +73,9 @@ class TestFunctionValidator:
     def test_function_mismatch_1(self, data_3:List[Function], data_4:List[Function], function_contract:FunctionContractViolation):
         mock_bundle = Bundle()
         mock_bundle[Errors.KEY_FILE_NAME] = "testmodule.py"
-        mock_bundle[Errors.KEY_FUNCTION_NAME] = "function"
-        mock_contract_violation = FunctionContractViolation(Contexts.MODULE_CONTEXT, mock_bundle)
+        mock_bundle[Errors.KEY_CLASS_NAME] = "TestClass"
+        mock_bundle[Errors.KEY_METHOD_NAME] = "method"
+        mock_contract_violation = FunctionContractViolation(Contexts.CLASS_CONTEXT, mock_bundle)
         with pytest.raises(
             ValueError,
             match=re.escape(
@@ -92,8 +93,9 @@ class TestFunctionValidator:
     def test_function_mismatch_5(self, data_3:List[Function], function_contract:FunctionContractViolation):
         mock_bundle = Bundle()
         mock_bundle[Errors.KEY_FILE_NAME] = "testmodule.py"
-        mock_bundle[Errors.KEY_FUNCTIONS_1] = data_3
-        mock_contract_violation = FunctionContractViolation(Contexts.MODULE_CONTEXT, mock_bundle)
+        mock_bundle[Errors.KEY_CLASS_NAME] = "TestClass"
+        mock_bundle[Errors.KEY_METHODS_1] = data_3
+        mock_contract_violation = FunctionContractViolation(Contexts.CLASS_CONTEXT, mock_bundle)
         with pytest.raises(
             ValueError,
             match=re.escape(mock_contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
