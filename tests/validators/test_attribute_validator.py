@@ -10,7 +10,6 @@ from typing import List
 import re
 
 from importspy.constants import (
-    Constants,
     Errors,
     Contexts
 )

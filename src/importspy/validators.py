@@ -209,8 +209,7 @@ class PythonValidator:
 
 class ModuleValidator:
 
-    def __init__(self, bundle:Bundle):
-        self.bundle = bundle
+    def __init__(self):
         self.variable_validator:VariableValidator = VariableValidator()
         self.function_validator:FunctionValidator = FunctionValidator()
         self.class_validator:ClassValidator = ClassValidator()
@@ -218,37 +217,40 @@ class ModuleValidator:
     def validate(
         self,
         modules_1: List[Module],
-        module_2: Module
+        module_2: Module,
+        contract_violation: ModuleContractViolation
+
     ):
+        bundle: Bundle = contract_violation.bundle
         if not modules_1:
             return
         
-        self.bundle[Errors.KEY_MODULES_1] = modules_1
+        bundle[Errors.KEY_MODULES_1] = modules_1
 
         if not module_2:
             raise ValueError(
                 ModuleContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    self.bundle
+                    bundle
                 ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
 
         for module_1 in modules_1:
 
-            self.bundle[Errors.KEY_MODULE_NAME] = module_1.filename
-            self.bundle[Errors.KEY_MODULE_VERSION] = module_1.version
+            bundle[Errors.KEY_MODULE_NAME] = module_1.filename
+            bundle[Errors.KEY_MODULE_VERSION] = module_1.version
 
             if module_1.filename and module_1.filename != module_2.filename:
                 raise ValueError(
                 ModuleContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    self.bundle
+                    bundle
                 ).mismatch_error_handler(module_1.filename, module_2.filename, Errors.ENTITY_MESSAGES))
 
             if module_1.version and module_1.version != module_2.version:
                 raise ValueError(
                 ModuleContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    self.bundle
+                    bundle
                 ).mismatch_error_handler(module_1.version, module_2.version, Errors.ENTITY_MESSAGES))
 
             self.variable_validator.validate(
@@ -257,7 +259,7 @@ class ModuleValidator:
                 VariableContractViolation(
                     Errors.SCOPE_VARIABLE,
                     Contexts.MODULE_CONTEXT,
-                    self.bundle
+                    bundle
                 )
             )
 
@@ -266,7 +268,7 @@ class ModuleValidator:
                 module_2.functions,
                 FunctionContractViolation(
                     Contexts.MODULE_CONTEXT,
-                    self.bundle
+                    bundle
                 )
             )
 
@@ -275,7 +277,7 @@ class ModuleValidator:
                 module_2.classes,
                 ModuleContractViolation(
                     Contexts.CLASS_CONTEXT,
-                    self.bundle
+                    bundle
                 )
             )
 
