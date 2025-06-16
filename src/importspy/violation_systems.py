@@ -85,7 +85,7 @@ class RuntimeContractViolation(BaseContractViolation):
         super().__init__(context, bundle)
     
     def label(self, spec:str) -> str:
-        return Errors.RUNTIME_LABEL_TEMPLATE[spec]
+        return Errors.RUNTIME_LABEL_TEMPLATE[spec].format(**self.bundle)
 
 class SystemContractViolation(BaseContractViolation):
 
@@ -93,16 +93,15 @@ class SystemContractViolation(BaseContractViolation):
         super().__init__(context, bundle)
     
     def label(self, spec:str) -> str:
-        return Errors.SYSTEM_LABEL_TEMPLATE[spec]
+        return Errors.SYSTEM_LABEL_TEMPLATE[spec].format(**self.bundle)
 
 class PythonContractViolation(BaseContractViolation):
 
     def __init__(self, context:str, bundle:'Bundle'):
         super().__init__(context, bundle)
     
-    @property
     def label(self, spec:str) -> str:
-        return Errors.PYTHON_LABEL_TEMPLATE[spec]
+        return Errors.PYTHON_LABEL_TEMPLATE[spec].format(**self.bundle)
 
 class ModuleContractViolation(BaseContractViolation):
 

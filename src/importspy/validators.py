@@ -33,24 +33,24 @@ from .log_manager import LogManager
 
 class RuntimeValidator:
 
-    def __init__(self, bundle:Bundle):
-        self.bundle = bundle
-
     def validate(
         self,
         runtimes_1: List[Runtime],
-        runtimes_2: List[Runtime]
+        runtimes_2: List[Runtime],
+        contract_violation: RuntimeContractViolation
+        
     ):
         if not runtimes_1:
             return
         
-        self.bundle[Errors.KEY_RUNTIMES_1] = runtimes_1
+        bundle: Bundle = contract_violation.bundle
+        bundle[Errors.KEY_RUNTIMES_1] = runtimes_1
 
         if not runtimes_2:
             raise ValueError(
                 RuntimeContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    self.bundle
+                    bundle
                 ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
 
         runtime_2 = runtimes_2[0]
@@ -60,34 +60,35 @@ class RuntimeValidator:
                 return runtime_1
         raise ValueError(RuntimeContractViolation(
             Contexts.RUNTIME_CONTEXT,
-            self.bundle
+            bundle
         ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
         
 
 class SystemValidator:
 
 
-    def __init__(self, bundle:Bundle):
+    def __init__(self):
 
-        self.bundle = bundle
         self._environment_validator = SystemValidator.EnvironmentValidator()
 
     def validate(
         self,
         systems_1: List[System],
-        systems_2: List[System]
-    ) -> None:
+        systems_2: List[System],
+        contract_violation: SystemContractViolation
+    ):
         
         if not systems_1:
             return
         
-        self.bundle[Errors.KEY_SYSTEMS_1] = systems_1
+        bundle: Bundle = contract_violation.bundle
+        bundle[Errors.KEY_SYSTEMS_1] = systems_1
 
         if not systems_2:
             raise ValueError(
                 SystemContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    self.bundle
+                    bundle
                 ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
         
         system_2 = systems_2[0]
@@ -95,75 +96,88 @@ class SystemValidator:
         for system_1 in systems_1:
             if system_1.os == system_2.os:
                 if system_1.environment:
-                    self._environment_validator.validate(system_1.environment, system_2.environment)
+                    self._environment_validator.validate(system_1.environment, system_2.environment, bundle)
                 return system_1.pythons
         raise ValueError(
                 SystemContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    self.bundle
+                    bundle
                 ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
 
     class EnvironmentValidator:
-
-        def __init__(self, bundle:Bundle):
-            self.bundle = bundle
         
         def validate(self,
                     environment_1: Environment,
-                    environment_2: Environment
+                    environment_2: Environment,
+                    bundle: Bundle
             ):
             
             if not environment_1:
                 return
             
-            self.bundle[Errors.KEY_ENVIRONMENT_1] = environment_1
+            bundle[Errors.KEY_ENVIRONMENT_1] = environment_1
 
             if not environment_2:
                 raise ValueError(
                 VariableContractViolation(
+                    Errors.SCOPE_VARIABLE,
                     Contexts.ENVIRONMENT_CONTEXT,
-                    self.bundle
+                    bundle
                 ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
             
             variables_2 = environment_2.variables
 
             if environment_1.variables:
                 variables_1 = environment_1.variables
-                VariableValidator().validate(variables_1, variables_2)
+                VariableValidator().validate(
+                    variables_1,
+                    variables_2, 
+                    VariableContractViolation(
+                        Errors.SCOPE_VARIABLE,
+                        Contexts.ENVIRONMENT_CONTEXT,
+                        bundle
+                    )
+                )
                 return
 
 class PythonValidator:
 
-    def __init__(self, bundle:Bundle):
-        self.bundle = bundle
-
     def validate(
         self,
         pythons_1: List[Python],
-        pythons_2: List[Python]
+        pythons_2: List[Python],
+        contract_violation: PythonContractViolation
     ):
         if not pythons_1:
             return
         
-        self.bundle[Errors.KEY_PYTHONS_1] = pythons_1
+        bundle: Bundle = contract_violation.bundle
+        bundle[Errors.KEY_PYTHONS_1] = pythons_1
 
         if not pythons_2:
             raise ValueError(
                 PythonContractViolation(
                     Contexts.RUNTIME_CONTEXT,
-                    self.bundle
+                    bundle
                 ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
 
         python_2 = pythons_2[0]
         for python_1 in pythons_1:
 
-            if self._is_python_match(python_1, python_2):
+            if self._is_python_match(python_1, python_2, contract_violation):
                 return python_1.modules
+            
+        raise ValueError(
+                PythonContractViolation(
+                    Contexts.RUNTIME_CONTEXT,
+                    bundle
+                ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
 
     def _is_python_match(
         self,
         python_1: Python,
-        python_2: Python
+        python_2: Python,
+        contract_violation: PythonContractViolation
     ) -> bool:
         """
         Determine whether two Python configurations match.
@@ -188,7 +202,8 @@ class PythonValidator:
         - If only interpreter is defined: match interpreter.
         - If none are defined: match anything (default `True`).
         """
-        self.bundle[Errors.KEY_PYTHON_1] = python_1
+        bundle: Bundle = contract_violation.bundle
+        bundle[Errors.KEY_PYTHON_1] = python_1
         if python_1.version and python_1.interpreter:
             return (
                 python_1.version == python_2.version and
@@ -200,12 +215,6 @@ class PythonValidator:
 
         if python_1.interpreter:
             return python_1.interpreter == python_2.interpreter
-
-        raise ValueError(
-                PythonContractViolation(
-                    Contexts.RUNTIME_CONTEXT,
-                    self.bundle
-                ).missing_error_handler(Errors.ENTITY_MESSAGES))
 
 class ModuleValidator:
 

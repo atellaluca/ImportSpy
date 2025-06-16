@@ -47,7 +47,7 @@ class Python(BaseModel):
     Includes the Python version, interpreter type, and the list of loaded modules.
     Used to validate compatibility between caller and callee environments.
     """
-    version: Optional[Constants.SupportedPythonVersions] = None
+    version: Optional[str] = None
     interpreter: Optional[Constants.SupportedPythonImplementations] = None
     modules: list['Module']
 

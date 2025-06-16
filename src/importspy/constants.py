@@ -17,42 +17,34 @@ class Constants:
 
     class SupportedArchitectures(str, Enum):
 
-        Config.ARCH_x86_64 
-        Config.ARCH_AARCH64 
-        Config.ARCH_ARM
-        Config.ARCH_ARM64 
-        Config.ARCH_I386 
-        Config.ARCH_PPC64 
-        Config.ARCH_PPC64LE 
-        Config.ARCH_S390X
+        ARCH_x86_64 = Config.ARCH_x86_64 
+        ARCH_AARCH64 = Config.ARCH_AARCH64 
+        ARCH_ARM = Config.ARCH_ARM
+        ARCH_ARM64 = Config.ARCH_ARM64 
+        ARCH_I386 = Config.ARCH_I386 
+        ARCH_PPC64 = Config.ARCH_PPC64 
+        ARCH_PPC64LE = Config.ARCH_PPC64LE 
+        ARCH_S390X = Config.ARCH_S390X
 
     class SupportedOS(str, Enum):
 
-        Config.OS_WINDOWS
-        Config.OS_LINUX 
-        Config.OS_MACOS
-
-    class SupportedPythonVersions(str, Enum):
-
-        Config.PYTHON_VERSION_3_13
-        Config.PYTHON_VERSION_3_12
-        Config.PYTHON_VERSION_3_11
-        Config.PYTHON_VERSION_3_10
-        Config.PYTHON_VERSION_3_9
+        OS_WINDOWS = Config.OS_WINDOWS
+        OS_LINUX = Config.OS_LINUX 
+        OS_MACOS = Config.OS_MACOS
 
     class SupportedPythonImplementations(str, Enum):
         
-        Config.INTERPRETER_CPYTHON
-        Config.INTERPRETER_PYPY
-        Config.INTERPRETER_JYTHON
-        Config.INTERPRETER_IRON_PYTHON
-        Config.INTERPRETER_MICROPYTHON
-        Config.INTERPRETER_BRYTHON
-        Config.INTERPRETER_PYSTON
-        Config.INTERPRETER_GRAALPYTHON
-        Config.INTERPRETER_RUSTPYTHON
-        Config.INTERPRETER_NUITKA
-        Config.INTERPRETER_TRANSCRYPT
+        INTERPRETER_CPYTHON = Config.INTERPRETER_CPYTHON
+        INTERPRETER_PYPY = Config.INTERPRETER_PYPY
+        INTERPRETER_JYTHON = Config.INTERPRETER_JYTHON
+        INTERPRETER_IRON_PYTHON = Config.INTERPRETER_IRON_PYTHON
+        INTERPRETER_MICROPYTHON = Config.INTERPRETER_MICROPYTHON
+        INTERPRETER_BRYTHON = Config.INTERPRETER_BRYTHON
+        INTERPRETER_PYSTON = Config.INTERPRETER_PYSTON
+        INTERPRETER_GRAALPYTHON = Config.INTERPRETER_GRAALPYTHON
+        INTERPRETER_RUSTPYTHON = Config.INTERPRETER_RUSTPYTHON
+        INTERPRETER_NUITKA = Config.INTERPRETER_NUITKA
+        INTERPRETER_TRANSCRYPT = Config.INTERPRETER_TRANSCRYPT
     
     class SupportedClassAttributeTypes(str, Enum):
 
@@ -220,7 +212,7 @@ class Errors:
     }
 
     KEY_RUNTIMES_1 = "runtimes_1"
-    KEY_SYSTEMS_1 = "runtimes_1"
+    KEY_SYSTEMS_1 = "systems_1"
     KEY_PYTHONS_1 = "pythons_1"
     KEY_PYTHON_1 = "python_1"
     KEY_ENVIRONMENT_1 = "environment_1"
