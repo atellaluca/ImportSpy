@@ -54,13 +54,13 @@ class BaseContractViolation(ContractViolation):
         return self._context
     
     def missing_error_handler(self, spec:str) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISSING][Errors.TEMPLATE_KEY].format(label=self.label(spec))} - {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISSING][Errors.SOLUTION_KEY].capitalize()}'
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISSING][spec][Errors.TEMPLATE_KEY].format(label=self.label(spec))} - {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISSING][spec][Errors.SOLUTION_KEY].capitalize()}'
 
     def mismatch_error_handler(self, expected:Any, actual:Any, spec:str) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][Errors.TEMPLATE_KEY].format(label=self.label(spec), expected=expected, actual=actual)} - {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][Errors.SOLUTION_KEY].capitalize()}'
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][spec][Errors.TEMPLATE_KEY].format(label=self.label(spec), expected=expected, actual=actual)} - {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][spec][Errors.SOLUTION_KEY].capitalize()}'
 
     def invalid_error_handler(self, allowed:Any, found:Any, spec:str) -> str:
-        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][Errors.TEMPLATE_KEY].format(label=self.label(spec), expected=allowed, actual=found)} - {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][Errors.SOLUTION_KEY].capitalize()}'
+        return f'{Errors.CONTEXT_INTRO[self.context]}: {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][spec][Errors.TEMPLATE_KEY].format(label=self.label(spec), expected=allowed, actual=found)} - {Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][spec][Errors.SOLUTION_KEY].capitalize()}'
 
 class VariableContractViolation(BaseContractViolation):
 

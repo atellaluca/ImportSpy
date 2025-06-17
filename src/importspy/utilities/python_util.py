@@ -46,14 +46,9 @@ class PythonUtil:
         -------
         str
             Python version string (e.g., '3.11.2').
-
-        Example
-        -------
-        >>> PythonUtil().extract_python_version()
-        '3.11'
         """
         python_version = platform.python_version()
-        return ".".join(python_version.split(".")[:2])
+        return python_version
 
     def extract_python_implementation(self) -> str:
         """

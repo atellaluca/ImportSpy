@@ -32,7 +32,7 @@ from typing import List
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-VariableInfo = namedtuple('VariableInfo', ["name", "value"])
+VariableInfo = namedtuple('VariableInfo', ["name", "annotation", "value"])
 
 class SystemUtil:
     """
@@ -84,5 +84,5 @@ class SystemUtil:
         >>> SystemUtil().extract_envs()
         [VariableInfo(name='PATH', value='/usr/bin'), VariableInfo(name='HOME', value='/home/user'), ...]
         """
-        return [VariableInfo(name, value) for name, value in os.environ.items()]
+        return [VariableInfo(name, None, value) for name, value in os.environ.items()]
 

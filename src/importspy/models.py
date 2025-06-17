@@ -51,6 +51,12 @@ class Python(BaseModel):
     interpreter: Optional[Constants.SupportedPythonImplementations] = None
     modules: list['Module']
 
+    def __str__(self):
+        return f"{self.interpreter.value} v{self.version}"
+    
+    def __repr__(self):
+        return str(self)
+
 class Environment(BaseModel):
     """
     Represents a set of environment variables and secret keys
@@ -67,6 +73,15 @@ class System(BaseModel):
     os: Constants.SupportedOS
     environment: Optional[Environment] = None
     pythons: list[Python]
+
+    def __str__(self):
+        pretty_string = ""
+        if self.os:
+            pretty_string = self.os.value
+        return f"{self.os.value}"
+    
+    def __repr__(self):
+        return str(self)
 
 
 class Runtime(BaseModel):
@@ -97,6 +112,13 @@ class Variable(BaseModel):
             value=var_info.value,
             annotation=var_info.annotation
         ) for var_info in variables_info]
+    
+    def __str__(self):
+        type_part = f": {self.annotation}" if self.annotation else ""
+        return f"{self.name}{type_part} = {self.value}"
+    
+    def __repr__(self):
+        return str(self)
 
 
 class Attribute(Variable):
@@ -176,14 +198,16 @@ class Class(BaseModel):
             name=name,
             attributes=Attribute.from_attributes_info(attributes),
             methods=Function.from_functions_info(methods),
-            superclasses=superclasses
+            superclasses= cls.from_class_info(superclasses)
         ) for name, attributes, methods, superclasses in extracted_classes]
     
     def get_class_attributes(self) -> List[Attribute]:
-        return [attr for attr in self.attributes if attr.type == Config.CLASS_TYPE]
+        if self.attributes:
+            return [attr for attr in self.attributes if attr.type == Config.CLASS_TYPE]
     
     def get_instance_attributes(self) -> List[Attribute]:
-        return [attr for attr in self.attributes if attr.type == Config.INSTANCE_TYPE]
+        if self.attributes:
+            return [attr for attr in self.attributes if attr.type == Config.INSTANCE_TYPE]
 
 
 class Module(BaseModel):
@@ -196,6 +220,12 @@ class Module(BaseModel):
     variables: Optional[list[Variable]] = None
     functions: Optional[list[Function]] = None
     classes: Optional[list[Class]] = None
+
+    def __str__(self):
+        return f"Module: {self.filename or 'unknown'} (v{self.version or '-'})"
+    
+    def __repr__(self):
+        return str(self)
 
 
 class SpyModel(Module):
@@ -231,7 +261,7 @@ class SpyModel(Module):
         os = system_utils.extract_os()
         python_version = python_utils.extract_python_version()
         interpreter = python_utils.extract_python_implementation()
-        envs = system_utils.extract_envs()
+        envs = Variable.from_variable_info(system_utils.extract_envs())
 
         module_utils.unload_module(info_module)
         logger.debug("Unload module")

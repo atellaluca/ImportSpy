@@ -138,7 +138,6 @@ class SystemValidator:
                         bundle
                     )
                 )
-                return
 
 class PythonValidator:
 
@@ -353,12 +352,6 @@ class ClassValidator:
                     Contexts.CLASS_CONTEXT,
                     bundle
                 )
-            )
-
-            self.function_validator.validate(
-                class_1.methods,
-                class_2.methods,
-                classname=class_1.name
             )
 
             self.validate(class_1.superclasses,

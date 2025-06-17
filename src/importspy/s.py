@@ -42,8 +42,15 @@ from typing import (
 )
 import logging
 
-from .violation_systems import Bundle
+from .violation_systems import (
+    Bundle,
+    ModuleContractViolation,
+    RuntimeContractViolation,
+    SystemContractViolation,
+    PythonContractViolation
+)
 
+from .constants import Contexts
 
 class Spy:
     """
@@ -153,15 +160,19 @@ class Spy:
         self.logger.debug(f"info_module: {info_module}")
         if spymodel:
             bundle = Bundle()
-            module_validator:ModuleValidator = ModuleValidator(bundle)
+            module_validator:ModuleValidator = ModuleValidator()
             self.logger.debug(f"Import contract detected: {spymodel}")
             spy_module = SpyModel.from_module(info_module)
             self.logger.debug(f"Extracted module structure: {spy_module}")
-            module_validator.validate([spymodel],spy_module.deployments[0].systems[0].pythons[0].modules[0])
-            runtime:Runtime = RuntimeValidator(bundle).validate(spymodel.deployments, spy_module.deployments)
-            pythons:List[Python] = SystemValidator(bundle).validate(runtime.systems, spy_module.deployments[0].systems)
-            modules: List[Module] = PythonValidator(bundle).validate(pythons, spy_module.deployments[0].systems[0].pythons)
-            module_validator.validate(modules, spy_module.deployments[0].systems[0].pythons[0].modules[0])
+            module_contract: ModuleContractViolation = ModuleContractViolation(Contexts.MODULE_CONTEXT, bundle)
+            module_validator.validate([spymodel],spy_module.deployments[0].systems[0].pythons[0].modules[0], module_contract)
+            runtime_contract: RuntimeContractViolation = RuntimeContractViolation(Contexts.RUNTIME_CONTEXT, bundle)
+            runtime:Runtime = RuntimeValidator().validate(spymodel.deployments, spy_module.deployments, runtime_contract)
+            system_contract: SystemContractViolation = SystemContractViolation(Contexts.RUNTIME_CONTEXT, bundle)
+            pythons:List[Python] = SystemValidator().validate(runtime.systems, spy_module.deployments[0].systems, system_contract)
+            python_contract: PythonContractViolation = PythonContractViolation(Contexts.RUNTIME_CONTEXT, bundle)
+            modules: List[Module] = PythonValidator().validate(pythons, spy_module.deployments[0].systems[0].pythons, python_contract)
+            module_validator.validate(modules, spy_module.deployments[0].systems[0].pythons[0].modules[0], module_contract)
         return ModuleUtil().load_module(info_module)
 
     def _inspect_module(self) -> ModuleType:
