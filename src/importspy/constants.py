@@ -123,7 +123,7 @@ class Errors:
     SYSTEM_LABEL_TEMPLATE = {
 
         ENTITY_MESSAGES: 'The system "{system_1}"',
-        COLLECTIONS_MESSAGES: 'The systems "{systems_1}"'
+        COLLECTIONS_MESSAGES: 'systems "{systems_1}"'
 
     }
 
@@ -295,15 +295,34 @@ class Errors:
 
     ERROR_MESSAGE_TEMPLATES = {
         Category.MISSING: {
-            TEMPLATE_KEY: "{label} is declared but missing.",
-            SOLUTION_KEY: "Ensure it is properly defined and implemented."
+            ENTITY_MESSAGES: {
+                TEMPLATE_KEY: '{label} is declared but missing.',
+                SOLUTION_KEY: 'Ensure it is properly defined and implemented.'
+            },
+            COLLECTIONS_MESSAGES: {
+                TEMPLATE_KEY: '{label} are declared but missing.',
+                SOLUTION_KEY: 'Ensure all of them are properly defined and implemented.'
+            }
         },
         Category.MISMATCH: {
-            TEMPLATE_KEY: "{label} does not match the expected value. Expected: {expected!r}, Found: {actual!r}.",
-            SOLUTION_KEY: "Check the implementation or update the contract accordingly."
+            ENTITY_MESSAGES: {
+                TEMPLATE_KEY: '{label} does not match the expected value. Expected: {expected!r}, Found: {actual!r}.',
+                SOLUTION_KEY: 'Check the value and update the contract or implementation accordingly.'
+            },
+            COLLECTIONS_MESSAGES: {
+                TEMPLATE_KEY: '{label} do not match the expected values. Expected: {expected!r}, Found: {actual!r}.',
+                SOLUTION_KEY: 'Review the values and update the contract or implementation as needed.'
+            }
         },
         Category.INVALID: {
-            TEMPLATE_KEY: "{label} has an invalid value. Allowed values: {allowed}. Found: {found!r}.",
-            SOLUTION_KEY: "Update the environment or contract accordingly."
+            ENTITY_MESSAGES: {
+                TEMPLATE_KEY: '{label} has an invalid value. Allowed values: {allowed}. Found: {found!r}.',
+                SOLUTION_KEY: 'Update the value to one of the allowed options.'
+            },
+            COLLECTIONS_MESSAGES: {
+                TEMPLATE_KEY: '{label} have invalid values. Allowed values: {allowed}. Found: {found!r}.',
+                SOLUTION_KEY: 'Update the values to be within the allowed options.'
+            }
         }
     }
+

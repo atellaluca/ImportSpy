@@ -34,7 +34,7 @@ classes:
         arguments:
           - name: self
     superclasses:
-      - Plugin
+      - name: Plugin
   - name: Foo
     attributes:
     methods:
@@ -65,7 +65,7 @@ deployments:
               - filename: addons.py
       - os: linux
         pythons:
-          - version: 3.12.8
+          - version: 3.12.9
             interpreter: CPython
             modules:
               - filename: extension.py
