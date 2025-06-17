@@ -7,8 +7,8 @@ from importspy.models import (
 from importspy.config import Config
 
 from importspy.constants import (
-    Constants,
-    Contexts
+    Contexts,
+    Constants
 )
 
 from importspy.validators import SystemValidator
@@ -29,7 +29,7 @@ class TestSystemValidator:
     @pytest.fixture
     def data_1(self):
         return [System(
-            os=Config.OS_LINUX,
+            os=Constants.SupportedOS.OS_LINUX,
             environment=Environment(
                 variables=[Variable(
                     name="CI",
@@ -42,7 +42,7 @@ class TestSystemValidator:
     @pytest.fixture
     def data_2(self):
         return [System(
-            os=Config.OS_LINUX,
+            os=Constants.SupportedOS.OS_LINUX,
             pythons=[]
         )]
     

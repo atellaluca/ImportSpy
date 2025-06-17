@@ -52,7 +52,7 @@ class Python(BaseModel):
     modules: list['Module']
 
     def __str__(self):
-        return f"{self.interpreter.value} v{self.version}"
+        return f"{self.interpreter} v{self.version}"
     
     def __repr__(self):
         return str(self)
@@ -65,6 +65,12 @@ class Environment(BaseModel):
     variables: Optional[list['Variable']] = None
     secrets: Optional[list[str]] = None
 
+    def __str__(self):
+        return f"variables: {self.variables} | secrets: {self.secrets}"
+    
+    def __repr__(self):
+        return str(self)
+
 class System(BaseModel):
     """
     Represents the system environment, including OS, environment variables,
@@ -75,9 +81,6 @@ class System(BaseModel):
     pythons: list[Python]
 
     def __str__(self):
-        pretty_string = ""
-        if self.os:
-            pretty_string = self.os.value
         return f"{self.os.value}"
     
     def __repr__(self):
@@ -91,6 +94,12 @@ class Runtime(BaseModel):
     """
     arch: Constants.SupportedArchitectures
     systems: list[System]
+
+    def __str__(self):
+        return f"{self.arch}"
+    
+    def __repr__(self):
+        return str(self)
 
 
 class Variable(BaseModel):
@@ -177,6 +186,13 @@ class Function(BaseModel):
             arguments=Argument.from_arguments_info(func_info.arguments),
             return_annotation=func_info.return_annotation
         ) for func_info in functions_info]
+    
+    def __str__(self):
+        formatted_arguments = f"{', '.join(str(arg) for arg in self.arguments)}" if self.arguments else ""
+        return f"{self.name}({formatted_arguments}) -> {self.return_annotation}"
+    
+    def __repr__(self):
+        return str(self)
 
 
 class Class(BaseModel):
