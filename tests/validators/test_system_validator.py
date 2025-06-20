@@ -61,7 +61,7 @@ class TestSystemValidator:
     
     @pytest.fixture
     def os_windows_setter(self, data_1:List[System]):
-        data_1[0].os = Config.OS_WINDOWS
+        data_1[0].os = Constants.SupportedOS.OS_WINDOWS
     
     @pytest.fixture
     def envs_setter(self, data_2):
