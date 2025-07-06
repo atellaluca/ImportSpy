@@ -44,9 +44,9 @@ classes:
 deployments:
   - arch: x86_64
     systems:
-      - os: windows
+      - os: linux
         pythons:
-          - version: 3.12.8
+          - version: 3.12.9
             interpreter: CPython
             modules:
               - filename: extension.py
@@ -63,7 +63,7 @@ deployments:
           - interpreter: IronPython
             modules:
               - filename: addons.py
-      - os: linux
+      - os: windows
         pythons:
           - version: 3.12.9
             interpreter: CPython
