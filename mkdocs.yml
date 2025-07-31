@@ -1,1 +1,53 @@
-site_name: My Docs
+site_name: ImportSpy
+#site_url: 
+repo_url: https://github.com/importspy/importspy
+repo_name: importspy/importspy
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.ico
+  palette:
+    - scheme: default
+      primary: blue
+      accent: light blue
+  features:
+    - navigation.tabs
+    - navigation.instant
+
+nav:
+  - Home: index.md
+  - Introduction:
+      - What is ImportSpy: intro/overview.md
+      - Installation: intro/install.md
+      - Quickstart: intro/quickstart.md
+  - Operating Modes:
+      - Embedded Mode: modes/embedded.md
+      - CLI Mode: modes/cli.md
+  - YAML Contracts:
+      - Syntax: contracts/syntax.md
+      - Examples: contracts/examples.md
+  - Advanced Usage:
+      - CI/CD Integration: advanced/cicd.md
+      - Plugin Systems: advanced/plugins.md
+      - SpyModel Architecture: advanced/spymodel.md
+      - Violation System: advanced/violations.md
+  - Validation & Errors: validation-errors.md
+  - API Reference: api-reference.md
+  - Contributing: contribute.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+
+markdown_extensions:
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.tabbed:
+      alternate_style: true
+
+

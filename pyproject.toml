@@ -13,6 +13,7 @@ pydantic = "^2.9.2"
 ruamel-yaml = "^0.18.10"
 typer = "^0.15.2"
 mkdocs = "^1.6.1"
+pymdown-extensions = "^10.16.1"
 
 
 [tool.poetry.group.dev.dependencies]
