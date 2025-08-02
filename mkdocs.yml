@@ -1,15 +1,14 @@
 site_name: ImportSpy
-#site_url: 
+site_url: https://importspy.github.io/importspy/
 repo_url: https://github.com/importspy/importspy
 repo_name: importspy/importspy
 
 theme:
   name: material
-  logo: assets/logo.svg
-  favicon: assets/favicon.ico
+  logo: assets/importspy-logo.png
   palette:
     - scheme: default
-      primary: blue
+      primary: purple
       accent: light blue
   features:
     - navigation.tabs

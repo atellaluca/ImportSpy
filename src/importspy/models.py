@@ -1,21 +1,18 @@
 """
-importspy.models
-----------------
+models.py
+==========
 
-This module defines the core data models used by ImportSpy for contract-based
-runtime validation of Python modules. It includes structural representations
-of variables, functions, classes, and full modules, as well as runtime and
-system-level metadata required to enforce import contracts across execution contexts.
+Defines the structural and contextual data models used across ImportSpy.
+These models represent modules, variables, functions, classes, runtimes,
+systems, and environments involved in contract-based validation.
+
+This module powers both embedded validation and CLI checks, enabling ImportSpy
+to introspect, serialize, and enforce compatibility rules at multiple levels:
+from source code structure to runtime platform details.
 """
 
 from pydantic import BaseModel
-
-from typing import (
-    Optional,
-    Union,
-    List
-)
-
+from typing import Optional, Union, List
 from types import ModuleType
 
 from .utilities.module_util import (
@@ -25,14 +22,8 @@ from .utilities.module_util import (
 from .utilities.runtime_util import RuntimeUtil
 from .utilities.system_util import SystemUtil
 from .utilities.python_util import PythonUtil
-from .constants import (
-    Constants,
-    Contexts,
-    Errors
-)
-
+from .constants import Constants, Contexts, Errors
 from .config import Config
-
 import logging
 
 logger = logging.getLogger("/".join(__file__.split('/')[-2:]))
@@ -41,10 +32,13 @@ logger.addHandler(logging.NullHandler())
 
 class Python(BaseModel):
     """
-    Represents a specific Python runtime configuration.
+    Represents a Python runtime environment.
 
-    Includes the Python version, interpreter type, and the list of loaded modules.
-    Used to validate compatibility between caller and callee environments.
+    Includes:
+    - Python version
+    - Interpreter type (e.g., CPython, PyPy)
+    - List of loaded modules
+    Used in validating runtime compatibility.
     """
     version: Optional[str] = None
     interpreter: Optional[Constants.SupportedPythonImplementations] = None
@@ -52,28 +46,35 @@ class Python(BaseModel):
 
     def __str__(self):
         return f"{self.interpreter} v{self.version}"
-    
+
     def __repr__(self):
         return str(self)
 
+
 class Environment(BaseModel):
     """
-    Represents a set of environment variables and secret keys
-    defined for the system or application runtime.
+    Represents runtime environment variables and secrets.
+    Used for validating runtime configuration.
     """
     variables: Optional[list['Variable']] = None
     secrets: Optional[list[str]] = None
 
     def __str__(self):
         return f"variables: {self.variables} | secrets: {self.secrets}"
-    
+
     def __repr__(self):
         return str(self)
 
+
 class System(BaseModel):
     """
-    Represents the system environment, including OS, environment variables,
-    and Python runtimes configured within the system.
+    Represents a full OS environment within a deployment system.
+
+    Includes:
+    - OS type
+    - Environment variables
+    - Python runtimes
+    Used to validate cross-platform compatibility.
     """
     os: Constants.SupportedOS
     environment: Optional[Environment] = None
@@ -81,30 +82,36 @@ class System(BaseModel):
 
     def __str__(self):
         return f"{self.os.value}"
-    
+
     def __repr__(self):
         return str(self)
 
 
 class Runtime(BaseModel):
     """
-    Represents the deployment runtime, identified by CPU architecture and
-    the list of supported systems associated with that architecture.
+    Represents a runtime deployment context.
+
+    Defined by CPU architecture and associated systems.
     """
     arch: Constants.SupportedArchitectures
     systems: list[System]
 
     def __str__(self):
         return f"{self.arch}"
-    
+
     def __repr__(self):
         return str(self)
 
 
 class Variable(BaseModel):
     """
-    Represents a declared variable within a Python module, including optional type
-    annotation and value. Used for structural validation of the importing module.
+    Represents a top-level variable in a Python module.
+
+    Includes:
+    - Name
+    - Optional annotation
+    - Optional static value
+    Used to enforce structural consistency.
     """
     name: str
     annotation: Optional[Constants.SupportedAnnotations] = None
@@ -112,36 +119,31 @@ class Variable(BaseModel):
 
     @classmethod
     def from_variable_info(cls, variables_info: list[VariableInfo]):
-        """
-        Convert a list of extracted VariableInfo into Variable instances.
-        """
-        return [Variable(
+        return [cls(
             name=var_info.name,
             value=var_info.value,
             annotation=var_info.annotation
         ) for var_info in variables_info]
-    
+
     def __str__(self):
         type_part = f": {self.annotation}" if self.annotation else ""
         return f"{self.name}{type_part} = {self.value}"
-    
+
     def __repr__(self):
         return str(self)
 
 
 class Attribute(Variable):
     """
-    Represents a class attribute, extending Variable with a 'type' indicator
-    (e.g., 'class', 'instance'). Used in class-level contract validation.
+    Represents a class-level attribute.
+
+    Extends Variable with attribute type (e.g., class or instance).
     """
     type: Constants.SupportedClassAttributeTypes
 
     @classmethod
     def from_attributes_info(cls, attributes_info: list[AttributeInfo]):
-        """
-        Convert a list of AttributeInfo objects into Attribute instances.
-        """
-        return [Attribute(
+        return [cls(
             type=attr_info.type,
             name=attr_info.name,
             value=attr_info.value,
@@ -151,15 +153,17 @@ class Attribute(Variable):
 
 class Argument(Variable, BaseModel):
     """
-    Represents a function argument, including its name, type annotation, and default value.
-    Used to validate callable structures and type consistency.
+    Represents a function/method argument.
+
+    Includes:
+    - Name
+    - Optional type annotation
+    - Optional default value
+    Used to check call signatures.
     """
     @classmethod
     def from_arguments_info(cls, arguments_info: list[ArgumentInfo]):
-        """
-        Convert a list of ArgumentInfo into Argument instances.
-        """
-        return [Argument(
+        return [cls(
             name=arg_info.name,
             annotation=arg_info.annotation,
             value=arg_info.value
@@ -168,8 +172,12 @@ class Argument(Variable, BaseModel):
 
 class Function(BaseModel):
     """
-    Represents a callable function, including its name, argument signature,
-    and return type annotation.
+    Represents a callable entity.
+
+    Includes:
+    - Name
+    - List of arguments
+    - Optional return annotation
     """
     name: str
     arguments: Optional[list[Argument]] = None
@@ -177,27 +185,29 @@ class Function(BaseModel):
 
     @classmethod
     def from_functions_info(cls, functions_info: list[FunctionInfo]):
-        """
-        Convert a list of FunctionInfo into Function instances.
-        """
-        return [Function(
+        return [cls(
             name=func_info.name,
             arguments=Argument.from_arguments_info(func_info.arguments),
             return_annotation=func_info.return_annotation
         ) for func_info in functions_info]
-    
+
     def __str__(self):
-        formatted_arguments = f"{', '.join(str(arg) for arg in self.arguments)}" if self.arguments else ""
-        return f"{self.name}({formatted_arguments}) -> {self.return_annotation}"
-    
+        args = ", ".join(str(arg) for arg in self.arguments) if self.arguments else ""
+        return f"{self.name}({args}) -> {self.return_annotation}"
+
     def __repr__(self):
         return str(self)
 
 
 class Class(BaseModel):
     """
-    Represents a Python class, including its attributes, methods, and declared superclasses.
-    Used to enforce object-level validation rules in contracts.
+    Represents a Python class declaration.
+
+    Includes:
+    - Name
+    - Attributes (class/instance)
+    - Methods
+    - Superclasses (recursive)
     """
     name: str
     attributes: Optional[list[Attribute]] = None
@@ -206,20 +216,17 @@ class Class(BaseModel):
 
     @classmethod
     def from_class_info(cls, extracted_classes: list[ClassInfo]):
-        """
-        Convert a list of extracted class definitions into Class instances.
-        """
-        return [Class(
+        return [cls(
             name=name,
             attributes=Attribute.from_attributes_info(attributes),
             methods=Function.from_functions_info(methods),
-            superclasses= cls.from_class_info(superclasses)
+            superclasses=cls.from_class_info(superclasses)
         ) for name, attributes, methods, superclasses in extracted_classes]
-    
+
     def get_class_attributes(self) -> List[Attribute]:
         if self.attributes:
             return [attr for attr in self.attributes if attr.type == Config.CLASS_TYPE]
-    
+
     def get_instance_attributes(self) -> List[Attribute]:
         if self.attributes:
             return [attr for attr in self.attributes if attr.type == Config.INSTANCE_TYPE]
@@ -227,8 +234,12 @@ class Class(BaseModel):
 
 class Module(BaseModel):
     """
-    Represents a full Python module, including its filename, version,
-    and all its internal components (variables, functions, classes).
+    Represents a Python module.
+
+    Includes:
+    - Filename
+    - Version (if extractable)
+    - Top-level variables, functions, and classes
     """
     filename: Optional[str] = None
     version: Optional[str] = None
@@ -238,25 +249,25 @@ class Module(BaseModel):
 
     def __str__(self):
         return f"Module: {self.filename or 'unknown'} (v{self.version or '-'})"
-    
+
     def __repr__(self):
         return str(self)
 
 
 class SpyModel(Module):
     """
-    Extends the base Module structure with additional deployment metadata.
+    High-level model used by ImportSpy for validation.
 
-    SpyModel is the top-level object representing a module's structure and its
-    runtime/environment constraints. This is the core of ImportSpy's contract model.
+    Extends the module representation with runtime metadata and
+    platform-specific deployment constraints (architecture, OS, interpreter, etc).
     """
     deployments: Optional[list[Runtime]] = None
 
     @classmethod
     def from_module(cls, info_module: ModuleType):
         """
-        Create a SpyModel from a loaded Python module, extracting its metadata
-        and attaching runtime/system context.
+        Build a SpyModel instance by extracting structure and metadata
+        from an actual Python module object.
         """
         module_utils = ModuleUtil()
         runtime_utils = RuntimeUtil()
@@ -313,32 +324,16 @@ class SpyModel(Module):
             ]
         )
 
-class Error(BaseModel):
 
+class Error(BaseModel):
+    """
+    Describes a structured validation error.
+
+    Includes the context, error type, message, and resolution steps.
+    Used to serialize feedback during contract enforcement.
+    """
     context: Contexts
     title: str
     category: Errors.Category
     description: str
     solution: str
-
-"""
-    @classmethod
-    def from_contract_violation(cls, contract_violation: BaseContractViolation):
-        tpl = Errors.ERROR_MESSAGE_TEMPLATES.get(contract_violation.category)
-        title = Errors.CONTEXT_INTRO.get(contract_violation.context)
-        description = tpl[Errors.TEMPLATE_KEY].format(label=contract_violation.label)
-        solution = tpl[Errors.SOLUTION_KEY]
-        return cls(
-            context=contract_violation.context,
-            title=title,
-            category=contract_violation.category,
-            description=description,
-            solution=solution
-        )
-
-    def render_message(self) -> str:
-        return f"[{self.title}] {self.description} {self.solution}"
-"""
-
-
-

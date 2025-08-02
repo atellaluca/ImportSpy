@@ -1,16 +1,12 @@
 """
-importspy.persistences
-=======================
-
-This module defines the interfaces and implementations for handling **import contracts** —  
+Defines interfaces and implementations for handling **import contracts** —  
 external YAML files used by ImportSpy to validate the structure and runtime expectations  
 of dynamically loaded Python modules.
 
-Currently, YAML is the only supported contract format, but the architecture is fully  
-extensible via the `Parser` interface.
+Currently, only YAML is supported, but the architecture is extensible via the `Parser` interface.
 
-All file access operations are wrapped in safe error handling using `handle_persistence_error`,  
-which raises human-readable exceptions when contract files are missing, corrupted, or unreadable.
+All file I/O operations are wrapped in `handle_persistence_error`, ensuring clear error  
+messages in case of missing, malformed, or inaccessible contract files.
 """
 
 from abc import ABC, abstractmethod
@@ -20,86 +16,84 @@ import functools
 
 class Parser(ABC):
     """
-    Abstract interface for import contract parsers.
+    Abstract base class for import contract parsers.
 
-    A contract parser is responsible for loading and saving `.yml` files  
-    that describe the expected structure of a Python module. This abstraction  
-    allows ImportSpy to support multiple formats (e.g., YAML, JSON, TOML) in the future.
+    Parsers are responsible for loading and saving `.yml` contract files that define
+    a module’s structural and runtime expectations. This abstraction enables future
+    support for additional formats (e.g., JSON, TOML).
 
-    Subclasses must implement both `save()` and `load()` methods.
+    Subclasses must implement `save()` and `load()`.
     """
 
     @abstractmethod
     def save(self, data: dict, filepath: str):
         """
-        Serializes the given import contract (as a Python dictionary) and writes it to a file.
+        Serializes the contract (as a dictionary) and writes it to disk.
 
         Parameters:
         -----------
         data : dict
-            A dictionary representation of the import contract.
+            Dictionary containing the contract structure.
 
         filepath : str
-            The path where the contract should be saved (usually with `.yml` extension).
+            Target path for saving the contract (typically `.yml`).
         """
         pass
 
     @abstractmethod
     def load(self, filepath: str) -> dict:
         """
-        Loads and parses an import contract from a file into a Python dictionary.
+        Parses a contract file and returns it as a dictionary.
 
         Parameters:
         -----------
         filepath : str
-            Path to the `.yml` contract file.
+            Path to the contract file on disk.
 
         Returns:
         --------
         dict
-            The parsed contract as a dictionary.
+            Parsed contract data.
         """
         pass
 
 
 class PersistenceError(Exception):
     """
-    Custom exception raised when there is a problem reading or writing import contracts.
+    Raised when contract loading or saving fails due to I/O or syntax issues.
 
-    This error wraps low-level I/O or parsing issues and presents them in a way  
-    that is meaningful to end users.
+    This exception wraps low-level errors and provides human-readable feedback.
     """
 
     def __init__(self, msg: str):
         """
-        Initializes the `PersistenceError`.
+        Initialize the error with a descriptive message.
 
         Parameters:
         -----------
         msg : str
-            A human-readable error message describing the failure.
+            Explanation of the failure.
         """
         super().__init__(msg)
 
 
 def handle_persistence_error(func):
     """
-    Decorator that wraps file I/O operations in safe error handling.
+    Decorator for wrapping parser I/O methods with user-friendly error handling.
 
-    If the decorated function raises any exception (e.g., file not found, malformed YAML),
-    a `PersistenceError` is raised with a descriptive message instead.
-
-    This helps ensure that ImportSpy fails gracefully during contract handling.
+    Catches all exceptions and raises a `PersistenceError` with a generic message.
+    This ensures ImportSpy fails gracefully if a contract file is missing,
+    malformed, or inaccessible.
 
     Parameters:
     -----------
     func : Callable
-        The function to decorate.
+        The I/O method to wrap.
 
     Returns:
     --------
     Callable
-        The wrapped function.
+        A wrapped version that raises `PersistenceError` on failure.
     """
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
@@ -115,26 +109,26 @@ def handle_persistence_error(func):
 
 class YamlParser(Parser):
     """
-    YAML-based implementation of the `Parser` interface.
+    YAML-based contract parser implementation.
 
-    This parser reads and writes import contracts from `.yml` files using the `ruamel.yaml` library.
-    It preserves indentation, flow style, and quotes to ensure consistent structure across validations.
+    Uses `ruamel.yaml` to read and write `.yml` files that define import contracts.  
+    Preserves formatting, indentation, and quotes for consistent serialization.
     """
 
     def __init__(self):
         """
-        Initializes the YAML parser and applies default formatting rules for readability.
+        Initializes the YAML parser and configures output formatting.
         """
         self.yaml = YAML()
         self._yml_configuration()
 
     def _yml_configuration(self):
         """
-        Applies consistent formatting to YAML output:
+        Applies formatting rules to YAML output:
 
-        - Disables flow style for better readability
-        - Sets indentation rules for mappings and sequences
-        - Preserves quotes for exact string representation
+        - Disables flow style
+        - Sets consistent indentation
+        - Preserves quotes in strings
         """
         self.yaml.default_flow_style = False
         self.yaml.indent(mapping=2, sequence=4, offset=2)
@@ -143,15 +137,15 @@ class YamlParser(Parser):
     @handle_persistence_error
     def save(self, data: dict, filepath: str):
         """
-        Saves an import contract to a `.yml` file.
+        Saves a contract dictionary to a `.yml` file.
 
         Parameters:
         -----------
         data : dict
-            The contract content as a dictionary.
+            Contract structure.
 
         filepath : str
-            The output path where the YAML file will be saved.
+            Destination file path.
         """
         with open(filepath, "w") as file:
             self.yaml.dump(data, file)
@@ -159,17 +153,17 @@ class YamlParser(Parser):
     @handle_persistence_error
     def load(self, filepath: str) -> dict:
         """
-        Loads an import contract from a `.yml` file and parses it into a dictionary.
+        Loads and parses a `.yml` contract into a Python dictionary.
 
         Parameters:
         -----------
         filepath : str
-            Path to the YAML file.
+            Path to the contract file.
 
         Returns:
         --------
         dict
-            A Python dictionary containing the contract structure.
+            Parsed contract structure.
         """
         with open(filepath) as file:
             data = self.yaml.load(file)
