@@ -62,7 +62,7 @@ class RuntimeValidator:
             Contexts.RUNTIME_CONTEXT,
             bundle
         ).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
-        
+
 
 class SystemValidator:
 
@@ -165,7 +165,7 @@ class PythonValidator:
 
             if self._is_python_match(python_1, python_2, contract_violation):
                 return python_1.modules
-            
+        
         raise ValueError(
                 PythonContractViolation(
                     Contexts.RUNTIME_CONTEXT,
@@ -178,29 +178,6 @@ class PythonValidator:
         python_2: Python,
         contract_violation: PythonContractViolation
     ) -> bool:
-        """
-        Determine whether two Python configurations match.
-
-        Parameters
-        ----------
-        python_1 : Python
-            Expected configuration.
-        python_2 : Python
-            Actual system configuration.
-
-        Returns
-        -------
-        bool
-            `True` if the two configurations match according to the declared criteria,
-            otherwise `False`.
-
-        Matching Criteria
-        -----------------
-        - If both version and interpreter are defined: match both.
-        - If only version is defined: match version.
-        - If only interpreter is defined: match interpreter.
-        - If none are defined: match anything (default `True`).
-        """
         bundle: Bundle = contract_violation.bundle
         bundle[Errors.KEY_PYTHON_1] = python_1
         if python_1.version and python_1.interpreter:
@@ -288,7 +265,6 @@ class ModuleValidator:
                     bundle
                 )
             )
-
 
 class ClassValidator:
 

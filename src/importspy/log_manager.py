@@ -22,19 +22,15 @@ class CustomFormatter(logging.Formatter):
     This formatter extends the default logging format by appending the exact
     filename, line number, and function name where each log was triggered.
 
-    This is especially useful in distributed architectures, plugin-based systems, 
-    or debugging deeply nested calls during module inspection.
-
     Format:
     -------
-    ``[timestamp] [LEVEL] [logger name] [caller: file, line, function] message``
+    [timestamp] [LEVEL] [logger name] 
+    [caller: file, line, function] message
 
     Example:
     --------
-    .. code-block:: text
-
-        2024-02-24 14:30:12 [INFO] [my_logger] 
-        [caller: example.py, line: 42, function: my_function] This is a log message.
+    2024-02-24 14:30:12 [INFO] [my_logger] 
+    [caller: example.py, line: 42, function: my_function] This is a log message.
     """
 
     LOG_FORMAT = (
@@ -51,22 +47,17 @@ class CustomFormatter(logging.Formatter):
 
     def format(self, record):
         """
-        Adds caller details to the log record.
-
-        Enhances logs with:
-        - Filename where the log was triggered
-        - Line number
-        - Function name
+        Enriches the log record with caller information.
 
         Parameters:
         -----------
         record : logging.LogRecord
-            The original log event.
+            The original log record to be formatted.
 
         Returns:
         --------
         str
-            The enriched, formatted log message.
+            A fully formatted log message including file, line, and function context.
         """
         record.caller_file = record.pathname.split("/")[-1]
         record.caller_line = record.lineno
@@ -78,37 +69,28 @@ class LogManager:
     """
     Centralized manager for all logging within ImportSpy.
 
-    This class ensures that:
-    - All loggers use the same format (`CustomFormatter`)
-    - Logging is only configured once to avoid duplication
-    - Each component of the framework can retrieve its own scoped logger
-
-    Whether ImportSpy runs embedded inside another module or as a CLI tool,  
-    the `LogManager` ensures that log output is clean, traceable, and standardized.
+    This class ensures:
+    - Uniform formatting across all loggers
+    - Avoidance of duplicate configuration
+    - Consistent output in both CLI and embedded contexts
 
     Attributes:
     -----------
     default_level : int
-        The system's current log level at the time of instantiation.
+        The current log level derived from the root logger.
 
     default_handler : logging.StreamHandler
-        Default output handler using `CustomFormatter`.
+        Default handler for logging output, using the `CustomFormatter`.
 
     configured : bool
-        Indicates whether global logging has already been configured.
-
-    Methods:
-    --------
-    - `configure(level, handlers)`: Applies global settings to the root logger.
-    - `get_logger(name)`: Retrieves a logger with consistent formatting and context.
+        Whether the logging system has already been configured.
     """
 
     def __init__(self):
         """
-        Sets up default logging options.
+        Sets up the default logging handler and format.
 
-        The default handler uses ImportSpy’s `CustomFormatter` and logs to `stdout`.
-        Logging is deferred until explicitly configured.
+        Uses `CustomFormatter` and logs to standard output by default.
         """
         self.default_level = logging.getLogger().getEffectiveLevel()
         self.default_handler = logging.StreamHandler()
@@ -117,30 +99,22 @@ class LogManager:
 
     def configure(self, level: int = None, handlers: list = None):
         """
-        Configures the global logging system.
+        Applies logging configuration globally.
 
-        This method attaches handlers to the root logger and sets the global level.  
-        It must be called only once to avoid duplicate logs or handler conflicts.
+        Prevents duplicate setup. This method should be called once per application.
 
         Parameters:
         -----------
         level : int, optional
-            Desired log level (e.g., `logging.DEBUG` or `logging.INFO`).  
-            Defaults to the system’s current level.
+            Log level (e.g., logging.DEBUG). Defaults to current system level.
 
         handlers : list of logging.Handler, optional
-            List of custom handlers to attach. If omitted, uses the default stream handler.
+            Custom handlers to use. Falls back to `default_handler` if none provided.
 
         Raises:
         -------
         RuntimeError
-            If logging has already been configured elsewhere in the application.
-
-        Example:
-        --------
-        .. code-block:: python
-
-            LogManager().configure(level=logging.DEBUG)
+            If logging is already configured.
         """
         if self.configured:
             raise RuntimeError("LogManager has already been configured.")
@@ -158,27 +132,19 @@ class LogManager:
 
     def get_logger(self, name: str) -> logging.Logger:
         """
-        Retrieves a scoped logger configured with ImportSpy’s formatting.
+        Returns a named logger with ImportSpy's formatting applied.
 
-        This logger is safe to use across modules and plugins.  
-        It ensures no duplicate handlers and maintains the current log level.
+        Ensures the logger is properly configured and ready for use.
 
         Parameters:
         -----------
         name : str
-            Name of the logger (typically `__name__` or class name).
+            The name of the logger (e.g., a module name).
 
         Returns:
         --------
         logging.Logger
-            A configured logger ready for use.
-
-        Example:
-        --------
-        .. code-block:: python
-
-            logger = LogManager().get_logger("my_module")
-            logger.info("Validation complete.")
+            The initialized logger instance.
         """
         logger = logging.getLogger(name)
         if not logger.handlers:
