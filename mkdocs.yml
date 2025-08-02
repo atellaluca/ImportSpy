@@ -33,7 +33,7 @@ nav:
       - Violation System: advanced/violations.md
   - Validation & Errors: validation-errors.md
   - API Reference: api-reference.md
-  - Contributing: contribute.md
+  - Contributing: ../CONTRIBUTING.md
 
 plugins:
   - search
