@@ -27,11 +27,10 @@ nav:
       - Syntax: contracts/syntax.md
       - Examples: contracts/examples.md
   - Advanced Usage:
-      - CI/CD Integration: advanced/cicd.md
-      - Plugin Systems: advanced/plugins.md
+#      - CI/CD Integration: advanced/cicd.md
       - SpyModel Architecture: advanced/spymodel.md
       - Violation System: advanced/violations.md
-  - Validation & Errors: validation-errors.md
+  - Validation & Errors: errors/contract-violations.md
   - API Reference: api-reference.md
   - Contributing: ../CONTRIBUTING.md
 
