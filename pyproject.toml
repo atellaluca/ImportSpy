@@ -4,7 +4,7 @@ version = "0.4.0"
 description = "ImportSpy ensures structural integrity, runtime compliance, and security for external modules, preventing inconsistencies and enforcing controlled execution."  
 license = "MIT"
 authors = ["Luca Atella <atellaluca@outlook.it>"]
-readme = "README.rst"
+readme = "README.md"
 packages = [{include = "importspy", from = "src"}]
 
 [tool.poetry.dependencies]
@@ -12,12 +12,13 @@ python = "^3.10"
 pydantic = "^2.9.2"
 ruamel-yaml = "^0.18.10"
 typer = "^0.15.2"
-mkdocs = "^1.6.1"
 pymdown-extensions = "^10.16.1"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
+mkdocs = "^1.6.1"
+mkdocstrings = {version = "^0.30.0", extras = ["python"]}
 
 [tool.poetry.urls]
 Repository = "https://github.com/atellaluca/importspy"

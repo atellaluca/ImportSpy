@@ -105,12 +105,6 @@ ImportSpy is built around 3 key components:
 
 - [API Docs](api-reference.md)
 
-### 🤝 Contributing
-
-- [Contributing Guidelines](../CONTRIBUTING.md)
-- [Security Policy](../SECURITY.md)
-- [License (MIT)](../LICENSE)
-
 ---
 
 ## Architecture Diagram
@@ -139,7 +133,6 @@ If ImportSpy is useful in your infrastructure, help us grow by:
 
 - [Starring the project on GitHub](https://github.com/your-org/importspy)
 - [Becoming a GitHub Sponsor](https://github.com/sponsors/your-org)
-- [Contributing modules, tests, or docs](../CONTRIBUTING.md)
 
 ---
 

@@ -32,7 +32,7 @@ nav:
       - Violation System: advanced/violations.md
   - Validation & Errors: errors/contract-violations.md
   - API Reference: api-reference.md
-  - Contributing: ../CONTRIBUTING.md
+  - Contributing: CONTRIBUTING.md
 
 plugins:
   - search
@@ -47,5 +47,4 @@ markdown_extensions:
   - admonition
   - pymdownx.tabbed:
       alternate_style: true
-
 
