@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 permissions:
-  contents: read
+  contents: write  # Necessario per il deploy su gh-pages
   issues: write
   pull-requests: write
 
@@ -47,6 +47,31 @@ jobs:
       run: |
         poetry run mkdocs build --strict
 
-    - name: Push docs on gh-pages branch
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.12"
+
+    - name: Install MkDocs and dependencies
+      run: |
+        pip install poetry mkdocs
+        poetry install
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "MkDocs CI"
+        git config --global user.email "ci@mkdocs.deploy"
+
+    - name: Deploy docs to gh-pages
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         poetry run mkdocs gh-deploy --force
