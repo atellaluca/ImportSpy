@@ -19,7 +19,7 @@ This prevents silent failures or misconfigurations by enforcing structural and r
     --8<-- "examples/plugin_based_architecture/package.py"
     ```
 
-See also [Embedded Mode](../../modes/embedded.md) and [Contract Syntax](../../contracts/syntax.md) for YAML details.
+See also [Embedded Mode](../modes/embedded.md) and [Contract Syntax](../contracts/syntax.md) for YAML details.
 
 ---
 
@@ -37,7 +37,7 @@ Typical use cases:
     importspy extensions.py -s spymodel.yml -l INFO
     ```
 
-See [CLI Mode](../../modes/cli.md) for full usage.
+See [CLI Mode](../modes/cli.md) for full usage.
 
 ---
 

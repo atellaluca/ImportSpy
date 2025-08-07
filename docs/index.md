@@ -94,8 +94,8 @@ ImportSpy is built around 3 key components:
 ### 🧠 Validation Engine
 
 - [Violation System](advanced/violations.md)
-- [Contract Violations](errors/contract_violations.md)
-- [Error Table](errors/error_table.md)
+- [Contract Violations](errors/contract-violations.md)
+- [Error Table](errors/error-table.md)
 
 ### 📦 Use Cases
 
@@ -109,7 +109,7 @@ ImportSpy is built around 3 key components:
 
 ## Architecture Diagram
 
-![SpyModel UML](../assets/importspy-spy-model-architecture.png)
+![SpyModel UML](assets/importspy-spy-model-architecture.png)
 
 ---
 

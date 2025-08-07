@@ -211,4 +211,4 @@ ImportSpy uses a strict structural validator. Here are some notes:
 
 - [Contract Examples](examples.md)
 - [SpyModel Architecture](../advanced/spymodel.md)
-- [Contract Violations](../validation-errors.md)
+- [Contract Violations](../errors/contract-violations.md)

@@ -1,26 +1,23 @@
-"""
-System Utilities for ImportSpy
-==============================
+"""System Utilities for ImportSpy
 
-Provides tools to interact with the host system and environment variables.
+Provides tools to inspect the host operating system and environment variables.
 
-This utility module helps ImportSpy detect and normalize runtime conditions, such as
-the operating system or environment setup, ensuring compatibility checks work reliably.
+This module supports ImportSpy by normalizing system-level information that may
+affect import contract validation. It helps ensure that environmental conditions
+are consistent and inspectable across different operating systems and deployment contexts.
 
 Features:
----------
-- Identifies the current operating system in a standardized lowercase format.
-- Retrieves environment variables as a key-value dictionary.
+    - Detects the current operating system in a normalized, lowercase format.
+    - Retrieves all environment variables as a list of structured objects.
 
 Example:
---------
-.. code-block:: python
-
-    from importspy.utilities.system_util import SystemUtil
-
-    util = SystemUtil()
-    os_name = util.extract_os()
-    env = util.extract_envs()
+    >>> from importspy.utilities.system_util import SystemUtil
+    >>> util = SystemUtil()
+    >>> util.extract_os()
+    'linux'
+    >>> envs = util.extract_envs()
+    >>> envs[0]
+    VariableInfo(name='PATH', annotation=None, value='/usr/bin')
 """
 
 import os
@@ -34,55 +31,49 @@ logger.addHandler(logging.NullHandler())
 
 VariableInfo = namedtuple('VariableInfo', ["name", "annotation", "value"])
 
+
 class SystemUtil:
-    """
-    System-level utility class for environment inspection.
+    """Utility class for inspecting system-level properties.
 
-    Offers support for OS detection and retrieval of environment variables.
+    Used by ImportSpy to collect information about the current operating system
+    and active environment variables. These details are typically validated
+    against constraints defined in `.yml` import contracts.
 
-    Methods
-    -------
-    extract_os() -> str
-        Returns the lowercase name of the operating system (e.g., 'windows', 'linux').
-
-    extract_envs() -> dict
-        Returns a dictionary of all active environment variables.
+    Methods:
+        extract_os(): Return the normalized name of the current operating system.
+        extract_envs(): Return all active environment variables as structured entries.
     """
 
     def extract_os(self) -> str:
-        """
-        Return the operating system name in lowercase.
+        """Return the name of the operating system in lowercase format.
 
-        Uses `platform.system()` for OS detection.
+        This method uses `platform.system()` and normalizes the result
+        to lowercase. It simplifies comparisons with import contract conditions
+        that expect a canonical form such as "linux", "darwin", or "windows".
 
-        Returns
-        -------
-        str
-            'windows', 'linux', or 'darwin', depending on the system.
+        Returns:
+            str: The normalized operating system name (e.g., "linux", "windows").
 
-        Example
-        -------
-        >>> SystemUtil().extract_os()
-        'linux'
+        Example:
+            >>> SystemUtil().extract_os()
+            'darwin'
         """
         return platform.system().lower()
 
     def extract_envs(self) -> List[VariableInfo]:
-        """
-        Return a list of environment variables available in the current process.
+        """Return all environment variables as a list of structured objects.
 
-        Uses `os.environ.items()` to collect all key-value pairs.
+        Collects all key-value pairs from `os.environ` and wraps them in
+        `VariableInfo` namedtuples. The `annotation` field is reserved for
+        optional type annotation metadata (currently set to `None`).
 
-        Returns
-        -------
-        List[VariableInfo]
+        Returns:
+            List[VariableInfo]: A list of environment variables available
+            in the current process environment.
 
-            A list of VariableInfo instances, each representing an environment variable.
-
-        Example
-        -------
-        >>> SystemUtil().extract_envs()
-        [VariableInfo(name='PATH', value='/usr/bin'), VariableInfo(name='HOME', value='/home/user'), ...]
+        Example:
+            >>> envs = SystemUtil().extract_envs()
+            >>> envs[0]
+            VariableInfo(name='PATH', annotation=None, value='/usr/bin')
         """
         return [VariableInfo(name, None, value) for name, value in os.environ.items()]
-

@@ -95,11 +95,6 @@ If it doesn't, you’ll see a structured error like:
 
 ---
 
-## Learn more
-
-- [→ Embedded Mode](embedded.md)
-- [→ Contract syntax](../contracts/syntax.md)
-- [→ Error types](../errors/index.md)
 # Import Contract Syntax
 
 An ImportSpy contract is a YAML file that describes:
@@ -277,6 +272,5 @@ environment:
 
 ## Learn more
 
-- [Embedded Mode](../modes/embedded.md)
-- [CLI Mode](../modes/cli.md)
-- [Contract violations](../errors/index.md)
+- [Contract syntax](../contracts/syntax.md)
+- [Contract violations](../errors/contract-violations.md)

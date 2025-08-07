@@ -5,6 +5,8 @@ repo_name: importspy/importspy
 
 theme:
   name: material
+  custom_dir: docs/overrides
+  favicon: assets/favicon.ico
   logo: assets/importspy-logo.png
   palette:
     - scheme: default
@@ -31,8 +33,8 @@ nav:
       - SpyModel Architecture: advanced/spymodel.md
       - Violation System: advanced/violations.md
   - Validation & Errors: errors/contract-violations.md
+  - Use Cases: use_cases/index.md
   - API Reference: api-reference.md
-  - Contributing: CONTRIBUTING.md
 
 plugins:
   - search
