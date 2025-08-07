@@ -1,31 +1,41 @@
+"""importspy.config
+
+Static configuration definitions for ImportSpy.
+
+This module declares platform-wide constants used throughout ImportSpy
+for validating compatibility and structural expectations declared in
+SpyModel contracts. These values represent the officially supported
+CPU architectures, operating systems, Python interpreters, version targets,
+class attribute types, and accepted type annotations.
+
+Example:
+    >>> from importspy.config import Config
+    >>> Config.ARCH_X86_64
+    'x86_64'
+    >>> Config.INTERPRETER_CPYTHON
+    'CPython'
+"""
+
 class Config:
-    
+    """Static configuration container for ImportSpy validation.
+
+    This class defines constants used during runtime and structural validation
+    of Python modules. All values reflect supported targets or accepted types
+    declared in `.yml` contracts interpreted by ImportSpy.
+
+    Attributes:
+        Architectures (str): Supported CPU architectures (e.g., "x86_64").
+        Operating Systems (str): Accepted OS identifiers (e.g., "linux").
+        Python Versions (str): Known compatible Python interpreter versions.
+        Interpreters (str): Recognized Python implementation names.
+        Attribute Types (str): Whether class-level or instance-level variables.
+        Annotation Types (str): Type annotations allowed in contract validation.
+
+    These constants are typically used in:
+    - Runtime environment checks
+    - Contract-based validation
+    - Enforcement of developer-specified constraints
     """
-    Static configuration for ImportSpy.
-
-    This class defines the baseline constants used during runtime and structural
-    validation of Python modules. Values declared here represent the supported
-    options for platforms, interpreters, Python versions, class attribute types,
-    and type annotations within a SpyModel contract.
-
-    These constants are used internally to validate compatibility and enforce
-    declared constraints across diverse environments.
-
-    Categories:
-    ----------
-    • Architectures: CPU instruction sets (e.g. x86_64, arm64).
-    • Operating Systems: Target OS identifiers (e.g. linux, windows).
-    • Python Versions: Compatible interpreter versions.
-    • Interpreters: Supported Python implementations.
-    • Attribute Types: Class vs. instance variables.
-    • Type Annotations: Accepted runtime-compatible types.
-
-    Examples:
-    ---------
-    - A contract may require `arch: x86_64` and `interpreter: CPython`.
-    - A method argument may be annotated with `Optional[str]`.
-    """
-
 
     # Supported Architectures
     ARCH_x86_64 = "x86_64"
@@ -42,12 +52,11 @@ class Config:
     OS_LINUX = "linux"
     OS_MACOS = "darwin"
 
-    # Supported Python Version
+    # Supported Python Versions
     PYTHON_VERSION_3_13 = "3.13"
     PYTHON_VERSION_3_12 = "3.12"
     PYTHON_VERSION_3_11 = "3.11"
     PYTHON_VERSION_3_10 = "3.10"
-    PYTHON_VERSION_3_9 = "3.9"
 
     # Supported Python Interpreters
     INTERPRETER_CPYTHON = "CPython"
