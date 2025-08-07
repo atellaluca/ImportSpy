@@ -1,22 +1,20 @@
-"""
-Python Runtime Utilities
-========================
+"""Python Runtime Utilities
 
-Provides helpers to inspect the active Python environment,
-such as the interpreter implementation and version.
+Provides utility methods to inspect the active Python runtime environment,
+such as the version number and interpreter implementation.
 
-Useful in ImportSpy to validate compatibility constraints across Python versions
-and runtime variants (e.g., CPython, PyPy, IronPython).
+These utilities are useful within ImportSpy to evaluate whether the current
+runtime context satisfies declared compatibility constraints in import contracts.
+This includes checks for specific Python versions and interpreter families
+(CPython, PyPy, IronPython, etc.).
 
 Example:
---------
-.. code-block:: python
-
-    from importspy.utilities.python_util import PythonUtil
-
-    util = PythonUtil()
-    print(util.extract_python_version())
-    print(util.extract_python_implementation())
+    >>> from importspy.utilities.python_util import PythonUtil
+    >>> util = PythonUtil()
+    >>> util.extract_python_version()
+    '3.12.0'
+    >>> util.extract_python_implementation()
+    'CPython'
 """
 
 import logging
@@ -25,43 +23,42 @@ import platform
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
+
 class PythonUtil:
-    """
-    Utility class for querying Python runtime details.
+    """Utility class for inspecting Python runtime characteristics.
 
-    Methods
-    -------
-    extract_python_version() -> str
-        Returns the current Python version (e.g., "3.11.2").
-
-    extract_python_implementation() -> str
-        Returns the Python interpreter name (e.g., "CPython", "PyPy").
+    Used internally by ImportSpy to validate runtime-specific conditions declared
+    in `.yml` import contracts. This includes checking Python version and interpreter
+    type during structural introspection and contract validation.
     """
 
     def extract_python_version(self) -> str:
-        """
-        Return the active Python version.
+        """Return the currently active Python version as a string.
 
-        Returns
-        -------
-        str
-            Python version string (e.g., '3.11.2').
+        This method queries the runtime using `platform.python_version()` and is
+        typically used to match version constraints defined in an import contract.
+
+        Returns:
+            str: The Python version string (e.g., "3.11.4").
+        
+        Example:
+            >>> PythonUtil().extract_python_version()
+            '3.11.4'
         """
-        python_version = platform.python_version()
-        return python_version
+        return platform.python_version()
 
     def extract_python_implementation(self) -> str:
-        """
-        Return the Python implementation type.
+        """Return the implementation name of the running Python interpreter.
 
-        Returns
-        -------
-        str
-            Python interpreter name (e.g., 'CPython', 'PyPy').
+        Common values include "CPython", "PyPy", or "IronPython". This is
+        essential in contexts where the implementation affects runtime behavior
+        or compatibility with native extensions.
 
-        Example
-        -------
-        >>> PythonUtil().extract_python_implementation()
-        'CPython'
+        Returns:
+            str: The interpreter implementation (e.g., "CPython").
+        
+        Example:
+            >>> PythonUtil().extract_python_implementation()
+            'CPython'
         """
         return platform.python_implementation()

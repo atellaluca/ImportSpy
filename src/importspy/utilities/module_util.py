@@ -1,25 +1,26 @@
 """
-Module: Module Utilities
+Module utilities for runtime introspection and structure extraction.
 
-This module provides a comprehensive set of utility functions for dynamic module inspection, 
-loading, unloading, and metadata extraction. It is designed to support ImportSpy's runtime 
-validation processes by enabling detailed analysis of Python modules.
+This module provides utility functions for analyzing Python modules dynamically,
+primarily to support ImportSpy's runtime validation mechanisms. It enables inspection
+of modules, their metadata, and internal structure at runtime.
 
-Key Features:
--------------
-- Inspect the calling stack and retrieve information about modules.
-- Dynamically load and unload modules for runtime modifications.
-- Extract metadata such as classes, functions, variables, and inheritance hierarchies from modules.
+Features:
+- Inspect the call stack and determine caller modules.
+- Dynamically load and unload Python modules.
+- Extract version information via metadata or attributes.
+- Retrieve global variables, top-level functions, and class definitions.
+- Analyze methods, attributes (class-level and instance-level), and superclasses.
 
-Example Usage:
---------------
-.. code-block:: python
-
+Example:
+    ```python
     from importspy.utilities.module_util import ModuleUtil
+    import inspect
 
     module_util = ModuleUtil()
-    module_info = module_util.get_info_module(inspect.stack()[0])
-    print(f"Module Name: {module_info.__name__}")
+    info = module_util.get_info_module(inspect.stack()[0])
+    print(info.__name__)
+    ```
 """
 
 import inspect
@@ -43,23 +44,11 @@ VariableInfo = namedtuple('VariableInfo', ["name", "annotation", "value"])
 
 class ModuleUtil:
     """
-    Utility class for dynamic module inspection and metadata extraction.
+    Provides methods to inspect and extract structural metadata from Python modules.
 
-    The `ModuleUtil` class provides methods to inspect, load, unload, and analyze Python 
-    modules at runtime. These utilities are essential for enabling ImportSpy's dynamic 
-    validation of runtime conditions.
-
-    Methods:
-    --------
-    - `inspect_module()`: Retrieve current and caller frames.
-    - `get_info_module()`: Extract module from a caller frame.
-    - `load_module()`: Dynamically reload a module.
-    - `unload_module()`: Remove module from memory.
-    - `extract_version()`: Retrieve version of a module.
-    - `extract_variables()`: Extract global variables.
-    - `extract_functions()`: Extract top-level functions.
-    - `extract_classes()`: Extract class definitions.
-    - `extract_superclasses()`: Collect all used base classes.
+    This class enables runtime inspection of loaded modules for metadata such as
+    functions, classes, variables, inheritance hierarchies, and version information.
+    It is a core component used by ImportSpy to validate structural contracts.
     """
 
     def inspect_module(self) -> tuple:
@@ -67,9 +56,7 @@ class ModuleUtil:
         Retrieve the current and caller frames from the stack.
 
         Returns:
-        --------
-        tuple
-            A tuple containing the current and caller frame.
+            tuple: A tuple with the current and the outermost caller frame.
         """
         stack = inspect.stack()
         current_frame = stack[1]
@@ -78,33 +65,25 @@ class ModuleUtil:
 
     def get_info_module(self, caller_frame: inspect.FrameInfo) -> ModuleType | None:
         """
-        Retrieves the module object from a caller frame.
+        Resolve a module object from a given caller frame.
 
-        Parameters:
-        -----------
-        caller_frame : inspect.FrameInfo
-            The frame to analyze.
+        Args:
+            caller_frame (inspect.FrameInfo): The caller frame to analyze.
 
         Returns:
-        --------
-        ModuleType | None
-            The resolved module or None if not found.
+            ModuleType | None: The resolved module or None if not found.
         """
         return inspect.getmodule(caller_frame.frame)
 
     def load_module(self, info_module: ModuleType) -> ModuleType | None:
         """
-        Dynamically reload a module.
+        Reload a module dynamically from its file location.
 
-        Parameters:
-        -----------
-        info_module : ModuleType
-            The module reference.
+        Args:
+            info_module (ModuleType): The module to reload.
 
         Returns:
-        --------
-        ModuleType | None
-            The reloaded module.
+            ModuleType | None: The reloaded module or None if loading fails.
         """
         spec = importlib.util.spec_from_file_location(info_module.__name__, info_module.__file__)
         if spec and spec.loader:
@@ -116,12 +95,10 @@ class ModuleUtil:
 
     def unload_module(self, module: ModuleType):
         """
-        Removes a module from memory.
+        Unload a module from sys.modules and globals.
 
-        Parameters:
-        -----------
-        module : ModuleType
-            The module to unload.
+        Args:
+            module (ModuleType): The module to unload.
         """
         module_name = module.__name__
         if module_name in sys.modules:
@@ -130,16 +107,13 @@ class ModuleUtil:
 
     def extract_version(self, info_module: ModuleType) -> str | None:
         """
-        Retrieves version metadata for the module.
+        Attempt to retrieve the version string from a module.
 
-        Parameters:
-        -----------
-        info_module : ModuleType
+        Args:
+            info_module (ModuleType): The target module.
 
         Returns:
-        --------
-        str | None
-            The version string if found.
+            str | None: Version string if found, otherwise None.
         """
         if hasattr(info_module, '__version__'):
             return info_module.__version__
@@ -150,7 +124,13 @@ class ModuleUtil:
 
     def extract_annotation(self, annotation) -> Optional[str]:
         """
-        Converts annotations to string format for validation.
+        Convert a type annotation object into a string representation.
+
+        Args:
+            annotation: The annotation object to convert.
+
+        Returns:
+            Optional[str]: The extracted annotation string or None.
         """
         if annotation == inspect._empty or not annotation:
             return None
@@ -158,8 +138,17 @@ class ModuleUtil:
             return annotation.__name__
         return str(annotation)
 
-    def extract_variables(self, info_module: ModuleType) -> dict:
-        variables_info:List[VariableInfo] = []
+    def extract_variables(self, info_module: ModuleType) -> List[VariableInfo]:
+        """
+        Extract top-level variable definitions from a module.
+
+        Args:
+            info_module (ModuleType): The module to analyze.
+
+        Returns:
+            List[VariableInfo]: List of variable metadata.
+        """
+        variables_info: List[VariableInfo] = []
         for name, value in inspect.getmembers(info_module):
             if not name.startswith('__') and not inspect.ismodule(value) and not inspect.isfunction(value) and not inspect.isclass(value):
                 annotation = self.extract_annotation(type(value))
@@ -168,11 +157,13 @@ class ModuleUtil:
 
     def extract_functions(self, info_module: ModuleType) -> List[FunctionInfo]:
         """
-        Extracts function definitions from the module.
+        Extract all functions defined at the top level of the module.
+
+        Args:
+            info_module (ModuleType): The target module.
 
         Returns:
-        --------
-        List[FunctionInfo]
+            List[FunctionInfo]: Function metadata extracted from the module.
         """
         functions_info: List[FunctionInfo] = []
         for name, obj in inspect.getmembers(info_module, inspect.isfunction):
@@ -182,7 +173,14 @@ class ModuleUtil:
 
     def _extract_function(self, name: str, obj: FunctionType) -> FunctionInfo:
         """
-        Builds metadata for a function.
+        Build structured metadata for a function.
+
+        Args:
+            name (str): Function name.
+            obj (FunctionType): Function object.
+
+        Returns:
+            FunctionInfo: Extracted function metadata.
         """
         return FunctionInfo(
             name,
@@ -192,7 +190,13 @@ class ModuleUtil:
 
     def _extract_arguments(self, obj: FunctionType) -> List[ArgumentInfo]:
         """
-        Retrieves argument names and annotations.
+        Extract arguments from a function's signature.
+
+        Args:
+            obj (FunctionType): Function object.
+
+        Returns:
+            List[ArgumentInfo]: List of function argument metadata.
         """
         args = []
         for name, param in inspect.signature(obj).parameters.items():
@@ -202,7 +206,13 @@ class ModuleUtil:
 
     def extract_methods(self, cls_obj) -> List[FunctionInfo]:
         """
-        Extracts all method definitions from a class.
+        Extract method definitions from a class object.
+
+        Args:
+            cls_obj: The class to inspect.
+
+        Returns:
+            List[FunctionInfo]: Extracted method metadata.
         """
         methods: List[FunctionInfo] = []
         for name, obj in inspect.getmembers(cls_obj, inspect.isfunction):
@@ -212,7 +222,14 @@ class ModuleUtil:
 
     def extract_attributes(self, cls_obj, info_module: ModuleType) -> List[AttributeInfo]:
         """
-        Extracts class-level and instance-level attributes.
+        Extract both class-level and instance-level attributes.
+
+        Args:
+            cls_obj: The class to analyze.
+            info_module (ModuleType): The module containing the class.
+
+        Returns:
+            List[AttributeInfo]: List of extracted attributes.
         """
         attributes: List[AttributeInfo] = []
         annotations = getattr(cls_obj, '__annotations__', {})
@@ -243,11 +260,13 @@ class ModuleUtil:
 
     def extract_classes(self, info_module: ModuleType) -> List[ClassInfo]:
         """
-        Extracts class definitions from the module.
+        Extract all class definitions from a module.
+
+        Args:
+            info_module (ModuleType): The module to inspect.
 
         Returns:
-        --------
-        List[ClassInfo]
+            List[ClassInfo]: Metadata about the module’s classes.
         """
         classes = []
         for name, cls in inspect.getmembers(info_module, inspect.isclass):
@@ -257,8 +276,16 @@ class ModuleUtil:
             classes.append(ClassInfo(name, attributes, methods, superclasses))
         return classes
 
-
     def extract_superclasses(self, cls) -> List[ClassInfo]:
+        """
+        Extract base classes for a given class, recursively.
+
+        Args:
+            cls: The class whose base classes are being extracted.
+
+        Returns:
+            List[ClassInfo]: Metadata for each superclass.
+        """
         superclasses = []
         for base in cls.__bases__:
             if base.__name__ == "object":
@@ -273,5 +300,3 @@ class ModuleUtil:
                 []
             ))
         return superclasses
-
-

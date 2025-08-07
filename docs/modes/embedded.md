@@ -70,6 +70,5 @@ Use this mode when:
 
 ## Learn more
 
-- [→ CLI Mode](cli.md)
-- [→ Contract syntax](../contracts/syntax.md)
-- [→ Error types](../errors/index.md)
+- [Contract syntax](../contracts/syntax.md)
+- [Contract violations](../errors/contract-violations.md)
