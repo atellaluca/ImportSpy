@@ -6,7 +6,7 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?branch=main)](https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml)
 [![Docs](https://img.shields.io/readthedocs/importspy)](https://importspy.readthedocs.io/)
 
-![ImportSpy banner](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-banner_100px.png)
+![ImportSpy banner](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-banner_500px.png)
 
 **Runtime contract validation for Python imports.**  
 _Enforce structure. Block invalid usage. Stay safe at runtime._
