@@ -137,7 +137,7 @@ Full documentation is available at:
 
 Here are some useful entry points:
 
-- 🧠 **[How ImportSpy works](https://atellaluca.github.io/ImportSpy/overview/how-it-works/)**  
+- 🧠 **[How ImportSpy works](https://atellaluca.github.io/ImportSpy/intro/overview/)**  
   A high-level overview of the validation lifecycle, contract structure, and runtime behavior.
 
 - ⚙️ **[SpyModel architecture](https://atellaluca.github.io/ImportSpy/advanced/spymodel/)**  
