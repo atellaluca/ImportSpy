@@ -29,7 +29,7 @@ import sys
 import importlib.metadata
 import logging
 from types import ModuleType, FunctionType
-from typing import List, Optional
+from typing import List, Optional, Any
 from collections import namedtuple
 
 logger = logging.getLogger(__name__)
@@ -122,7 +122,7 @@ class ModuleUtil:
         except importlib.metadata.PackageNotFoundError:
             return None
 
-    def extract_annotation(self, annotation) -> Optional[str]:
+    def extract_annotation(self, annotation:Any) -> Optional[str]:
         """
         Convert a type annotation object into a string representation.
 
@@ -204,7 +204,7 @@ class ModuleUtil:
             args.append(ArgumentInfo(name=name, annotation=self.extract_annotation(param.annotation), value=value))
         return args
 
-    def extract_methods(self, cls_obj) -> List[FunctionInfo]:
+    def extract_methods(self, cls_obj:Any) -> List[FunctionInfo]:
         """
         Extract method definitions from a class object.
 
@@ -220,7 +220,7 @@ class ModuleUtil:
                 methods.append(self._extract_function(name, obj))
         return methods
 
-    def extract_attributes(self, cls_obj, info_module: ModuleType) -> List[AttributeInfo]:
+    def extract_attributes(self, cls_obj:Any, info_module: ModuleType) -> List[AttributeInfo]:
         """
         Extract both class-level and instance-level attributes.
 
@@ -276,7 +276,7 @@ class ModuleUtil:
             classes.append(ClassInfo(name, attributes, methods, superclasses))
         return classes
 
-    def extract_superclasses(self, cls) -> List[ClassInfo]:
+    def extract_superclasses(self, cls:Any) -> List[ClassInfo]:
         """
         Extract base classes for a given class, recursively.
 
