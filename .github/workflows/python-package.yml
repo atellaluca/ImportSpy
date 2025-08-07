@@ -46,3 +46,7 @@ jobs:
     - name: Build docs with MkDocs
       run: |
         poetry run mkdocs build --strict
+
+    - name: Push docs on gh-pages branch
+      run: |
+        poetry run mkdocs gh-deploy --force
