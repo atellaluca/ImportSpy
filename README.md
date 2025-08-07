@@ -2,6 +2,7 @@
 
 ![License](https://img.shields.io/github/license/atellaluca/importspy)
 [![PyPI Version](https://img.shields.io/pypi/v/importspy)](https://pypi.org/project/importspy/)
+[![Docs](https://img.shields.io/badge/docs-online-blue)](https://atellaluca.github.io/ImportSpy/)
 ![Python Versions](https://img.shields.io/pypi/pyversions/importspy)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?branch=main)](https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml)
 
