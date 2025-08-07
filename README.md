@@ -146,13 +146,13 @@ Here are some useful entry points:
 - 🧪 **[Violation system](https://atellaluca.github.io/ImportSpy/advanced/violations/)**  
   Learn how ImportSpy reports context-aware, structured errors on invalid imports.
 
-- 🚀 **[CLI usage](https://atellaluca.github.io/ImportSpy/usage/cli/)**  
+- 🚀 **[CLI usage](https://atellaluca.github.io/ImportSpy/modes/cli/)**  
   Run contract validation in CI/CD pipelines or pre-deploy checks with the CLI interface.
 
-- 🛠 **[Embedded usage](https://atellaluca.github.io/ImportSpy/usage/embedded/)**  
+- 🛠 **[Embedded usage](https://atellaluca.github.io/ImportSpy/modes/embedded/)**  
   Use ImportSpy directly inside a module to protect it from being imported in unsupported contexts.
 
-- 📄 **[Writing import contracts](https://atellaluca.github.io/ImportSpy/guides/writing-contracts/)**  
+- 📄 **[Writing import contracts](https://atellaluca.github.io/ImportSpy/contracts/syntax/)**  
   Guide to authoring `.yml` contracts: syntax, best practices, and validation patterns.
 
 ---
