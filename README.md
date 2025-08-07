@@ -6,7 +6,7 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?branch=main)](https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml)
 [![Docs](https://img.shields.io/readthedocs/importspy)](https://importspy.readthedocs.io/)
 
-![ImportSpy banner](./assets/importspy-banner.png)
+![ImportSpy banner](https://github.com/atellaluca/ImportSpy/docs/assets/importspy-banner.png)
 
 **Runtime contract validation for Python imports.**  
 _Enforce structure. Block invalid usage. Stay safe at runtime._
@@ -48,7 +48,7 @@ pip install importspy
 
 ## 📐 Architecture
 
-![SpyModel UML](./assets/importspy-spy-model-architecture.png)
+![SpyModel UML](https://github.com/atellaluca/ImportSpy/docs/assets/importspy-spy-model-architecture.png)
 
 ImportSpy is powered by a layered introspection model (`SpyModel`), which captures:
 
@@ -93,7 +93,7 @@ caller = Spy().importspy(filepath="spymodel.yml")
 caller.Plugin().run()
 ```
 
-![Embedded mode](./assets/importspy-embedded-mode.png)
+![Embedded mode](https://github.com/atellaluca/ImportSpy/docs/assets/importspy-embedded-mode.png)
 
 ---
 
@@ -103,7 +103,7 @@ caller.Plugin().run()
 importspy -s spymodel.yml -l DEBUG path/to/module.py
 ```
 
-![CLI mode](./assets/importspy-works.png)
+![CLI mode](https://github.com/atellaluca/ImportSpy/docs/assets/importspy-works.png)
 
 ---
 
@@ -175,4 +175,4 @@ to how, when, and where modules are imported.
 ## 📜 License
 
 MIT © 2024 – Luca Atella  
-![ImportSpy logo](./assets/importspy-logo.png)
+![ImportSpy logo](https://github.com/atellaluca/ImportSpy/docs/assets/importspy-logo.png)
