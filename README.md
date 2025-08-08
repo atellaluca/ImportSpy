@@ -132,11 +132,28 @@ importspy -s spymodel.yml -l DEBUG path/to/module.py
 
 ## 📘 Documentation
 
-- **Full docs** → [importspy.readthedocs.io](https://importspy.readthedocs.io)  
-- [Quickstart](https://importspy.readthedocs.io/en/latest/intro/quickstart.html)  
-- [Contract syntax](https://importspy.readthedocs.io/en/latest/contracts/syntax.html)  
-- [Violation system](https://importspy.readthedocs.io/en/latest/advanced/violations.html)  
-- [API Reference](https://importspy.readthedocs.io/en/latest/api-reference.html)  
+Full documentation is available at:  
+👉 **[https://atellaluca.github.io/ImportSpy/](https://atellaluca.github.io/ImportSpy/)**
+
+Here are some useful entry points:
+
+- 🧠 **[How ImportSpy works](https://atellaluca.github.io/ImportSpy/intro/overview/)**  
+  A high-level overview of the validation lifecycle, contract structure, and runtime behavior.
+
+- ⚙️ **[SpyModel architecture](https://atellaluca.github.io/ImportSpy/advanced/spymodel/)**  
+  Deep dive into the declarative model that describes runtime, environment, and module contracts.
+
+- 🧪 **[Violation system](https://atellaluca.github.io/ImportSpy/advanced/violations/)**  
+  Learn how ImportSpy reports context-aware, structured errors on invalid imports.
+
+- 🚀 **[CLI usage](https://atellaluca.github.io/ImportSpy/modes/cli/)**  
+  Run contract validation in CI/CD pipelines or pre-deploy checks with the CLI interface.
+
+- 🛠 **[Embedded usage](https://atellaluca.github.io/ImportSpy/modes/embedded/)**  
+  Use ImportSpy directly inside a module to protect it from being imported in unsupported contexts.
+
+- 📄 **[Writing import contracts](https://atellaluca.github.io/ImportSpy/contracts/syntax/)**  
+  Guide to authoring `.yml` contracts: syntax, best practices, and validation patterns.
 
 ---
 
