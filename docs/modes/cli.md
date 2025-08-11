@@ -31,14 +31,26 @@ importspy extensions.py -s spymodel.yml -l WARNING
 
 ### CLI options
 
-+-----------------------------------------------------------------------------+
-| Flag               | Description                                            |
-|--------------------|--------------------------------------------------------|
-| `-s, --spymodel`   | Path to the import contract `.yml` file                |
-| `-l, --log-level`  | Logging verbosity: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
-| `-v, --version`    | Show ImportSpy version                                 |
-| `--help`           | Show help message and exit                             |
-+-----------------------------------------------------------------------------+
+```bash
+$ importspy --help
+Usage: importspy [OPTIONS] [MODULEPATH]
+
+Validates a Python module against a YAML-defined SpyModel contract.
+
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│   modulepath      [MODULEPATH]  Path to the Python module to load and validate.                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --version             -v                                  Show the version and exit.                              │
+│ --spymodel            -s      TEXT                        Path to the import contract file (.yml).                │
+│                                                           [default: spymodel.yml]                                 │
+│ --log-level           -l      [DEBUG|INFO|WARNING|ERROR]  Log level for output verbosity. [default: None]         │
+│ --install-completion                                      Install completion for the current shell.               │
+│ --show-completion                                         Show completion for the current shell, to copy it or    │
+│                                                           customize the installation.                             │
+│ --help                                                    Show this message and exit.                             |
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
 ---
 
 ## Example project
