@@ -40,13 +40,13 @@ external_module_compliance/
 === "package.py"
 
 ```python
---8<-- "examples/plugin_based_architecture/external_module_compliance/package.py"
+--8<-- "examples/plugin_based_architecture/external_module_compliance/package.py "
 ```
 
 === "extensions.py"
 
 ```python
---8<-- "examples/plugin_based_architecture/external_module_compliance/extensions.py"
+--8<-- "examples/plugin_based_architecture/external_module_compliance/extension.py"
 ```
 
 === "spymodel.yml"

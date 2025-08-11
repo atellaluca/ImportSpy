@@ -58,7 +58,7 @@ pipeline_validation/
 === "extensions.py"
 
 ```python
---8<-- "examples/plugin_based_architecture/pipeline_validation/extensions.py"
+--8<-- "examples/plugin_based_architecture/pipeline_validation/extension.py"
 ```
 
 === "spymodel.yml"
