@@ -5,12 +5,6 @@ Provides a lightweight utility for querying the system's hardware architecture.
 This module is used by ImportSpy to enforce architecture-specific constraints
 defined in import contracts (e.g., allowing a plugin only on x86_64 or arm64).
 It ensures that module imports are aligned with the intended deployment environment.
-
-Example:
-    >>> from importspy.utilities.runtime_util import RuntimeUtil
-    >>> runtime = RuntimeUtil()
-    >>> runtime.extract_arch()
-    'x86_64'
 """
 
 import logging
@@ -40,7 +34,7 @@ class RuntimeUtil:
             str: The system's hardware architecture.
         
         Example:
-            >>> RuntimeUtil().extract_arch()
-            'arm64'
+            RuntimeUtil().extract_arch()
+            > Output: 'arm64'
         """
         return platform.machine()

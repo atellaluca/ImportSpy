@@ -61,20 +61,20 @@ class Spy:
 
     Attributes:
     -----------
+
     logger : logging.Logger
         Structured logger for validation diagnostics.
 
-    parser : Parser
+    parser : Parser 
         Parser used to load import contracts (defaults to YAML).
+        
     """
 
     def __init__(self):
         """
         Initialize the Spy instance.
 
-        Sets up:
-        - a dedicated logger
-        - the default YAML parser
+        Sets up a dedicated logger and the default YAML parser
         """
         self.logger = LogManager().get_logger(self.__class__.__name__)
         self.parser: Parser = YamlParser()
@@ -91,6 +91,7 @@ class Spy:
 
         Parameters:
         -----------
+
         filepath : Optional[str]
             Path to the `.yml` import contract.
 
@@ -189,6 +190,7 @@ class Spy:
 
         Returns:
         --------
+        
         ModuleType
             The inferred external module.
 

@@ -11,13 +11,13 @@ Features:
     - Retrieves all environment variables as a list of structured objects.
 
 Example:
-    >>> from importspy.utilities.system_util import SystemUtil
-    >>> util = SystemUtil()
-    >>> util.extract_os()
+    from importspy.utilities.system_util import SystemUtil
+    util = SystemUtil()
+    util.extract_os()
     'linux'
-    >>> envs = util.extract_envs()
-    >>> envs[0]
-    VariableInfo(name='PATH', annotation=None, value='/usr/bin')
+    envs = util.extract_envs()
+    envs[0]
+    > Output: VariableInfo(name='PATH', annotation=None, value='/usr/bin')
 """
 
 import os
@@ -55,8 +55,8 @@ class SystemUtil:
             str: The normalized operating system name (e.g., "linux", "windows").
 
         Example:
-            >>> SystemUtil().extract_os()
-            'darwin'
+            SystemUtil().extract_os()
+            > Output 'darwin'
         """
         return platform.system().lower()
 
@@ -72,8 +72,8 @@ class SystemUtil:
             in the current process environment.
 
         Example:
-            >>> envs = SystemUtil().extract_envs()
-            >>> envs[0]
-            VariableInfo(name='PATH', annotation=None, value='/usr/bin')
+            envs = SystemUtil().extract_envs()
+            envs[0]
+            > Output: VariableInfo(name='PATH', annotation=None, value='/usr/bin')
         """
         return [VariableInfo(name, None, value) for name, value in os.environ.items()]

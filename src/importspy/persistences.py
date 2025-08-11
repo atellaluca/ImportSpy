@@ -32,6 +32,7 @@ class Parser(ABC):
 
         Parameters:
         -----------
+
         data : dict
             Dictionary containing the contract structure.
 
@@ -47,11 +48,13 @@ class Parser(ABC):
 
         Parameters:
         -----------
+
         filepath : str
             Path to the contract file on disk.
 
         Returns:
         --------
+
         dict
             Parsed contract data.
         """
@@ -71,6 +74,7 @@ class PersistenceError(Exception):
 
         Parameters:
         -----------
+
         msg : str
             Explanation of the failure.
         """
@@ -92,6 +96,7 @@ def handle_persistence_error(func):
 
     Returns:
     --------
+
     Callable
         A wrapped version that raises `PersistenceError` on failure.
     """
@@ -141,6 +146,7 @@ class YamlParser(Parser):
 
         Parameters:
         -----------
+
         data : dict
             Contract structure.
 
@@ -157,6 +163,7 @@ class YamlParser(Parser):
 
         Parameters:
         -----------
+        
         filepath : str
             Path to the contract file.
 

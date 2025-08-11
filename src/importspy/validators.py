@@ -10,15 +10,6 @@ If mismatches or missing elements are detected, specialized `ContractViolation`
 objects raise informative `ValueError` exceptions enriched with context bundles.
 
 Used both in embedded runtime validation and CLI mode.
-
-Validators:
-    - RuntimeValidator
-    - SystemValidator
-    - PythonValidator
-    - ModuleValidator
-    - ClassValidator
-    - FunctionValidator
-    - VariableValidator
 """
 
 from typing import List

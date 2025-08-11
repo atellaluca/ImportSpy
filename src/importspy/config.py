@@ -7,13 +7,6 @@ for validating compatibility and structural expectations declared in
 SpyModel contracts. These values represent the officially supported
 CPU architectures, operating systems, Python interpreters, version targets,
 class attribute types, and accepted type annotations.
-
-Example:
-    >>> from importspy.config import Config
-    >>> Config.ARCH_X86_64
-    'x86_64'
-    >>> Config.INTERPRETER_CPYTHON
-    'CPython'
 """
 
 class Config:

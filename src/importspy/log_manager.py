@@ -10,13 +10,6 @@ line number, and function.
 
 Used in ImportSpy to provide high-fidelity logs during validation steps,
 contract resolution, and runtime introspection.
-
-Example:
-    >>> from importspy.log_manager import LogManager
-    >>> log_manager = LogManager()
-    >>> log_manager.configure()
-    >>> logger = log_manager.get_logger("importspy.test")
-    >>> logger.info("Validation started.")
 """
 
 import logging

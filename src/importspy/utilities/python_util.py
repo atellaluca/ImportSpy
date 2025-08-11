@@ -9,12 +9,12 @@ This includes checks for specific Python versions and interpreter families
 (CPython, PyPy, IronPython, etc.).
 
 Example:
-    >>> from importspy.utilities.python_util import PythonUtil
-    >>> util = PythonUtil()
-    >>> util.extract_python_version()
-    '3.12.0'
-    >>> util.extract_python_implementation()
-    'CPython'
+    from importspy.utilities.python_util import PythonUtil
+    util = PythonUtil()
+    util.extract_python_version()
+    > Output '3.12.0'
+    util.extract_python_implementation()
+    > Output: 'CPython'
 """
 
 import logging
@@ -42,8 +42,8 @@ class PythonUtil:
             str: The Python version string (e.g., "3.11.4").
         
         Example:
-            >>> PythonUtil().extract_python_version()
-            '3.11.4'
+            PythonUtil().extract_python_version()
+            > Output: '3.11.4'
         """
         return platform.python_version()
 
@@ -58,7 +58,7 @@ class PythonUtil:
             str: The interpreter implementation (e.g., "CPython").
         
         Example:
-            >>> PythonUtil().extract_python_implementation()
-            'CPython'
+            PythonUtil().extract_python_implementation()
+            > Output: 'CPython'
         """
         return platform.python_implementation()
