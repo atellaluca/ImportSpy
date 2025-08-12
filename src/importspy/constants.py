@@ -106,6 +106,7 @@ class Errors:
     SOLUTION_KEY = "solution"
     SCOPE_VARIABLE = "variable"
     SCOPE_ARGUMENT = "argument"
+    SCOPE_SECRETS = "secrets"
 
     ENTITY_MESSAGES = "entity"
     COLLECTIONS_MESSAGES = "collections"
@@ -190,6 +191,7 @@ class Errors:
     KEY_RUNTIMES_1 = "runtimes_1"
     KEY_SYSTEMS_1 = "systems_1"
     KEY_PYTHONS_1 = "pythons_1"
+    KEY_SYSTEM_1 = "system_1"
     KEY_PYTHON_1 = "python_1"
     KEY_ENVIRONMENT_1 = "environment_1"
     KEY_ENVIRONMENT_VARIABLE_NAME = "environment_variable_name"

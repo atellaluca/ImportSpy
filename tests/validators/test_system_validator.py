@@ -52,10 +52,6 @@ class TestSystemValidator:
         return bundle
     
     @pytest.fixture
-    def variable_contract(self, systembundle) -> VariableContractViolation:
-        return VariableContractViolation(Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, systembundle)
-    
-    @pytest.fixture
     def system_contract(self, systembundle) -> SystemContractViolation:
         return SystemContractViolation(Contexts.RUNTIME_CONTEXT, systembundle)
     

@@ -158,6 +158,29 @@ class SystemValidator:
                         bundle
                     )
                 )
+            
+            self._secrets_validator(environment_1, environment_2, bundle)
+        
+        def _secrets_validator(
+                self, 
+                environment_1:Environment,
+                environment_2:Environment,
+                bundle: Bundle
+                ):
+            if not environment_1.secrets:
+                return
+            if not environment_2.secrets:
+                raise ValueError(VariableContractViolation(Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            for secret_1 in environment_1.secrets:
+                if not secret_1 in environment_2.secrets:
+                    bundle[Errors.KEY_ENVIRONMENT_VARIABLE_NAME] = secret_1
+                    raise ValueError(VariableContractViolation(Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle).missing_error_handler(Errors.ENTITY_MESSAGES))
+            
+
+
+                
+
+
 
 
 class PythonValidator:

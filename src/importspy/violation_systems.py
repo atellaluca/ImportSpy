@@ -145,7 +145,6 @@ class SystemContractViolation(BaseContractViolation):
     def label(self, spec: str) -> str:
         return Errors.SYSTEM_LABEL_TEMPLATE[spec].format(**self.bundle)
 
-
 class PythonContractViolation(BaseContractViolation):
     """
     Contract violation handler for Python version and interpreter mismatches.
