@@ -4,7 +4,7 @@
 [![PyPI Version](https://img.shields.io/pypi/v/importspy)](https://pypi.org/project/importspy/)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://atellaluca.github.io/ImportSpy/)
 ![Python Versions](https://img.shields.io/pypi/pyversions/importspy)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?branch=main)](https://github.com/atellaluca/ImportSpy/actions/workflows/python-package.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/python-package.yml?branch=main)](https://github.com/atellaluca/ImportSpy/actions/workflows/ci.yml)
 
 **Context-aware contract validation for Python imports.**  
 _Enforce runtime, environment, and code structure before execution._
