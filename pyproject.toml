@@ -11,7 +11,7 @@ packages = [{include = "importspy", from = "src"}]
 python = "^3.10"
 pydantic = "^2.9.2"
 ruamel-yaml = "^0.18.10"
-typer = "^0.15.2"
+typer = ">=0.15.2,<0.17.0"
 pymdown-extensions = "^10.16.1"
 
 
