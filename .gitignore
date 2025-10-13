@@ -11,3 +11,4 @@ env.bak/
 venv.bak/
 .pytest_cache/
 /site/
+.DS_Store
