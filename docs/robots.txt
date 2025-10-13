@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /assets/
+Disallow: /_*
+Disallow: /search/
+Disallow: /404.html
+
+Sitemap: https://atellaluca.github.io/ImportSpy/sitemap.xml
