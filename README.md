@@ -13,183 +13,270 @@ _Enforce runtime, environment, and code structure before execution._
 
 ---
 
-## 🔍 What is ImportSpy?
+**ImportSpy** is a runtime contract enforcement engine for Python modules.
 
-**ImportSpy** lets your Python modules declare structured **import contracts** (via `.yml` files) to define:
+It allows developers to declare and verify **structural, contextual, and execution constraints** on imported modules, making explicit the architectural assumptions that in Python are normally implicit or unverified.
 
-- What environment they expect (OS, Python version, interpreter)
-- What structure they must follow (classes, methods, variables)
-- Who is allowed to import them
+It is designed for modular systems, plugin architectures, embedded environments, and integration-heavy platforms.
 
-If the contract is not met, **ImportSpy blocks the import** — ensuring safe and predictable runtime behavior.
+ImportSpy formalizes architectural assumptions as executable contracts, making long-lived Python systems evolvable and governable over time.
 
 ---
 
-## ✨ Key Features
+## Problem
 
-- ✅ Validate imports dynamically at runtime or via CLI  
-- ✅ Block incompatible usage of internal or critical modules  
-- ✅ Enforce module structure, arguments, annotations  
-- ✅ Context-aware: Python version, OS, architecture, interpreter  
-- ✅ Human-readable YAML contracts  
-- ✅ Clear, CI-friendly violation messages  
+In Python:
 
----
+- a module is considered valid as long as it *imports*
+- assumptions about shape, dependencies, and side effects remain informal
+- failures emerge late, often in production
+- there is no clear boundary between **API**, **runtime behavior**, and **execution context**
 
-## 📦 Installation
+This makes the evolution of systems fragile, especially when they are:
 
-```bash
-pip install importspy
-```
-
-> Requires Python 3.10+
+- plugin-based  
+- multi-tenant  
+- long-running  
+- dynamically loaded  
 
 ---
 
-## 📐 Architecture
+## Approach
 
-![SpyModel UML](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-spy-model-architecture.png)
+ImportSpy introduces a **declarative contract** associated with a module, expressed through a YAML-based DSL and compiled into a `SpyModel`.
 
-ImportSpy is powered by a layered introspection model (`SpyModel`), which captures:
+The contract is verified **at import time** or during controlled initialization, and can cover:
 
-- `Runtime`: CPU architecture  
-- `System`: OS and environment  
-- `Python`: interpreter and version  
-- `Module`: classes, functions, variables, annotations  
+- module structure  
+- required public symbols  
+- allowed or forbidden dependencies  
+- runtime invariants  
+- contextual constraints (e.g., environment, flags, configuration)  
 
-Each layer is validated against the corresponding section of your `.yml` contract.
+Contract failures are **deterministic, immediate, and diagnosable**.
 
 ---
 
-## 📜 Example Contract
+## Key Concepts
+
+### SpyModel
+
+A `SpyModel` describes what a module **must be** at a structural and contextual level, not just what it exposes as an API.
+
+It models the **minimum acceptable contract** of a module in terms of:
+
+- required attributes and callables  
+- expected types and signatures  
+- custom validation rules  
+- restrictions on secondary imports  
+- execution conditions and invariants  
+
+---
+
+### Runtime Contract
+
+The contract:
+
+- is verified at runtime  
+- is versionable  
+- is separated from the implementation  
+- acts as an **architectural boundary**  
+
+It allows explicit governance over which modules are allowed to enter the runtime.
+
+---
+
+### Controlled Import
+
+ImportSpy does not replace Python’s `import`, it **governs** it:
+
+- intercepts  
+- validates  
+- fails explicitly  
+
+Modules that do not satisfy their declared contract are prevented from loading.
+
+---
+
+## Example (Embedded Mode, YAML-first)
+
+ImportSpy contracts are authored as a declarative YAML file (typically `spymodel.yml`) and parsed into a `SpyModel` internally.
+
+### 1) Contract (`spymodel.yml`)
 
 ```yaml
 filename: plugin.py
+version: "1.2.3"
+
 variables:
-  - name: mode
+  - name: MODE
     value: production
     annotation: str
+
+functions:
+  - name: initialize
+    arguments:
+      - name: self
+      - name: config
+        annotation: dict
+    return_annotation: None
+
 classes:
   - name: Plugin
+    attributes:
+      - name: settings
+        value: default
+        annotation: dict
+        type: instance
     methods:
       - name: run
         arguments:
           - name: self
-          - name: data
-            annotation: dict
         return_annotation: None
+    superclasses:
+      - BasePlugin
+
+deployments:
+  - arch: x86_64
+    systems:
+      - os: linux
+        environment:
+          variables:
+            - name: IMPORTSPY_ENABLED
+              value: true
+              annotation: bool
+        pythons:
+          - version: "3.11"
+            interpreter: CPython
+            modules:
+              - filename: plugin.py
+                version: "1.2.3"
 ```
 
----
-
-## 🔧 Modes of Use
-
-### Embedded Mode – protect your own module
+### 2) Protected module (`plugin.py`)
 
 ```python
 from importspy import Spy
 
 caller = Spy().importspy(filepath="spymodel.yml")
+
+# Example: call something from the importer
 caller.Plugin().run()
 ```
 
-![Embedded mode](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-embedded-mode.png)
+### 3) Importer (`main.py`)
 
----
+```python
+class Plugin:
+    def run(self):
+        print("Plugin running")
 
-### CLI Mode – external validation in CI
-
-```bash
-importspy -s spymodel.yml -l DEBUG path/to/module.py
+import plugin
 ```
 
-![CLI mode](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-works.png)
+If the module does not satisfy the contract, the import fails with structured diagnostics.
 
 ---
 
-## 🧠 How It Works
+## Validation Model
 
-1. You define an import contract in `.yml`  
-2. At runtime or via CLI, ImportSpy inspects:  
-   - Who is importing the module  
-   - What the system/environment looks like  
-   - What the module structure provides  
-3. If validation fails → the import is blocked  
-4. If valid → the module runs safely  
+ImportSpy uses a **subset compatibility strategy**:
 
----
+- the declared contract defines a minimum acceptable execution context  
+- the runtime context must contain **at least** what the contract specifies  
+- extra capabilities are allowed  
+- missing or incompatible capabilities are rejected  
 
-## ✅ Tech Stack
-
-- [Pydantic 2.x](https://docs.pydantic.dev) – schema validation  
-- [Typer](https://typer.tiangolo.com) – CLI  
-- [ruamel.yaml](https://yaml.readthedocs.io/) – YAML support  
-- `inspect` + `sys` – runtime introspection  
-- [Poetry](https://python-poetry.org) – dependency management  
-- [Sphinx](https://www.sphinx-doc.org) + ReadTheDocs – documentation  
+This makes contracts **future-proof** and evolution-friendly by design.
 
 ---
 
-## 📘 Documentation
+## Typical Use Cases
 
-Full documentation is available at:  
-👉 **[https://atellaluca.github.io/ImportSpy/](https://atellaluca.github.io/ImportSpy/)**
+ImportSpy is suitable when you:
 
-Here are some useful entry points:
+- load third-party plugins  
+- execute partially trusted code  
+- maintain long-term compatibility  
+- govern runtime extensions  
+- want to make system invariants explicit  
 
-- 🧠 **[How ImportSpy works](https://atellaluca.github.io/ImportSpy/intro/overview/)**  
-  A high-level overview of the validation lifecycle, contract structure, and runtime behavior.
+Typical domains include:
 
-- ⚙️ **[SpyModel architecture](https://atellaluca.github.io/ImportSpy/advanced/spymodel/)**  
-  Deep dive into the declarative model that describes runtime, environment, and module contracts.
-
-- 🧪 **[Violation system](https://atellaluca.github.io/ImportSpy/advanced/violations/)**  
-  Learn how ImportSpy reports context-aware, structured errors on invalid imports.
-
-- 🚀 **[CLI usage](https://atellaluca.github.io/ImportSpy/modes/cli/)**  
-  Run contract validation in CI/CD pipelines or pre-deploy checks with the CLI interface.
-
-- 🛠 **[Embedded usage](https://atellaluca.github.io/ImportSpy/modes/embedded/)**  
-  Use ImportSpy directly inside a module to protect it from being imported in unsupported contexts.
-
-- 📄 **[Writing import contracts](https://atellaluca.github.io/ImportSpy/contracts/syntax/)**  
-  Guide to authoring `.yml` contracts: syntax, best practices, and validation patterns.
+- plugin engines  
+- industrial or embedded systems  
+- integration orchestrators  
+- long-lived modular backends  
 
 ---
 
-## 🚀 Ideal Use Cases
+## Design Principles
 
-- Plugin-based frameworks (e.g., CMS, CLI, IDE)  
-- CI/CD pipelines with strict integration  
-- Security-regulated environments (IoT, medical, fintech)  
-- Package maintainers enforcing internal boundaries  
-
----
-
-## 💡 Why It Matters
-
-Python’s flexibility comes at a cost:
-
-- Silent runtime mismatches  
-- Missing methods or classes  
-- Platform-dependent failures  
-- No enforcement over module consumers  
-
-**ImportSpy brings governance**  
-to how, when, and where modules are imported.
+- Contract-first, not feature-first  
+- Deterministic validation  
+- No hidden side effects  
+- Explicit and early failures  
+- Low runtime overhead  
+- No invasive dependencies  
 
 ---
 
-## ❤️ Contribute & Support
+## Project Status
 
-- ⭐ [Star on GitHub](https://github.com/atellaluca/ImportSpy)  
-- 🐛 [File issues or feature requests](https://github.com/atellaluca/ImportSpy/issues)  
-- 🤝 [Contribute](https://github.com/atellaluca/ImportSpy/blob/main/CONTRIBUTING.md)  
-- 💖 [Sponsor on GitHub](https://github.com/sponsors/atellaluca)  
+- Used in real-world modular systems  
+- Stable and conservative public API  
+- Focused on correctness and readability  
+- No framework lock-in  
+
+## Documentation
+
+The official and authoritative documentation for ImportSpy is available at:
+
+https://importspy.atellaluca.com
+
+It includes:
+
+- the complete contract format specification  
+- advanced validation semantics  
+- runtime contract patterns  
+- architectural rationale  
+- embedded and CLI usage modes  
+- structured error models  
+- real-world examples  
+
+The online documentation is the primary reference for all features and should be considered the source of truth for the current API and contract DSL.
 
 ---
 
-## 📜 License
+## Installation
 
-MIT © 2024 – Luca Atella  
+```bash
+pip install importspy
+```
+
+---
+
+## Intentional Limitations
+
+ImportSpy does **not**:
+
+- sandbox Python code  
+- replace OS-level security systems  
+- isolate processes  
+- promise protection against malicious code  
+
+It is a tool for **architectural governance**, not for hard security.
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Author
+
+Luca Atella
+
 ![ImportSpy logo](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-logo_100px.png)
