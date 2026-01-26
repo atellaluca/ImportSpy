@@ -275,8 +275,8 @@ The online documentation is the primary reference for all features and should be
 
 The architectural concepts behind ImportSpy have been shared publicly within technical communities as part of a broader effort to promote runtime governance patterns for modular and extensible Python systems.
 
-### ImportSpy: Quando i moduli Python sanno dire di no.  
-**GDG Basilicata Â· Flash Talks Arena**
+### ImportSpy: When Python modules know how to say no.  
+**GDG Basilicata · Flash Talks Arena**
 
 A community talk focused on *import-time contracts* and how modular systems can enforce architectural assumptions (Python version, OS, environment variables, and other runtime constraints) before executing non-conforming modules.
 
