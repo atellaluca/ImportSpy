@@ -286,7 +286,9 @@ This talk introduces ImportSpy not as a utility library, but as an architectural
 - Slides (PDF, Italian): [ImportSpy GDG Basilicata talk](https://profile.atellaluca.com/assets/talks/importspy-gdg-basilicata-it.pdf)  
 - Slides (PDF, English technical translation): [Runtime Contract Validation in Modular Python Systems](https://profile.atellaluca.com/assets/talks/importspy-runtime-contract-validation-en.pdf)  
 - Official GDG Basilicata event page: https://gdg.community.dev/events/details/google-gdg-basilicata-presents-flash-talks-arena/  
-- Community listing: https://www.pignolalug.it/iniziative/flash-talks-arena/
+- Community listing: 
+  - https://www.pignolalug.it/iniziative/flash-talks-arena/
+  - https://www.comincenter.it/google-dev-group-al-comincenter-due-incontri-tech-da-non-perdere/
 
 For a deeper architectural overview, see the full case study:  
 https://profile.atellaluca.com/case-studies/importspy/
