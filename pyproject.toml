@@ -18,7 +18,7 @@ pymdown-extensions = "^10.16.1"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
 mkdocs = "^1.6.1"
-mkdocstrings = {version = "^0.30.0", extras = ["python"]}
+mkdocstrings = {version = ">=0.30,<1.1", extras = ["python"]}
 mkdocs-material = "^9.6.16"
 ruff = "^0.12.10"
 mypy = "^1.17.1"
