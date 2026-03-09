@@ -69,7 +69,7 @@ app = typer.Typer()
 
 @app.command()
 @handle_validation_error
-def importspy(
+def check(
     version: Optional[bool] = typer.Option(
         None,
         "--version",
@@ -117,7 +117,7 @@ def importspy(
     sys.modules[module_name] = info_module
     spec.loader.exec_module(info_module)
 
-    Spy().importspy(
+    Spy().guard(
         filepath=spymodel_path,
         log_level=logging.getLevelNamesMapping()[log_level] if log_level else None,
         info_module=info_module

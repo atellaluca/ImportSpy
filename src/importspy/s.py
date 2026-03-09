@@ -19,9 +19,6 @@ This module is typically used as the entry point for programmatic validation wor
 from types import ModuleType
 from .models import (
     SpyModel,
-    Runtime,
-    Python,
-    Module
 )
 from .utilities.module_util import ModuleUtil
 from .validators import (
@@ -34,7 +31,6 @@ from .log_manager import LogManager
 from .persistences import Parser, YamlParser
 from typing import (
     Optional,
-    List
 )
 import logging
 from .violation_systems import (
@@ -71,54 +67,25 @@ class Spy:
     """
 
     def __init__(self):
-        """
-        Initialize the Spy instance.
-
-        Sets up a dedicated logger and the default YAML parser
-        """
         self.logger = LogManager().get_logger(self.__class__.__name__)
         self.parser: Parser = YamlParser()
 
-    def importspy(self,
+    def install():
+        pass
+
+    def uninstall():
+        pass
+
+    def guard(self,
                   filepath: Optional[str] = None,
                   log_level: Optional[int] = None,
                   info_module: Optional[ModuleType] = None) -> ModuleType:
-        """
-        Main entry point for validation.
-
-        Loads and validates a Python module against the contract defined in the given YAML file.
-        If no module is explicitly provided, introspects the call stack to infer the caller.
-
-        Parameters:
-        -----------
-
-        filepath : Optional[str]
-            Path to the `.yml` import contract.
-
-        log_level : Optional[int]
-            Log verbosity level (e.g., `logging.DEBUG`).
-
-        info_module : Optional[ModuleType]
-            The module to validate. If `None`, uses the importer via stack inspection.
-
-        Returns:
-        --------
-        ModuleType
-            The validated module.
-
-        Raises:
-        -------
-        RuntimeError
-            If logging setup fails.
-
-        ValueError
-            If recursion is detected (e.g., a module is validating itself).
-        """
+        
         self._configure_logging(log_level)
         spymodel: SpyModel = SpyModel(**self.parser.load(filepath=filepath))
         if not info_module:
             info_module = self._inspect_module()
-        return self._validate_module(spymodel, info_module)
+        return self._validate_inbound(spymodel, info_module)
 
     def _configure_logging(self, log_level: Optional[int] = None):
         """
@@ -137,7 +104,7 @@ class Spy:
             system_log_level = logging.getLogger().getEffectiveLevel()
             log_manager.configure(level=log_level or system_log_level)
 
-    def _validate_module(self, spymodel: SpyModel, info_module: ModuleType) -> ModuleType:
+    def _validate_inbound(self, spymodel: SpyModel, info_module: ModuleType) -> ModuleType:
         """
         Perform all validation steps against the loaded module.
 
@@ -206,3 +173,6 @@ class Spy:
         info_module = module_util.get_info_module(caller_frame)
         self.logger.debug(f"Inferred caller module: {info_module}")
         return info_module
+    
+    def _validate_outbound(self):
+        pass
