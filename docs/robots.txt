@@ -6,4 +6,4 @@ Disallow: /_*
 Disallow: /search/
 Disallow: /404.html
 
-Sitemap: https://atellaluca.github.io/ImportSpy/sitemap.xml
+Sitemap: https://importspy.atellaluca.com/sitemap.xml

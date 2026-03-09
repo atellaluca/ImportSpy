@@ -1,5 +1,7 @@
 site_name: ImportSpy
-site_url: https://atellaluca.github.io/ImportSpy/
+site_url: https://importspy.atellaluca.com
+site_description: A Python library for monitoring and validating module imports using YAML-based contracts.
+site_author: Luca Atella
 repo_url: https://github.com/atellaluca/importspy
 repo_name: importspy/importspy
 
