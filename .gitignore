@@ -12,3 +12,4 @@ venv.bak/
 .pytest_cache/
 /site/
 .DS_Store
+.mypy_cache/
