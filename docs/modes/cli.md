@@ -1,288 +1,156 @@
-# CLI Mode
+# Command-line admission
 
-ImportSpy can also be used **outside of runtime** to validate a Python module against a contract from the command line.
+`importspy check` inspects Python source and evaluates its admission policy
+without executing the target. The same command is suitable for local review and
+CI. An `ADMIT` result means the requested policy passed using available evidence;
+it does not execute the module or prove arbitrary Python code is safe.
 
-This is useful in **CI/CD pipelines**, **pre-commit hooks**, or manual validations — whenever you want to enforce import contracts without modifying the target module.
-
----
-
-## How it works
-
-In CLI Mode, you invoke the `importspy` command and provide:
-
-- The path to the **module** to validate
-- The path to the **YAML contract**
-- (Optional) a log level for output verbosity
-
-ImportSpy loads the module dynamically, builds its SpyModel, and compares it against the `.yml` contract.
-
-If the module is non-compliant, the command will:
-
-- Exit with a non-zero status
-- Print a structured error explaining the violation
-
----
-
-## Basic usage
+## First use
 
 ```bash
-importspy extensions.py -s spymodel.yml -l WARNING
+importspy --version
+importspy init plugin.py
+importspy check plugin.py
 ```
 
-### CLI options
+`init` creates `plugin.importspy.yml` beside the source. Review that file, add
+requirements appropriate to the project, and commit it with the source. It
+contains the filename and statically discovered function/class/method names.
+Installed external distributions receive editable approval entries; unresolved
+imports receive denial entries. These are starting policy choices, not security
+or provenance verification. Decorated or conditional declarations remain
+requirements that can fail as unknown until reviewed.
+
+Generation never executes the target and never overwrites a destination. Select
+a different filename with:
 
 ```bash
-$ importspy --help
-Usage: importspy [OPTIONS] [MODULEPATH]
-
-Validates a Python module against a YAML-defined SpyModel contract.
-
-╭─ Arguments ──────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│   modulepath      [MODULEPATH]  Path to the Python module to load and validate.                                  │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --version             -v                                  Show the version and exit.                              │
-│ --spymodel            -s      TEXT                        Path to the import contract file (.yml).                │
-│                                                           [default: spymodel.yml]                                 │
-│ --log-level           -l      [DEBUG|INFO|WARNING|ERROR]  Log level for output verbosity. [default: None]         │
-│ --install-completion                                      Install completion for the current shell.               │
-│ --show-completion                                         Show completion for the current shell, to copy it or    │
-│                                                           customize the installation.                             │
-│ --help                                                    Show this message and exit.                             |
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-```
----
-
-## Example project
-
-Let’s look at a full CLI-mode validation example.
-
-### Project structure
-
-```
-pipeline_validation/
-├── extensions.py
-└── spymodel.yml
+importspy init plugin.py --output contracts/plugin.yml
+importspy check plugin.py --contract contracts/plugin.yml
 ```
 
-### 📄 Source files
+The parent directory for `--output` must already exist.
 
-=== "extensions.py"
-
-```python
---8<-- "examples/plugin_based_architecture/pipeline_validation/extension.py"
-```
-
-=== "spymodel.yml"
-
-```yaml
---8<-- "examples/plugin_based_architecture/pipeline_validation/spymodel.yml"
-```
-
-### 🔍 Run validation
+## Check a module
 
 ```bash
-cd examples/plugin_based_architecture/pipeline_validation
-importspy extensions.py -s spymodel.yml -l WARNING
+importspy check plugin.py
+importspy check plugin.py --contract policy.yml
+importspy check plugin.py --project-root .
 ```
 
-If the module matches the contract, the command exits silently with `0`.  
-If it doesn't, you’ll see a structured error like:
+Without `--contract`, a matching `plugin.importspy.yml` sidecar is selected when
+present. Otherwise, the default policy applies: unresolved imports are denied;
+no application-specific structure, version, origin, or provenance requirement is
+inferred. A sidecar and an explicitly passed contract are not merged.
 
-```
-[Structure Violation] Missing required method 'get_bar' in class 'Foo'.
-```
+`--project-root` controls the project metadata and local dependency boundary.
+Otherwise, ImportSpy uses the nearest ancestor containing `pyproject.toml`, or
+the source directory when no project file is found.
 
----
+| Option | Meaning |
+| --- | --- |
+| `--contract`, `--spymodel`, `-s` | YAML policy to evaluate |
+| `--format`, `-f` | `human` (default), `json`, or `sarif` |
+| `--project-root` | Project root for dependency classification/declarations |
+| `--provider` | Explicitly select an installed evidence provider; repeatable |
+| `--allow-network` | Permit collection by selected providers declaring network use |
 
-## When to use CLI Mode
+The human report shows source/preflight status, the contract, dependency
+classifications, host runtime facts, evidence, violations, and the decision.
+Unknown structural requirements fail closed; `check` does not execute the target
+to resolve them. Invalid contracts are reported without claiming source preflight
+completed.
 
-!!! tip "Use CLI Mode for automation"
-    CLI Mode is ideal when you want to:
-    
-    - Validate modules **without changing their code**
-    - Integrate checks in **CI/CD pipelines**
-    - Enforce contracts in **external packages**
-    - Run **batch validations** over multiple files
+## Machine-readable reports
 
----
-
-# Import Contract Syntax
-
-An ImportSpy contract is a YAML file that describes:
-
-- The **structure** expected in the calling module (classes, methods, variables…)
-- The **runtime and system environment** where the module is allowed to run
-- The required **environment variables** and optional secrets
-
-This contract is parsed into a `SpyModel`, which is then compared against the actual runtime and importing module.
-
----
-
-## ✅ Overview
-
-Here’s a minimal but complete contract:
-
-```yaml
-filename: extension.py
-variables:
-  - name: engine
-    value: docker
-classes:
-  - name: Plugin
-    methods:
-      - name: run
-        arguments:
-          - name: self
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        pythons:
-          - version: 3.12
-            interpreter: CPython
+```bash
+importspy check plugin.py --format json > decision.json
+importspy check plugin.py --format sarif > results.sarif
 ```
 
----
+JSON serializes the underlying `AdmissionDecision`, including source/contract
+hashes, engine version, dependency inventory, evidence, violations, phases,
+timestamp, and whether the target executed. Rendering the same decision is
+stable; separate checks have their own timestamps.
 
-## 📄 filename
+SARIF 2.1.0 reports use the same violations and stable rule codes. Known source
+paths and positive line/column positions are included. Unknown positions are
+omitted. A passing policy can produce an empty SARIF result list.
 
-```yaml
-filename: extension.py
+## Check configured project subjects
+
+Directory checks use explicit configuration, avoiding recursive scans of virtual
+environments or unrelated files. Add entries to `pyproject.toml`:
+
+```toml
+[tool.importspy]
+subjects = [
+  { path = "plugins/formatter.py", contract = "contracts/formatter.yml" },
+  { path = "plugins/exporter.py", contract = "contracts/exporter.yml" },
+]
 ```
 
-- Optional.
-- Declares the filename of the module being validated.
-- Used for reference and filtering in multi-module declarations.
+Then run:
 
----
-
-## 🔣 variables
-
-```yaml
-variables:
-  - name: engine
-    value: docker
+```bash
+importspy check .
+importspy check . --format json
+importspy check . --format sarif
 ```
 
-- Declares top-level variables that must be present in the importing module.
-- Supports optional `annotation` (type hint).
+Each entry requires exactly `path` and `contract`. Paths are relative to the
+checked directory, and both must resolve inside that directory; escaping paths
+and symlinks are rejected. Directory checks do not accept `--contract`.
 
-```yaml
-  - name: debug
-    annotation: bool
-    value: true
+Project JSON is always an array, including a project with one subject. Project
+SARIF combines results into one run. The project exit status is the highest
+failure code encountered, so configuration/tool failures take precedence over
+ordinary policy denials.
+
+## Evidence providers
+
+```bash
+importspy check plugin.py --provider company-evidence
+importspy check plugin.py --provider company-evidence --allow-network
 ```
 
----
+The provider must be installed under the `importspy.evidence_providers` entry
+point group. Only explicitly selected providers load. Loading a provider executes
+trusted extension code, so review providers before selecting them.
 
-## 🧠 functions
+Without `--allow-network`, providers declaring `requires_network = True` are
+skipped and recorded as unavailable. The flag governs provider collection; it is
+not an operating-system network sandbox for plugin import or constructor code.
+Provider failures are recorded without exposing exception details. Missing
+required evidence denies admission, while unavailable evidence that no policy
+requires does not independently deny it. No provider or network access is needed
+for the core local admission workflow.
 
-```yaml
-functions:
-  - name: run
-    arguments:
-      - name: self
-      - name: config
-        annotation: dict
-    return_annotation: bool
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| `0` | Policy admitted the subject, or `init` completed successfully |
+| `1` | Admission denied, including unreadable/invalid source during `check` |
+| `2` | Invalid contract/configuration or CLI usage; invalid source/destination during `init` |
+| `3` | Unexpected tool failure; sensitive exception details are withheld |
+
+Use the exit status in CI rather than parsing human output. JSON and SARIF are
+written to standard output for `check`, including structured policy/configuration
+failures. Typer usage errors, such as an invalid command-line option, use its
+normal error output rather than an admission decision.
+
+## Migrating an existing invocation
+
+The installed command still accepts the 0.4 positional form:
+
+```bash
+importspy plugin.py -s spymodel.yml
 ```
 
-- Declares standalone functions expected in the importing module.
-- Use `arguments` and `return_annotation` for stricter typing.
-
----
-
-## 🧱 classes
-
-```yaml
-classes:
-  - name: Plugin
-    attributes:
-      - type: class
-        name: plugin_name
-        value: my_plugin
-    methods:
-      - name: run
-        arguments:
-          - name: self
-    superclasses:
-      - name: BasePlugin
-```
-
-Each class can declare:
-
-- `attributes`: divided by `type` (`class` or `instance`)
-- `methods`: each with `arguments` and optional `return_annotation`
-- `superclasses`: flat list of required superclass names
-
----
-
-## 🧭 deployments
-
-This section defines where the module is allowed to run.
-
-```yaml
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        pythons:
-          - version: 3.12.9
-            interpreter: CPython
-            modules:
-              - filename: extension.py
-                version: 1.0.0
-                variables:
-                  - name: author
-                    value: Luca Atella
-```
-
-### ✳️ Fields
-
-| Field        | Type     | Description                                |
-|--------------|----------|--------------------------------------------|
-| `arch`       | Enum     | e.g. `x86_64`, `arm64`                     |
-| `os`         | Enum     | `linux`, `windows`, `darwin`               |
-| `version`    | str      | Python version string (`3.12.4`)           |
-| `interpreter`| Enum     | `CPython`, `PyPy`, `IronPython`, etc.      |
-| `modules`    | list     | Repeats the structure declaration per module |
-
-This structure allows fine-grained targeting of supported environments.
-
----
-
-## 🌱 environment
-
-Environment variables and secrets expected on the system.
-
-```yaml
-environment:
-  variables:
-    - name: LOG_LEVEL
-      value: INFO
-    - name: DEBUG
-      annotation: bool
-      value: true
-  secrets:
-    - MY_SECRET_KEY
-    - DATABASE_PASSWORD
-```
-
-- `variables`: can define name, value, and annotation
-- `secrets`: only their presence is verified — values are never exposed
-
----
-
-## Notes
-
-- All fields are optional — contracts can be partial
-- Field order does not matter
-- Unknown fields are ignored with a warning (not an error)
-
----
-
-## Learn more
-
-- [Contract syntax](../contracts/syntax.md)
-- [Contract violations](../errors/contract-violations.md)
+It emits a deprecation message on standard error and routes to static `check`.
+Use `importspy check plugin.py -s spymodel.yml` for new integrations. The old
+`--log-level`/`-l` option is no longer supported. See the
+[migration guide](../migration-0.5.md) for Python API changes and the
+[contract syntax](../contracts/syntax.md) for policy fields.
