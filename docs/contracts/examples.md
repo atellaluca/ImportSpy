@@ -1,168 +1,132 @@
-# Contract Examples
+# Contract examples
 
-This page provides complete examples of import contracts (`.yml` files) supported by ImportSpy.
+These policies use the [0.5 contract syntax](syntax.md). Static checks leave the
+target unexecuted whether they admit or deny it.
 
-Each example demonstrates how to declare structural expectations and runtime constraints for a Python module using the SpyModel format.
+## Structural admission
 
----
+Save `plugin.py`:
 
-## Basic Module Contract
+```python
+MODE = "production"
 
-This example defines a simple module called `plugin.py` with one variable, one class, and one method.
+class Plugin:
+    kind = "payments"
+
+    def run(self, amount: int) -> str:
+        return str(amount)
+```
+
+Save `plugin.importspy.yml`:
 
 ```yaml
+schema_version: 1
 filename: plugin.py
 variables:
-  - name: mode
+  - name: MODE
     value: production
-    annotation: str
 classes:
   - name: Plugin
-    methods:
-      - name: run
-        arguments:
-          - name: self
-        return_annotation: None
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        pythons:
-          - version: 3.11
-            interpreter: CPython
-```
-
----
-
-## Function With Typed Arguments
-
-This contract describes a module where the `analyze` function requires two arguments with specific types.
-
-```yaml
-filename: analyzer.py
-functions:
-  - name: analyze
-    arguments:
-      - name: self
-      - name: data
-        annotation: list[str]
-      - name: verbose
-        annotation: bool
-    return_annotation: dict
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        pythons:
-          - version: 3.12
-            interpreter: CPython
-```
-
----
-
-## Class With Attributes and Methods
-
-This contract defines a module that exposes a `TaskManager` class with attributes and a method.
-
-```yaml
-filename: manager.py
-classes:
-  - name: TaskManager
     attributes:
-      - name: tasks
-        annotation: list[str]
-      - name: state
-        annotation: str
-    methods:
-      - name: reset
-        arguments:
-          - name: self
-        return_annotation: None
-deployments:
-  - arch: arm64
-    systems:
-      - os: darwin
-        environment:
-          variables:
-            - name: MODE
-              value: development
-              annotation: str
-        pythons:
-          - version: 3.11
-            interpreter: CPython
-```
-
----
-
-## Runtime-Only Validation
-
-This contract enforces only environmental and interpreter constraints — no structural validation.
-
-```yaml
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        pythons:
-          - version: 3.10
-            interpreter: CPython
-```
-
----
-
-## Multiple Deployments
-
-If your module supports multiple platforms, you can define multiple `deployments`.
-
-```yaml
-filename: plugin.py
-classes:
-  - name: Plugin
+      - name: kind
+        type: class
+        value: payments
     methods:
       - name: run
         arguments:
-          - name: self
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        pythons:
-          - version: 3.11
-            interpreter: CPython
-  - arch: arm64
-    systems:
-      - os: darwin
-        pythons:
-          - version: 3.12
-            interpreter: CPython
+          - name: amount
+            annotation: int
+        return_annotation: str
 ```
 
----
+`importspy check plugin.py` admits these source declarations. It does not call
+`run` or instantiate `Plugin`.
 
-## Using Environment Variables
-
-This example enforces that an environment variable is set and has a given type.
+## Host requirements
 
 ```yaml
-filename: checker.py
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        environment:
-          variables:
-            - name: DEBUG
-              value: "true"
-              annotation: str
-        pythons:
-          - version: 3.10
-            interpreter: CPython
+runtime:
+  python: ">=3.10"
+  os: [linux, darwin, windows]
+  implementation: [CPython]
+  environment:
+    APP_MODE: production
+    SERVICE_TOKEN: null
 ```
 
----
+Run in a host that satisfies the policy. The token is checked for presence;
+its value is not included in the report. Host inspection needs no target import.
 
-## Related Topics
+## Deny a dependency before its importer runs
 
-- [Contract Syntax](syntax.md)
-- [Violation System](../advanced/violations.md)
-- [SpyModel Architecture](../advanced/spymodel.md)
+```python
+import packaging
+import typer
+
+print("THIS MUST NOT RUN")
+```
+
+```yaml
+schema_version: 1
+dependencies:
+  packaging:
+    version: ">=24"
+  typer:
+    allowed: false
+```
+
+Checking this source with that policy returns DENY and exit code 1 without
+running the print statement. Both packages are dependencies of ImportSpy; the
+[quickstart](../intro/quickstart.md) supplies the complete invocation.
+
+## Require declared dependencies
+
+```yaml
+dependencies:
+  requests:
+    required: true
+    version: ">=2.32,<3"
+    declared: true
+dependency_options:
+  undeclared: deny
+  unresolved: deny
+```
+
+The source must import the distribution, it must be installed at a permitted
+version, and supported project metadata must declare it. Being installed only
+as a transitive dependency does not satisfy `declared: true`. An unknown
+declaration context also fails that requirement.
+
+## Restrict a VCS origin
+
+```yaml
+dependencies:
+  internal-payment-sdk:
+    origin:
+      type: vcs
+      repository: https://github.com/acme/payment-sdk
+      commit: "0123456789abcdef"
+    editable: false
+```
+
+This example is an origin policy template: substitute your distribution and
+revision. PEP 610 metadata must establish the required fields. It does not
+verify the artifact's cryptographic provenance.
+
+## Require external verification
+
+```yaml
+evidence_requirements:
+  - kind: distribution.provenance
+    subject: cryptography
+    provider: trusted-verifier
+    status: verified
+```
+
+The requirement fails until a selected provider supplies matching verified
+evidence. This is an integration boundary, not a bundled verifier. See
+[evidence](../evidence.md), [extensions](../extensions.md), and the
+[community roadmap](../community-roadmap.md).
+
+Executable scenarios and their requirements are maintained in the repository's
+[admission examples](https://github.com/atellaluca/ImportSpy/tree/main/examples/admission).

@@ -1,0 +1,7 @@
+schema_version: 1
+dependencies:
+  company-payment-sdk:
+    required: true
+    origin:
+      type: local
+    editable: false

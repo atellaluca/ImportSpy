@@ -1,0 +1,9 @@
+schema_version: 1
+dependencies:
+  packaging:
+    version: ">=24"
+evidence_requirements:
+  - kind: example.inventory
+    subject: dependencies
+    provider: example-inventory
+    status: observed

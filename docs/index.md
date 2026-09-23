@@ -1,134 +1,42 @@
 # ImportSpy
 
-**Context‑aware import validation for Python modules**
+**Policy-as-code admission for Python modules and dependencies.**
 
-ImportSpy is an open‑source Python library that brings structural and environmental awareness to Python’s import system.  
-It introduces a new concept: the **import contract** — a versioned, declarative `.yml` file that describes exactly how and where a module is allowed to be imported.
-
-This enables predictable, secure, and modular Python codebases, especially in complex or regulated environments.
-
----
-
-## What is an Import Contract?
-
-An import contract defines what a module expects from:
-
-- The importing environment: operating system, CPU architecture, Python version, interpreter type
-- Its internal structure: functions, classes, methods, arguments, annotations, variables
-- Optional runtime conditions: environment variables, base classes, or structural patterns
-
-If the context does not meet the declared conditions, ImportSpy blocks the import and raises a structured, human-readable error — before any runtime logic is executed.
-
----
-
-## Key Features
-
-- Declarative, YAML-based import contracts  
-- Embedded and CLI validation modes  
-- Structural enforcement: functions, classes, variables, method signatures  
-- Runtime checks: OS, architecture, Python version, interpreter  
-- Contract-driven plugin validation and safe extensibility  
-- CI/CD‑friendly error reporting  
-- Seamless integration with DevSecOps pipelines
-
----
-
-## Use Cases
-
-ImportSpy is designed for:
-
-- Plugin frameworks with strict interface enforcement  
-- Runtime protection against unsupported environments  
-- Early validation in CI/CD and regulated deployments  
-- Defensive boundaries between internal components  
-- Automated structural checks during deployment
-
----
-
-## Example: Embedded Mode
-
-```python
-from importspy import Spy
-
-caller = Spy().importspy(filepath="contracts/spymodel.yml")
-caller.MyPlugin().run()
-```
-
----
-
-## Example: CLI Mode
+ImportSpy inspects Python source, resolves its external dependencies, collects
+evidence, and evaluates policy before you choose to execute the module.
 
 ```bash
-importspy src/mymodule.py -s contracts/spymodel.yml --log-level DEBUG
+pip install importspy
+importspy init plugin.py
+# Review the generated plugin.importspy.yml.
+importspy check plugin.py
 ```
 
----
+A check never imports the target, including when the decision is ADMIT.
+The [quickstart](intro/quickstart.md) demonstrates a dependency denial that
+prevents a top-level print statement from running.
 
-## Project Structure
+## What admission evaluates
 
-ImportSpy is built around:
+| Layer | What it checks |
+| --- | --- |
+| Static preflight | Syntax, declarations, signatures, annotations, imports, and known literal values. |
+| Dependencies | Distribution identity, versions, declarations, origins, and editable installations. |
+| Host runtime | Python, OS, architecture, interpreter implementation, and environment requirements. |
+| Evidence | Facts from core and explicitly selected trusted providers. |
+| Policy | Consistent violations and an ADMIT or DENY decision. |
 
-- `SpyModel`: defines expected structure and runtime environment  
-- `Spy`: the engine that validates real vs declared conditions  
-- Violation system: structured, human‑readable error reporting
+Human, JSON, and SARIF output derive from the same decision. Required facts that
+cannot be established statically fail closed. Execution is a separate explicit
+library operation; runtime validators run after that execution.
 
----
+## Read next
 
-## Documentation Overview
+- [Quickstart](intro/quickstart.md) and [installation](intro/install.md).
+- [Contract syntax](contracts/syntax.md), [examples](contracts/examples.md), and [CLI](modes/cli.md).
+- [Dependency policy](dependencies.md), [static preflight](static-preflight.md), and [library usage](modes/embedded.md).
+- [Architecture](architecture.md), [extensions](extensions.md), and [API reference](api-reference.md).
+- [CI](ci.md), [security model](security-model.md), and [migration from 0.4](migration-0.5.md).
 
-### Get Started
-- [Quickstart](intro/quickstart.md)  
-- [Installation](intro/install.md)  
-- [Overview](intro/overview.md)
-
-### Modes of Operation
-- [Embedded Mode](modes/embedded.md)  
-- [CLI Mode](modes/cli.md)
-
-### Import Contracts
-- [Contract Syntax](contracts/syntax.md)  
-- [SpyModel Specification](advanced/spymodel.md)
-
-### Validation Engine
-- [Violation System](advanced/violations.md)  
-- [Contract Violations](errors/contract-violations.md)
-
-### Use Cases
-- [Plugin-based Architectures](use_cases/index.md)
-
-### API Reference
-- [API Docs](api-reference.md)
-
----
-
-## Architecture Diagram
-
-![SpyModel UML](assets/importspy-spy-model-architecture.png)
-
----
-
-## Why ImportSpy?
-
-Python’s import mechanism is flexible, but not context-aware.  
-ImportSpy adds a layer of governance and runtime validation, making your code more robust and secure.
-
-It’s ideal for:
-
-- Securing plugin boundaries  
-- Enforcing internal interfaces  
-- Preventing unsupported imports  
-- CI/CD enforcement of import assumptions  
-- Runtime compatibility in multi-environment systems
-
----
-
-## Support and Community
-
-If ImportSpy is useful in your infrastructure, consider:
-
-- [Starring the project on GitHub](https://github.com/atellaluca/ImportSpy)  
-- [Becoming a GitHub Sponsor](https://github.com/sponsors/atellaluca)
-
----
-
-> ImportSpy is more than a validator — it’s a contract of trust between Python modules.
+Core admission works offline without an account or telemetry. ImportSpy is not a
+sandbox or a vulnerability scanner: it enforces policy using available evidence.

@@ -1,74 +1,71 @@
-# Embedded Mode
+# Library admission and execution
 
-In Embedded Mode, ImportSpy is embedded directly into the module you want to protect.  
-When that module is imported, it inspects the runtime environment and the importing module.  
-If the context doesn't match the declared contract, the import fails with a structured error.
-
----
-
-## How it works
-
-By using `Spy().importspy(...)`, a protected module can validate:
-
-- The **runtime** (OS, Python version, architecture…)
-- The **caller module’s structure** (classes, methods, variables, annotations…)
-
-If validation passes, the module returns a reference to the caller.  
-If not, the import is blocked and an exception is raised (e.g. `ValueError` or custom error class).
-
----
-
-## Real-world example: plugin-based architecture
-
-Let’s walk through a complete example.  
-This simulates a plugin framework that wants to validate the structure of external plugins at import time.
-
-### Project structure
-
-```
-external_module_compliance/
-├── extensions.py          # The plugin (caller)
-├── package.py             # The protected framework
-├── plugin_interface.py    # Base interface for plugins
-└── spymodel.yml           # The import contract
-```
-
----
-
-### 🧩 Source files
-
-=== "package.py"
+Place admission in the application's loader, before it imports a candidate.
+`AdmissionEngine.check` inspects source and returns a decision without executing
+the target. The application chooses whether to proceed.
 
 ```python
---8<-- "examples/plugin_based_architecture/external_module_compliance/package.py "
+from pathlib import Path
+from importspy.domain import AdmissionRequest
+from importspy.engine import AdmissionEngine
+from importspy.reporters import HumanReporter
+
+request = AdmissionRequest(
+    subject=Path("plugin.py"),
+    contract=Path("plugin.importspy.yml"),
+)
+engine = AdmissionEngine()
+decision = engine.check(request)
+print(HumanReporter().render(decision))
 ```
 
-=== "extensions.py"
+Unlike CLI sidecar discovery, the Python request uses the contract path supplied
+by the caller. Omitting `contract` uses the default policy. Set `project_root`
+when project declaration metadata or local source resolution needs an explicit
+root.
+
+## Execute after fresh admission
 
 ```python
---8<-- "examples/plugin_based_architecture/external_module_compliance/extension.py"
+from importspy.engine import AdmissionDenied, ExecutionFailed
+
+try:
+    module, executed_decision = engine.load(request, name="admitted_plugin")
+except AdmissionDenied as error:
+    print(error.decision.decision, error.decision.target_executed)
+except ExecutionFailed as error:
+    print(error.decision.violations)
+else:
+    print(executed_decision.target_executed)
 ```
 
-=== "spymodel.yml"
+`load` repeats admission with refreshed dependency metadata and executes the
+exact source bytes it inspected. It does not accept an old decision as authority
+to execute changed source. It rejects a name already present in `sys.modules`.
+The loader does not modify `sys.path`; configure the application's normal import
+environment first. Package-relative imports require an appropriate qualified
+module name and an existing package context.
 
-```yaml
---8<-- "examples/plugin_based_architecture/external_module_compliance/spymodel.yml"
-```
+Execution runs arbitrary Python, including normal dependency imports. The
+loader does not recursively admit dependency source or freeze the host
+environment. Runtime validators supplied through `runtime_validators=(...)`
+run **after top-level execution**. A later failure removes the loader's module
+registration but cannot undo filesystem, network, or other effects.
 
----
+The [extension guide](../extensions.md) documents evidence providers, pure
+policy validators, and runtime validators. Network providers require explicit
+selection and opt-in; loading those providers itself runs trusted Python code.
 
-## When to use Embedded Mode
+## Deprecated embedded validation
 
-Use this mode when:
+`Spy.importspy` remains a runtime-only compatibility API in 0.5 and is scheduled
+for removal in 1.0. It emits `DeprecationWarning`, inspects an already loaded
+module, and returns the same object without reloading it.
 
-- You want to **protect a module** from being imported incorrectly
-- You’re building a **plugin system** and expect structural consistency from plugins
-- You want to **fail fast** in invalid environments
-- You need to enforce custom logic during `import` without modifying the caller
+Embedding `Spy` inside a module does not prevent its earlier top-level code from
+running. It cannot provide a pre-execution guarantee. New applications should
+use source admission in their loader; existing applications should follow
+[migration from 0.4](../migration-0.5.md).
 
----
-
-## Learn more
-
-- [Contract syntax](../contracts/syntax.md)
-- [Contract violations](../errors/contract-violations.md)
+See [static preflight](../static-preflight.md), [contract syntax](../contracts/syntax.md),
+and the [security model](../security-model.md) for the limits of admission.

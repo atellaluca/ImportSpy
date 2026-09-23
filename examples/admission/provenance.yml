@@ -1,0 +1,6 @@
+schema_version: 1
+dependencies:
+  packaging:
+    required: true
+    provenance:
+      required: true

@@ -1,0 +1,35 @@
+name: Integration or feature proposal
+description: Propose a provider, policy rule, reporter, or developer workflow.
+title: "proposal: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and intended workflow
+      description: Describe the admission decision a user needs to make and a concrete example.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Primary area
+      options:
+        - Evidence provider
+        - Dependency resolution
+        - Policy or structural validation
+        - Reporter or developer integration
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and trust boundary
+      description: Identify the data source, artifact identity binding, verification procedure, and unavailable or offline behavior where applicable.
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope and acceptance criteria
+      description: Include useful tests, compatibility concerns, and a reference to an existing roadmap item if relevant.
+    validations:
+      required: true

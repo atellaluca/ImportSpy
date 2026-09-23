@@ -1,95 +1,58 @@
-# Contract Violations
+# Understanding admission violations
 
-When an import contract is not satisfied, **ImportSpy** blocks the import and raises a detailed error message.  
-These violations are central to the library's purpose: enforcing predictable, secure, and valid module usage across Python runtimes.
+`check` returns an ADMIT or DENY decision without executing the target. It can
+report multiple policy violations together. Use stable codes from JSON or SARIF
+for automation rather than parsing human message text.
 
-## How Violations Work
-
-Every time a module is imported using ImportSpy (either in **embedded** or **CLI** mode), the system performs deep introspection and validation checks.
-
-If something does not match the declared contract (`.yml`), ImportSpy will:
-
-1. **Capture the context** (e.g., `MODULE`, `CLASS`, `RUNTIME`, etc.)
-2. **Identify the type** of error:
-   - `missing`: required element is absent
-   - `mismatch`: expected vs actual values differ
-   - `invalid`: unexpected or disallowed value found
-3. **Generate a structured error message** including:
-   - a human-readable message
-   - exact label of the failing entity
-   - possible solutions or corrective actions
-
-These violations are raised as `ValueError`, but contain detailed introspection metadata under the hood.
-
----
-
-## Error Categories
-
-ImportSpy organizes violations into **logical layers**, based on what is being validated:
-
-| Layer              | Validator Class         | Violation Raised                        |
-|-------------------|--------------------------|------------------------------------------|
-| Architecture/OS   | `RuntimeValidator`       | `RuntimeContractViolation`              |
-| OS / Environment  | `SystemValidator`        | `SystemContractViolation`               |
-| Python Interpreter| `PythonValidator`        | `PythonContractViolation`               |
-| Module File       | `ModuleValidator`        | `ModuleContractViolation`               |
-| Class Structure   | `ClassValidator`         | `ModuleContractViolation (CLASS_CONTEXT)` |
-| Functions         | `FunctionValidator`      | `FunctionContractViolation`             |
-| Variables / Args  | `VariableValidator`      | `VariableContractViolation`             |
-
-Each of these violations inherits from `BaseContractViolation`, which provides:
-- A consistent interface for labeling (`.label()`)
-- Templated messages for each category
-- A `Bundle` object used to inject dynamic context into the error
-
----
-
-## Error Message Anatomy
-
-A full ImportSpy violation message looks like this:
-
-```
-[MODULE] Expected variable `timeout: int` not found in `my_module.py`
-→ Please add the variable or update your contract.
+```bash
+importspy check plugin.py --contract policy.yml --format json
 ```
 
-Each message consists of:
-- `[CONTEXT]`: tells where the error occurred
-- **Label**: dynamically generated from the contract structure
-- **Expected/Actual**: shown for mismatch/invalid errors
-- **Solution**: human-readable advice from the YAML spec
+## Core codes
 
----
+| Code | Meaning | Next step |
+| --- | --- | --- |
+| `ISPY-S001` | Unreadable or invalid Python source | Check the path, encoding, syntax, and scope rules. |
+| `ISPY-S101` | Missing structural declaration | Add the required declaration or correct the contract. |
+| `ISPY-S102` | Structural value, annotation, filename, or version mismatch | Compare the reported facts with the requirement. |
+| `ISPY-S103` | Required structure remains unknown statically | Use inspectable declarations or explicitly redesign the runtime check. |
+| `ISPY-D101` | Dependency denied by policy | Remove the dependency or review the policy. |
+| `ISPY-D102` | Unresolved import | Check installations, import paths, and project-root configuration. |
+| `ISPY-D103` | Required dependency not observed | Import the required dependency or revise the requirement. |
+| `ISPY-D104` | Dependency version requirement failed | Install an allowed version and recheck. |
+| `ISPY-D105` | Declaration requirement failed or unknown | Correct supported project metadata and the selected project root. |
+| `ISPY-D106` | Origin requirement failed or unknown | Inspect PEP 610 metadata and the policy's origin fields. |
+| `ISPY-D107` | Editable-install requirement failed or unknown | Use an installation whose metadata establishes the required state. |
+| `ISPY-D108` | External distribution missing a policy entry | Review and add an explicit distribution rule. |
+| `ISPY-R101` | Host OS, architecture, or implementation denied | Use an allowed host or update the requirement. |
+| `ISPY-R102` | Host Python version denied | Use a permitted interpreter version. |
+| `ISPY-R103` | Environment or secret requirement failed | Supply the required host configuration; values stay redacted. |
+| `ISPY-R104` | No matching legacy deployment | Review the legacy architecture/system/Python alternatives. |
+| `ISPY-R201` | Target failed during explicit execution | Inspect the application failure; target effects may already have occurred. |
+| `ISPY-P101` | Required evidence unavailable or insufficient | Select a trusted provider and inspect verification/availability status. |
+| `ISPY-C101` | Invalid contract or configuration | Correct the configuration; the CLI exits with code 2. |
+| `ISPY-C199` | Admission tool failure | Report a minimal, redacted reproduction; the CLI exits with code 3. |
 
-## Debugging Tips
+Unknown facts are not successful checks. In particular, `ISPY-S103` does not
+cause ImportSpy to execute source to discover the answer. Unavailable evidence
+causes denial when a policy requires that evidence.
 
-- Use `-l DEBUG` when invoking ImportSpy via CLI to see exact comparison steps.
-- Violations are deterministic and reproducible. If one fails in CI, it will fail locally too.
-- You can inspect the violation context by capturing the `ValueError` and logging its message.
+## Reading a report
 
----
+A violation contains its code, category, severity, phase, subject, message, and
+optional location, expected/observed data, and remediation. Missing source
+locations are left absent. A decision also records dependency inventory,
+evidence status, hashes, host identity, and whether target execution occurred.
 
-## 📋 Contract Violation Table
+Warnings and notes do not cause denial by themselves. CLI exit codes are 0 for
+ADMIT, 1 for DENY, 2 for invalid configuration, and 3 for tool failure. A directory
+check reports all explicitly configured subjects; use the exit code as the
+aggregate outcome and inspect individual decisions for details.
 
-Below is a comprehensive list of all possible error messages emitted by ImportSpy:
+Compare the source hash, policy hash, host, project root, and installed versions
+when local and CI outcomes differ. Separate checks can observe different
+environments even though evaluation of the same facts is deterministic.
 
-| Category   | Context       | Error Message |
-|------------|---------------|---------------|
-| `missing`  | `runtime`     | The runtime `CPython 3.12` is declared but missing. Ensure it is properly defined and implemented. |
-|            | `environment` | The environment variable `DEBUG` is declared but missing. Ensure it is properly defined and implemented. |
-|            | `module`      | The variable `plugin_name` in module `extension.py` is declared but missing. Ensure it is properly defined and implemented. |
-|            | `class`       | The method `run` in class `Plugin` is declared but missing. Ensure it is properly defined and implemented. |
-| `mismatch` | `runtime`     | The runtime `CPython 3.12` does not match the expected value. Expected: `CPython 3.11`, Found: `CPython 3.12`. Check the value and update the contract or implementation accordingly. |
-|            | `environment` | The environment variable `LOG_LEVEL` does not match the expected value. Expected: `'INFO'`, Found: `'DEBUG'`. Check the value and update the contract or implementation accordingly. |
-|            | `class`       | The class attribute `engine` in class `Extension` does not match the expected value. Expected: `'docker'`, Found: `'podman'`. Check the value and update the contract or implementation accordingly. |
-| `invalid`  | `class`       | The argument `msg` of method `send` has an invalid value. Allowed values: `[str, None]`, Found: `42`. Update the value to one of the allowed options. |
-
-
----
-
-## Related Topics
-
-- [Contract Syntax](../contracts/syntax.md)
-- [Embedded Mode](../modes/embedded.md)
-- [CLI Mode](../modes/cli.md)
-- [SpyModel Architecture](../advanced/spymodel.md)
+The deprecated `Spy` validators still raise `ValueError` with legacy formatting.
+See [structured reporting](../advanced/violations.md),
+[CLI usage](../modes/cli.md), and [migration](../migration-0.5.md).

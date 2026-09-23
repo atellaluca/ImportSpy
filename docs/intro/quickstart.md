@@ -1,98 +1,72 @@
 # Quickstart
 
-This quickstart shows how to use **ImportSpy in Embedded Mode** to protect a Python module from being imported in an invalid context.
-
----
-
-## Step 1 — Install ImportSpy
-
-If you haven’t already:
+A static admission check tells you whether source satisfies your policy without
+running the target. Python 3.10 or newer is required.
 
 ```bash
 pip install importspy
 ```
 
----
+## Try a dependency denial
 
-## Step 2 — Create a contract (`spymodel.yml`)
+Save this as `plugin.py`:
 
-This file defines the conditions under which your module can be imported.  
-For example, it can require specific Python versions, operating systems, or structure in the calling module.
+```python
+import packaging
+import typer
+
+print("THIS MUST NOT RUN")
+```
+
+Both packages are installed with ImportSpy. Save `plugin.importspy.yml` beside it:
 
 ```yaml
-filename: plugin.py
-classes:
-  - name: Plugin
-    methods:
-      - name: run
-        arguments:
-          - name: self
-        return_annotation:
-deployments:
-  - arch: x86_64
-    systems:
-      - os: linux
-        pythons:
-          - version: 3.12
-            interpreter: CPython
+schema_version: 1
+dependencies:
+  packaging:
+    version: ">=24"
+  typer:
+    allowed: false
 ```
 
-Save this file as `spymodel.yml`.
-
----
-
-## Step 3 — Protect your module
-
-Here’s how to use ImportSpy inside the module you want to protect (e.g. `plugin.py`):
-
-```python
-# plugin.py
-from importspy import Spy
-
-caller = Spy().importspy(filepath="spymodel.yml")
-
-# Call something from the importer (for example)
-caller.MyPlugin().run()
-```
-
-This checks the current environment and the module that is importing `plugin.py`.
-If it doesn’t match the contract, ImportSpy raises an error and blocks the import.
-
----
-
-## Step 4 — Create an importer
-
-Write a simple module that tries to import `plugin.py`.
-
-```python
-# main.py
-class MyPlugin:
-    def run(self):
-        print("Plugin running")
-
-import plugin
-```
-
----
-
-## Step 5 — Run it
-
-If the environment and structure of `main.py` match the contract, the import will succeed:
+Run:
 
 ```bash
-python main.py
+importspy check plugin.py
 ```
 
-Otherwise, you'll get a clear and structured error like:
+The report includes `ISPY-D101`, `Decision: DENY`, and
+`Target module was not executed.` The command exits with code 1. The print
+statement never runs. This example is covered by the repository's automated tests.
 
+## Generate a contract for your code
+
+For a different source file without an existing sidecar:
+
+```bash
+importspy init my_plugin.py
 ```
-[Structure Violation] Missing required class 'Plugin' in caller module.
+
+This creates `my_plugin.importspy.yml` using source declarations and installed
+metadata. It will not overwrite an existing file. Review generated approvals,
+then add version constraints, runtime requirements, or evidence policy.
+
+```bash
+importspy check my_plugin.py
+importspy check my_plugin.py --format json
+importspy check my_plugin.py --contract team-policy.yml --format sarif
 ```
 
----
+A successful check exits with code 0 and still does not execute the target.
+Unresolved imports default to denial, including imports in optional branches.
+A required computed value or dynamic definition can produce an unknown-static-fact
+denial; see [static preflight](../static-preflight.md).
 
-## Next steps
+## Execute only after admission
 
-- Learn more about [Embedded Mode](../modes/embedded.md)
-- Explore [CLI Mode](../modes/cli.md) for validating modules from the outside
-- Dive into [contract syntax](../contracts/syntax.md) to write more advanced rules
+An application can use [AdmissionEngine.load](../modes/embedded.md) for fresh
+admission followed by explicit execution. That operation runs arbitrary Python.
+Runtime validation after loading cannot undo effects.
+
+Continue with [contract syntax](../contracts/syntax.md),
+[dependency policy](../dependencies.md), or [CI integration](../ci.md).

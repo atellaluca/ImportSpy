@@ -1,0 +1,5 @@
+schema_version: 1
+runtime:
+  python: ">=3.10"
+  environment:
+    IMPORTSPY_EXAMPLE_MODE: production

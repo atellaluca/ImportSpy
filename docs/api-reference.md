@@ -1,119 +1,79 @@
-# API Reference
+# Python API reference
 
-This section documents the public Python API exposed by ImportSpy, organized by module.  
-All components listed here are available when you install the package.
+The 0.5 API separates source inspection, evidence collection, policy evaluation,
+and explicit execution. Start with [library admission](modes/embedded.md) and
+[architecture](architecture.md); use [extensions](extensions.md) for third-party
+providers, validators, and reporters.
 
-## `importspy.s`
+## Admission engine
+
+`AdmissionEngine.check(AdmissionRequest(...))` returns an `AdmissionDecision`
+without target execution. `load` performs fresh admission and explicitly executes
+captured source bytes. `AdmissionDenied` and `ExecutionFailed` retain their
+associated decision.
+
+::: importspy.engine
+
+## Requests, facts, and decisions
+
+The shared domain records serialize to JSON through Pydantic's
+`model_dump(mode="json")` and `model_dump_json()` methods. Decision schema version
+and contract schema version describe separate record formats.
+
+::: importspy.domain
+
+## Contracts and policy
+
+`AdmissionPolicy` extends the structural model. `load_policy` uses safe YAML and
+returns the validated policy with its SHA-256 hash. `PolicyEngine.evaluate`
+compares collected facts without performing I/O.
+
+::: importspy.policy
+
+## Static source inspection
+
+`SourceInspector.inspect` reads, hashes, parses, and compiles source without
+execution. `evaluate_structure` compares structural requirements with those
+facts; `starter_contract` generates editable structural requirements.
+
+::: importspy.inspection
+
+## Dependency resolution
+
+`DependencyResolver` uses source paths and installed metadata without importing
+the target dependencies. An instance is a metadata snapshot; recreate it after
+changing installations. Origin and declaration facts retain unknown states.
+
+::: importspy.dependencies
+
+## Extension protocols
+
+Provider loading is explicit and executes trusted plugin code. `RuntimeValidator`
+here is the post-execution protocol; it is distinct from the legacy class with
+the same name in `importspy.validators`.
+
+::: importspy.extensions
+
+## Reporters
+
+Human, JSON, and SARIF reporters render the same decision. A reporter does not
+collect evidence or evaluate policy again.
+
+::: importspy.reporters
+
+## Legacy runtime compatibility
+
+These modules support 0.4-style validation of already executed modules.
+`Spy.importspy` is deprecated in 0.5, with removal planned for 1.0.
+`SpyModel.from_module` is runtime introspection and can invoke dynamic attributes;
+it is not static admission. See [migration](migration-0.5.md).
 
 ::: importspy.s
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.models`
 
 ::: importspy.models
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.validators`
 
 ::: importspy.validators
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.violation_systems`
 
 ::: importspy.violation_systems
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.persistences`
 
 ::: importspy.persistences
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.cli`
-
-::: importspy.cli
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.constants`
-
-::: importspy.constants
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.config`
-
-::: importspy.config
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.log_manager`
-
-::: importspy.log_manager
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.utilities.module_util`
-
-::: importspy.utilities.module_util
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.utilities.runtime_util`
-
-::: importspy.utilities.runtime_util
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.utilities.system_util`
-
-::: importspy.utilities.system_util
-    handler: python
-    options:
-      show_source: false
-
----
-
-## `importspy.utilities.python_util`
-
-::: importspy.utilities.python_util
-    handler: python
-    options:
-      show_source: false

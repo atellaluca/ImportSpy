@@ -1,0 +1,7 @@
+schema_version: 1
+dependencies:
+  packaging:
+    allowed: true
+    version: ">=24"
+  typer:
+    allowed: false

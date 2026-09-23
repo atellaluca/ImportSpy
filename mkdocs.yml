@@ -1,7 +1,7 @@
 site_name: ImportSpy
-site_url: https://atellaluca.github.io/ImportSpy/
+site_url: https://importspy.readthedocs.io/
 repo_url: https://github.com/atellaluca/importspy
-repo_name: importspy/importspy
+repo_name: atellaluca/ImportSpy
 
 theme:
   name: material
@@ -16,25 +16,38 @@ theme:
     - navigation.tabs
     - navigation.instant
 
+exclude_docs: |
+  /build/
+
 nav:
   - Home: index.md
-  - Introduction:
-      - What is ImportSpy: intro/overview.md
+  - Get started:
+      - Overview: intro/overview.md
       - Installation: intro/install.md
       - Quickstart: intro/quickstart.md
-  - Operating Modes:
-      - Embedded Mode: modes/embedded.md
-      - CLI Mode: modes/cli.md
-  - YAML Contracts:
-      - Syntax: contracts/syntax.md
-      - Examples: contracts/examples.md
-  - Advanced Usage:
-#      - CI/CD Integration: advanced/cicd.md
-      - SpyModel Architecture: advanced/spymodel.md
-      - Violation System: advanced/violations.md
-  - Validation & Errors: errors/contract-violations.md
-  - Use Cases: use_cases/index.md
-  - API Reference: api-reference.md
+      - CLI: modes/cli.md
+      - Library and loading: modes/embedded.md
+  - Admission:
+      - Architecture: architecture.md
+      - Static preflight: static-preflight.md
+      - Contract syntax: contracts/syntax.md
+      - Contract examples: contracts/examples.md
+      - Dependencies: dependencies.md
+      - Evidence: evidence.md
+      - Supply chain: supply-chain.md
+      - Security and limitations: security-model.md
+  - Integrate and extend:
+      - Extensions: extensions.md
+      - CI and GitHub Actions: ci.md
+      - Use cases: use_cases/index.md
+      - Community roadmap: community-roadmap.md
+  - Reference:
+      - API: api-reference.md
+      - Violations: errors/contract-violations.md
+      - Decision model: advanced/violations.md
+      - Legacy SpyModel: advanced/spymodel.md
+      - Migration from 0.4: migration-0.5.md
+      - Release engineering: release.md
 
 plugins:
   - search

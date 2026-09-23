@@ -1,0 +1,17 @@
+schema_version: 1
+functions:
+  - name: normalize
+    arguments:
+      - name: value
+        annotation: str
+    return_annotation: str
+dependencies:
+  packaging:
+    allowed: true
+    required: true
+    version: ">=24"
+    declared: true
+dependency_options:
+  unresolved: deny
+  undeclared: deny
+  unlisted: deny

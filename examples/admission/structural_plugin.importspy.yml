@@ -1,0 +1,27 @@
+schema_version: 1
+filename: structural_plugin.py
+version: "1.0"
+variables:
+  - name: MODE
+    annotation: str
+    value: production
+functions:
+  - name: process
+    arguments:
+      - name: amount
+        annotation: int
+    return_annotation: str
+classes:
+  - name: Plugin
+    attributes:
+      - name: name
+        annotation: str
+        value: payments
+        type: class
+    methods:
+      - name: run
+        arguments:
+          - name: self
+          - name: request
+            annotation: str
+        return_annotation: str

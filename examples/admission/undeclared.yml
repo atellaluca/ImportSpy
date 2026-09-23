@@ -1,0 +1,8 @@
+schema_version: 1
+dependencies:
+  packaging:
+    allowed: true
+  typer:
+    allowed: true
+dependency_options:
+  undeclared: deny

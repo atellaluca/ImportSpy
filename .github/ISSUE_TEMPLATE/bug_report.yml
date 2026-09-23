@@ -1,0 +1,41 @@
+name: Bug report
+description: Report reproducible admission, CLI, or packaging behavior.
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For security vulnerabilities, use the private maintainer contact in SECURITY.md.
+        Do not include real credentials, private package URLs, or environment values.
+  - type: input
+    id: versions
+    attributes:
+      label: ImportSpy, Python, and OS versions
+      placeholder: "ImportSpy 0.5.0, CPython 3.12, Linux"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide source, contract, exact command, and relevant installed distributions. Use harmless local fixtures.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the exit code and a redacted report or traceback.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Note editable installations, namespace packages, selected providers, or project-root configuration if relevant.

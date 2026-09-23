@@ -1,165 +1,50 @@
-# Violation System
+# Structured violations and reporting
 
-The Violation System in **ImportSpy** is responsible for surfacing clear, contextual, and actionable errors when a Python module fails to comply with its declared **import contract**.
+Admission rules return `Violation` records. `AdmissionEngine.check` gathers
+those records into an `AdmissionDecision`; a failed policy normally returns
+DENY instead of raising the first generic validation error.
 
-Rather than raising generic Python exceptions, this subsystem transforms validation failures into precise, domain-specific diagnostics that are structured, explainable, and safe to expose in both development and production contexts.
-
----
-
-## Purpose
-
-In modular and plugin-based systems, structural mismatches and runtime incompatibilities can lead to subtle bugs, hard crashes, or silent failures.
-
-The Violation System serves as a **contract enforcement layer** that:
-
-- Captures detailed context about the failure (module, scope, variable, system)
-- Distinguishes between **missing**, **mismatched**, and **invalid** values
-- Produces **human-readable** error messages tailored to developers and CI pipelines
-- Structures error reporting consistently across validation layers (module, runtime, environment, etc.)
-
----
-
-## Core Concepts
-
-### 1. `ContractViolation` Interface
-
-An abstract base that defines the required interface for all contract violations. It ensures consistency across the different scopes (variables, functions, systems, etc.).
+A violation records a stable code, category, severity, phase, subject, message,
+and optional location, expected/observed facts, and remediation. Reporters render
+that existing decision as human text, JSON, or SARIF without evaluating policy
+again. Locations are included only when known.
 
 ```python
-class ContractViolation(ABC):
-    @property
-    @abstractmethod
-    def context(self) -> str
+from importspy.domain import Violation
 
-    @abstractmethod
-    def label(self, spec: str) -> str
-
-    @abstractmethod
-    def missing_error_handler(self, spec: str) -> str
-
-    @abstractmethod
-    def mismatch_error_handler(self, spec: str) -> str
-
-    @abstractmethod
-    def invalid_error_handler(self, spec: str) -> str
-```
-
-### 2. `BaseContractViolation`
-
-A reusable abstract class that implements common logic for generating violation messages (e.g. missing values, mismatches, invalid values) across all scopes.  
-It uses templates from `Errors` to construct consistent, high-fidelity diagnostics.
-
-```text
-Example output:
-[Module Validation Error]: Variable 'API_KEY' is missing. - Declare it in the expected module.
-```
-
----
-
-## Specific Violation Classes
-
-Each domain (Variable, Function, Runtime, etc.) has its own implementation:
-
-| Class                     | Purpose                                                  |
-|--------------------------|----------------------------------------------------------|
-| `VariableContractViolation` | Handles variable mismatches or missing values           |
-| `FunctionContractViolation` | Detects function mismatches and signature issues        |
-| `ModuleContractViolation`   | Validates filename and version consistency              |
-| `RuntimeContractViolation`  | Validates system architectures (`x86_64`, `arm64`, etc.)|
-| `SystemContractViolation`   | Checks operating system and environment variable match  |
-| `PythonContractViolation`   | Validates interpreter and Python version compatibility  |
-
-Each one specializes the `.label()` method to return error-specific context (e.g., "Environment variable `MY_SECRET` is missing in production runtime").
-
----
-
-## Dynamic Payload Injection via `Bundle`
-
-Each violation operates with a shared mutable dictionary-like object called a **`Bundle`**:
-
-```python
-@dataclass
-class Bundle(MutableMapping):
-    state: Optional[dict[str, Any]] = field(default_factory=dict)
-```
-
-It serves two purposes:
-
-- Collect **contextual information** at validation time (e.g., variable name, expected type)
-- Dynamically populate **templated error messages** using the `Errors` constant map
-
-This design allows error messages to adapt to the specific failure, with no hardcoding.
-
----
-
-## Error Categorization
-
-ImportSpy distinguishes between three primary error types:
-
-| Category     | Description                                                              |
-|--------------|--------------------------------------------------------------------------|
-| `MISSING`     | A required entity (class, method, variable) was not found               |
-| `MISMATCH`    | An entity exists but its value, annotation, or structure differs        |
-| `INVALID`     | A value exists but does not belong to the allowed set (e.g., OS types)  |
-
-The `Errors` constant defines templates for all categories, per context:
-
-```yaml
-"MISSING":
-  "module":
-    "template": "Expected module '{label}' is missing"
-    "solution": "Add the module to your import path"
-```
-
----
-
-## Engineering Highlights
-
-- **Encapsulation**: All formatting, message construction, and error typing is abstracted out of validators.
-- **Separation of Concerns**: Validators focus only on logic, while violations handle messaging.
-- **Templated Errors**: All violations draw from `Errors`, ensuring uniformity and easier localization or branding.
-- **Composable Context**: The `Bundle` allows rich diagnostics without tight coupling between layers.
-
----
-
-## Example Usage
-
-```python
-from importspy.violation_systems import VariableContractViolation
-
-bundle = Bundle()
-bundle["expected_variable"] = "API_KEY"
-
-raise ValueError(
-    VariableContractViolation(
-        scope="module",
-        context="MODULE_CONTEXT",
-        bundle=bundle
-    ).missing_error_handler("entity")
+violation = Violation(
+    code="ACME-P101",
+    category="organization-policy",
+    phase="external",
+    subject="example-package",
+    message="Required review evidence is unavailable.",
+    remediation="Provide a current review from the selected trusted provider.",
 )
 ```
 
-Produces:
+Use a distinct code namespace for a third-party extension. Core code families
+and user remediation are listed in [contract violations](../errors/contract-violations.md).
+The [extension guide](../extensions.md) explains custom policy validators.
 
-```text
-[Module Validation]: Variable 'API_KEY' is missing - Declare it in the target module.
-```
+## Decisions and exceptions
 
----
+Error-severity violations cause DENY. Warnings and notes remain visible without
+causing denial by themselves. A required static fact that remains unknown is an
+error, not a warning. `runtime_required` indicates this uncertainty; it does not
+authorize execution to resolve a failed policy.
 
-## Future Extensions
+An unreadable or invalid contract raises `ContractError` in the Python API and
+maps to CLI exit code 2. `AdmissionEngine.load` raises `AdmissionDenied` when
+fresh admission fails, and also when post-execution runtime validation denies.
+Inspect its `decision.target_executed` to distinguish those cases. Target
+execution failure is represented by `ExecutionFailed` with an attached decision.
 
-The Violation System is designed to be:
+## Legacy exception formatting
 
-- Extensible with new scopes (`Decorators`, `ReturnTypes`, `Dependencies`)
-- Pluggable with i18n/l10n systems
-- Renderable in **structured JSON** for machine processing in DevOps pipelines
+The 0.4 compatibility validators still raise `ValueError` using the
+`ContractViolation` hierarchy and a mutable `Bundle` of formatting context.
+These are retained for existing callers; they are not the 0.5 admission record
+format. Environment diagnostics redact values.
 
----
-
-## Summary
-
-The Violation System is not just error handling — it is ImportSpy’s **engine of clarity**.  
-It converts abstract contract mismatches into structured, interpretable diagnostics that empower developers to catch errors before runtime.
-
-By modeling validation feedback as first-class entities, ImportSpy enables precise governance across modular codebases.
+Migrate integrations that parse legacy exception text to structured decision
+codes. See [migration](../migration-0.5.md) and the [API reference](../api-reference.md).
