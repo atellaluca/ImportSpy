@@ -17,7 +17,7 @@ tomli = {version = ">=2", python = "<3.11"}
 
 
 [tool.poetry.group.dev.dependencies]
-pymdown-extensions = "^10.16.1"
+pymdown-extensions = ">=10.16.1,<12.0.0"
 tomli = ">=2"
 pytest = "^8.3.3"
 mkdocs = "^1.6.1"
