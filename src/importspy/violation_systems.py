@@ -15,8 +15,8 @@ formatting error messages and debugging failed imports.
 from abc import ABC, abstractmethod
 from collections.abc import MutableMapping
 from dataclasses import dataclass, field
-from typing import Optional, Any, Iterator
-from .constants import Errors
+from typing import Any, Iterator
+from .constants import Contexts, Errors
 
 
 class ContractViolation(ABC):
@@ -37,7 +37,7 @@ class ContractViolation(ABC):
 
     @property
     @abstractmethod
-    def context(self) -> str:
+    def context(self) -> Contexts:
         pass
 
     @abstractmethod
@@ -64,13 +64,13 @@ class BaseContractViolation(ContractViolation):
     Includes default implementations of error formatting methods.
     """
 
-    def __init__(self, context: str, bundle: 'Bundle'):
-        self._context = context
+    def __init__(self, context: Contexts | str, bundle: "Bundle"):
+        self._context = Contexts(context)
         self.bundle = bundle
         super().__init__()
 
     @property
-    def context(self) -> str:
+    def context(self) -> Contexts:
         return self._context
 
     def missing_error_handler(self, spec: str) -> str:
@@ -81,6 +81,8 @@ class BaseContractViolation(ContractViolation):
         )
 
     def mismatch_error_handler(self, expected: Any, actual: Any, spec: str) -> str:
+        if self.context == Contexts.ENVIRONMENT_CONTEXT:
+            expected = actual = "[redacted]"
         return (
             f"{Errors.CONTEXT_INTRO[self.context]}: "
             f"{Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.MISMATCH][spec][Errors.TEMPLATE_KEY].format(label=self.label(spec), expected=expected, actual=actual)} - "
@@ -88,9 +90,11 @@ class BaseContractViolation(ContractViolation):
         )
 
     def invalid_error_handler(self, allowed: Any, found: Any, spec: str) -> str:
+        if self.context == Contexts.ENVIRONMENT_CONTEXT:
+            allowed = found = "[redacted]"
         return (
             f"{Errors.CONTEXT_INTRO[self.context]}: "
-            f"{Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][spec][Errors.TEMPLATE_KEY].format(label=self.label(spec), expected=allowed, actual=found)} - "
+            f"{Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][spec][Errors.TEMPLATE_KEY].format(label=self.label(spec), allowed=allowed, found=found)} - "
             f"{Errors.ERROR_MESSAGE_TEMPLATES[Errors.Category.INVALID][spec][Errors.SOLUTION_KEY].capitalize()}"
         )
 
@@ -102,12 +106,19 @@ class VariableContractViolation(BaseContractViolation):
     Includes scope information to distinguish between types of variables.
     """
 
-    def __init__(self, scope: str, context: str, bundle: 'Bundle'):
+    def __init__(self, scope: str, context: str, bundle: "Bundle"):
         super().__init__(context, bundle)
         self.scope = scope
 
     def label(self, spec: str) -> str:
-        return Errors.VARIABLES_LABEL_TEMPLATE[self.scope][spec][self.context].format(**self.bundle)
+        if (
+            self.context == Contexts.ENVIRONMENT_CONTEXT
+            and spec == Errors.COLLECTIONS_MESSAGES
+        ):
+            return "The required environment variables"
+        return Errors.VARIABLES_LABEL_TEMPLATE[self.scope][spec][self.context].format(
+            **self.bundle
+        )
 
 
 class FunctionContractViolation(BaseContractViolation):
@@ -115,7 +126,7 @@ class FunctionContractViolation(BaseContractViolation):
     Contract violation handler for function signature mismatches.
     """
 
-    def __init__(self, context: str, bundle: 'Bundle'):
+    def __init__(self, context: str, bundle: "Bundle"):
         super().__init__(context, bundle)
 
     def label(self, spec: str) -> str:
@@ -127,7 +138,7 @@ class RuntimeContractViolation(BaseContractViolation):
     Contract violation handler for runtime architecture mismatches.
     """
 
-    def __init__(self, context: str, bundle: 'Bundle'):
+    def __init__(self, context: str, bundle: "Bundle"):
         super().__init__(context, bundle)
 
     def label(self, spec: str) -> str:
@@ -139,18 +150,19 @@ class SystemContractViolation(BaseContractViolation):
     Contract violation handler for system-level mismatches (OS, environment variables).
     """
 
-    def __init__(self, context: str, bundle: 'Bundle'):
+    def __init__(self, context: str, bundle: "Bundle"):
         super().__init__(context, bundle)
 
     def label(self, spec: str) -> str:
         return Errors.SYSTEM_LABEL_TEMPLATE[spec].format(**self.bundle)
+
 
 class PythonContractViolation(BaseContractViolation):
     """
     Contract violation handler for Python version and interpreter mismatches.
     """
 
-    def __init__(self, context: str, bundle: 'Bundle'):
+    def __init__(self, context: str, bundle: "Bundle"):
         super().__init__(context, bundle)
 
     def label(self, spec: str) -> str:
@@ -162,7 +174,7 @@ class ModuleContractViolation(BaseContractViolation):
     Contract violation handler for module-level mismatches (filename, version, structure).
     """
 
-    def __init__(self, context: str, bundle: 'Bundle'):
+    def __init__(self, context: str, bundle: "Bundle"):
         super().__init__(context, bundle)
 
     def label(self, spec: str) -> str:
@@ -170,7 +182,7 @@ class ModuleContractViolation(BaseContractViolation):
 
 
 @dataclass
-class Bundle(MutableMapping):
+class Bundle(MutableMapping[str, Any]):
     """
     Shared mutable state passed to all violation handlers.
 
@@ -178,7 +190,7 @@ class Bundle(MutableMapping):
     (like module name, attribute name, or class name) into error templates.
     """
 
-    state: Optional[dict[str, Any]] = field(default_factory=dict)
+    state: dict[str, Any] = field(default_factory=dict)
 
     def __getitem__(self, key):
         return self.state[key]
@@ -189,7 +201,7 @@ class Bundle(MutableMapping):
     def __delitem__(self, key):
         del self.state[key]
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[str]:
         return iter(self.state)
 
     def __len__(self) -> int:

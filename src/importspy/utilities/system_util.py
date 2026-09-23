@@ -23,13 +23,11 @@ Example:
 import os
 import logging
 import platform
-from collections import namedtuple
 from typing import List
+from .module_util import VariableInfo
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
-VariableInfo = namedtuple('VariableInfo', ["name", "annotation", "value"])
 
 
 class SystemUtil:

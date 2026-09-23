@@ -35,11 +35,11 @@ from collections import namedtuple
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-ClassInfo = namedtuple('ClassInfo', ["name", "attributes", "methods", "superclasses"])
-FunctionInfo = namedtuple('FunctionInfo', ["name", "arguments", "return_annotation"])
-ArgumentInfo = namedtuple('ArgumentInfo', ["name", "annotation", "value"])
-AttributeInfo = namedtuple('AttributeInfo', ["type", "name", "annotation", "value"])
-VariableInfo = namedtuple('VariableInfo', ["name", "annotation", "value"])
+ClassInfo = namedtuple("ClassInfo", ["name", "attributes", "methods", "superclasses"])
+FunctionInfo = namedtuple("FunctionInfo", ["name", "arguments", "return_annotation"])
+ArgumentInfo = namedtuple("ArgumentInfo", ["name", "annotation", "value"])
+AttributeInfo = namedtuple("AttributeInfo", ["type", "name", "annotation", "value"])
+VariableInfo = namedtuple("VariableInfo", ["name", "annotation", "value"])
 
 
 class ModuleUtil:
@@ -60,7 +60,15 @@ class ModuleUtil:
         """
         stack = inspect.stack()
         current_frame = stack[1]
-        caller_frame = stack[-1]
+        caller_frame = next(
+            (
+                frame
+                for frame in stack[2:]
+                if frame.frame.f_globals.get("__name__", "").split(".")[0]
+                != "importspy"
+            ),
+            current_frame,
+        )
         return current_frame, caller_frame
 
     def get_info_module(self, caller_frame: inspect.FrameInfo) -> ModuleType | None:
@@ -77,7 +85,10 @@ class ModuleUtil:
 
     def load_module(self, info_module: ModuleType) -> ModuleType | None:
         """
-        Reload a module dynamically from its file location.
+        Explicitly execute a new module from its file location.
+
+        This legacy execution helper is never used by static admission or by
+        runtime validation. Calling it executes target top-level code again.
 
         Args:
             info_module (ModuleType): The module to reload.
@@ -85,7 +96,9 @@ class ModuleUtil:
         Returns:
             ModuleType | None: The reloaded module or None if loading fails.
         """
-        spec = importlib.util.spec_from_file_location(info_module.__name__, info_module.__file__)
+        spec = importlib.util.spec_from_file_location(
+            info_module.__name__, info_module.__file__
+        )
         if spec and spec.loader:
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
@@ -115,14 +128,14 @@ class ModuleUtil:
         Returns:
             str | None: Version string if found, otherwise None.
         """
-        if hasattr(info_module, '__version__'):
+        if hasattr(info_module, "__version__"):
             return info_module.__version__
         try:
             return importlib.metadata.version(info_module.__name__)
         except importlib.metadata.PackageNotFoundError:
             return None
 
-    def extract_annotation(self, annotation:Any) -> Optional[str]:
+    def extract_annotation(self, annotation: Any) -> Optional[str]:
         """
         Convert a type annotation object into a string representation.
 
@@ -150,9 +163,16 @@ class ModuleUtil:
         """
         variables_info: List[VariableInfo] = []
         for name, value in inspect.getmembers(info_module):
-            if not name.startswith('__') and not inspect.ismodule(value) and not inspect.isfunction(value) and not inspect.isclass(value):
+            if (
+                not name.startswith("__")
+                and not inspect.ismodule(value)
+                and not inspect.isfunction(value)
+                and not inspect.isclass(value)
+            ):
                 annotation = self.extract_annotation(type(value))
-                variables_info.append(VariableInfo(name=name, annotation=annotation, value=value))
+                variables_info.append(
+                    VariableInfo(name=name, annotation=annotation, value=value)
+                )
         return variables_info
 
     def extract_functions(self, info_module: ModuleType) -> List[FunctionInfo]:
@@ -185,7 +205,7 @@ class ModuleUtil:
         return FunctionInfo(
             name,
             self._extract_arguments(obj),
-            self.extract_annotation(inspect.signature(obj).return_annotation)
+            self.extract_annotation(inspect.signature(obj).return_annotation),
         )
 
     def _extract_arguments(self, obj: FunctionType) -> List[ArgumentInfo]:
@@ -200,11 +220,19 @@ class ModuleUtil:
         """
         args = []
         for name, param in inspect.signature(obj).parameters.items():
-            value = param.default if param.default is not inspect.Signature.empty else None
-            args.append(ArgumentInfo(name=name, annotation=self.extract_annotation(param.annotation), value=value))
+            value = (
+                param.default if param.default is not inspect.Signature.empty else None
+            )
+            args.append(
+                ArgumentInfo(
+                    name=name,
+                    annotation=self.extract_annotation(param.annotation),
+                    value=value,
+                )
+            )
         return args
 
-    def extract_methods(self, cls_obj:Any) -> List[FunctionInfo]:
+    def extract_methods(self, cls_obj: Any) -> List[FunctionInfo]:
         """
         Extract method definitions from a class object.
 
@@ -220,7 +248,9 @@ class ModuleUtil:
                 methods.append(self._extract_function(name, obj))
         return methods
 
-    def extract_attributes(self, cls_obj:Any, info_module: ModuleType) -> List[AttributeInfo]:
+    def extract_attributes(
+        self, cls_obj: Any, info_module: ModuleType
+    ) -> List[AttributeInfo]:
         """
         Extract both class-level and instance-level attributes.
 
@@ -232,30 +262,36 @@ class ModuleUtil:
             List[AttributeInfo]: List of extracted attributes.
         """
         attributes: List[AttributeInfo] = []
-        annotations = getattr(cls_obj, '__annotations__', {})
+        annotations = getattr(cls_obj, "__annotations__", {})
         for attr_name, value in cls_obj.__dict__.items():
-            if not callable(value) and not attr_name.startswith('__'):
-                attributes.append(AttributeInfo(
-                    name=attr_name,
-                    value=value,
-                    type="class",
-                    annotation=self.extract_annotation(annotations.get(attr_name))
-                ))
+            if not callable(value) and not attr_name.startswith("__"):
+                attributes.append(
+                    AttributeInfo(
+                        name=attr_name,
+                        value=value,
+                        type="class",
+                        annotation=self.extract_annotation(annotations.get(attr_name)),
+                    )
+                )
         if cls_obj.__module__ == info_module.__name__:
-            init_method = cls_obj.__dict__.get('__init__')
+            init_method = cls_obj.__dict__.get("__init__")
             if init_method:
                 for line in inspect.getsourcelines(init_method)[0]:
                     line = line.strip()
-                    if line.startswith('self.') and '=' in line:
-                        parts = line.split('=')
-                        attr_name = parts[0].strip().split('.')[1]
+                    if line.startswith("self.") and "=" in line:
+                        parts = line.split("=")
+                        attr_name = parts[0].strip().split(".")[1]
                         attr_value = parts[1].strip().strip('"')
-                        attributes.append(AttributeInfo(
-                            name=attr_name,
-                            value=attr_value,
-                            type="instance",
-                            annotation=self.extract_annotation(annotations.get(attr_name))
-                        ))
+                        attributes.append(
+                            AttributeInfo(
+                                name=attr_name,
+                                value=attr_value,
+                                type="instance",
+                                annotation=self.extract_annotation(
+                                    annotations.get(attr_name)
+                                ),
+                            )
+                        )
         return attributes
 
     def extract_classes(self, info_module: ModuleType) -> List[ClassInfo]:
@@ -276,7 +312,7 @@ class ModuleUtil:
             classes.append(ClassInfo(name, attributes, methods, superclasses))
         return classes
 
-    def extract_superclasses(self, cls:Any) -> List[ClassInfo]:
+    def extract_superclasses(self, cls: Any) -> List[ClassInfo]:
         """
         Extract base classes for a given class, recursively.
 
@@ -293,10 +329,12 @@ class ModuleUtil:
             module = sys.modules.get(base.__module__)
             if not module:
                 continue
-            superclasses.append(ClassInfo(
-                base.__name__,
-                self.extract_attributes(base, module),
-                self.extract_methods(base),
-                []
-            ))
+            superclasses.append(
+                ClassInfo(
+                    base.__name__,
+                    self.extract_attributes(base, module),
+                    self.extract_methods(base),
+                    [],
+                )
+            )
         return superclasses

@@ -79,7 +79,9 @@ class LogManager:
         self.default_handler.setFormatter(CustomFormatter())
         self.configured = False
 
-    def configure(self, level: int = None, handlers: list = None):
+    def configure(
+        self, level: int | None = None, handlers: list[logging.Handler] | None = None
+    ):
         """Apply logging configuration globally.
 
         Should be called once per execution to avoid duplicated handlers.

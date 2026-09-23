@@ -4,7 +4,6 @@ from importspy.models import (
     Environment,
     Variable
 )
-from importspy.config import Config
 
 from importspy.constants import (
     Contexts,

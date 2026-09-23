@@ -8,7 +8,6 @@ from importspy.models import (
 
 from importspy.violation_systems import (
     VariableContractViolation,
-    SystemContractViolation,
     Bundle
 )
 

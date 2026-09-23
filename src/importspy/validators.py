@@ -12,16 +12,26 @@ objects raise informative `ValueError` exceptions enriched with context bundles.
 Used both in embedded runtime validation and CLI mode.
 """
 
-from typing import List
+from typing import List, Sequence
 from .models import (
-    Runtime, System, Environment, Python, Module,
-    Variable, Function, Class
+    Runtime,
+    System,
+    Environment,
+    Python,
+    Module,
+    Variable,
+    Function,
+    Class,
 )
 from .violation_systems import (
-    RuntimeContractViolation, SystemContractViolation,
-    VariableContractViolation, PythonContractViolation,
-    ModuleContractViolation, BaseContractViolation,
-    FunctionContractViolation, Bundle
+    RuntimeContractViolation,
+    SystemContractViolation,
+    VariableContractViolation,
+    PythonContractViolation,
+    ModuleContractViolation,
+    BaseContractViolation,
+    FunctionContractViolation,
+    Bundle,
 )
 from .constants import Constants, Contexts, Errors
 from .config import Config
@@ -33,10 +43,10 @@ class RuntimeValidator:
 
     def validate(
         self,
-        runtimes_1: List[Runtime],
-        runtimes_2: List[Runtime],
-        contract_violation: RuntimeContractViolation
-    ) -> None:
+        runtimes_1: Sequence[Runtime] | None,
+        runtimes_2: Sequence[Runtime] | None,
+        contract_violation: RuntimeContractViolation,
+    ) -> Runtime | None:
         """Compare runtime architectures and raise if no match is found.
 
         Args:
@@ -51,13 +61,15 @@ class RuntimeValidator:
             ValueError: If runtimes_2 is empty or no arch matches.
         """
         if not runtimes_1:
-            return
+            return None
 
         bundle = contract_violation.bundle
         bundle[Errors.KEY_RUNTIMES_1] = runtimes_1
 
         if not runtimes_2:
-            raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            raise ValueError(
+                contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+            )
 
         runtime_2 = runtimes_2[0]
 
@@ -65,7 +77,9 @@ class RuntimeValidator:
             if runtime_1.arch == runtime_2.arch:
                 return runtime_1
 
-        raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+        raise ValueError(
+            contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+        )
 
 
 class SystemValidator:
@@ -76,10 +90,10 @@ class SystemValidator:
 
     def validate(
         self,
-        systems_1: List[System],
-        systems_2: List[System],
-        contract_violation: SystemContractViolation
-    ) -> None:
+        systems_1: Sequence[System] | None,
+        systems_2: Sequence[System] | None,
+        contract_violation: SystemContractViolation,
+    ) -> List[Python] | None:
         """Compare systems and delegate to environment validation.
 
         Args:
@@ -94,32 +108,38 @@ class SystemValidator:
             ValueError: If no matching OS or missing environment.
         """
         if not systems_1:
-            return
+            return None
 
         bundle = contract_violation.bundle
         bundle[Errors.KEY_SYSTEMS_1] = systems_1
 
         if not systems_2:
-            raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            raise ValueError(
+                contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+            )
 
         system_2 = systems_2[0]
 
         for system_1 in systems_1:
             if system_1.os == system_2.os:
                 if system_1.environment:
-                    self._environment_validator.validate(system_1.environment, system_2.environment, bundle)
+                    self._environment_validator.validate(
+                        system_1.environment, system_2.environment, bundle
+                    )
                 return system_1.pythons
 
-        raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+        raise ValueError(
+            contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+        )
 
     class EnvironmentValidator:
         """Validates environment-level variables and configuration."""
 
         def validate(
             self,
-            environment_1: Environment,
-            environment_2: Environment,
-            bundle: Bundle
+            environment_1: Environment | None,
+            environment_2: Environment | None,
+            bundle: Bundle,
         ):
             """Compare two environments' variable lists.
 
@@ -139,9 +159,7 @@ class SystemValidator:
             if not environment_2:
                 raise ValueError(
                     VariableContractViolation(
-                        Errors.SCOPE_VARIABLE,
-                        Contexts.ENVIRONMENT_CONTEXT,
-                        bundle
+                        Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle
                     ).missing_error_handler(Errors.COLLECTIONS_MESSAGES)
                 )
 
@@ -153,34 +171,31 @@ class SystemValidator:
                     variables_1,
                     variables_2,
                     VariableContractViolation(
-                        Errors.SCOPE_VARIABLE,
-                        Contexts.ENVIRONMENT_CONTEXT,
-                        bundle
-                    )
+                        Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle
+                    ),
                 )
-            
+
             self._secrets_validator(environment_1, environment_2, bundle)
-        
+
         def _secrets_validator(
-                self, 
-                environment_1:Environment,
-                environment_2:Environment,
-                bundle: Bundle
-                ):
+            self, environment_1: Environment, environment_2: Environment, bundle: Bundle
+        ):
             if not environment_1.secrets:
                 return
             if not environment_2.secrets:
-                raise ValueError(VariableContractViolation(Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+                raise ValueError(
+                    VariableContractViolation(
+                        Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle
+                    ).missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+                )
             for secret_1 in environment_1.secrets:
-                if not secret_1 in environment_2.secrets:
+                if secret_1 not in environment_2.secrets:
                     bundle[Errors.KEY_ENVIRONMENT_VARIABLE_NAME] = secret_1
-                    raise ValueError(VariableContractViolation(Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle).missing_error_handler(Errors.ENTITY_MESSAGES))
-            
-
-
-                
-
-
+                    raise ValueError(
+                        VariableContractViolation(
+                            Errors.SCOPE_VARIABLE, Contexts.ENVIRONMENT_CONTEXT, bundle
+                        ).missing_error_handler(Errors.ENTITY_MESSAGES)
+                    )
 
 
 class PythonValidator:
@@ -188,10 +203,10 @@ class PythonValidator:
 
     def validate(
         self,
-        pythons_1: List[Python],
-        pythons_2: List[Python],
-        contract_violation: PythonContractViolation
-    ) -> None:
+        pythons_1: Sequence[Python] | None,
+        pythons_2: Sequence[Python] | None,
+        contract_violation: PythonContractViolation,
+    ) -> List[Module] | None:
         """Ensure that Python version/interpreter match expectations.
 
         Args:
@@ -206,26 +221,30 @@ class PythonValidator:
             ValueError: On missing or mismatched Python definitions.
         """
         if not pythons_1:
-            return
+            return None
 
         bundle = contract_violation.bundle
         bundle[Errors.KEY_PYTHONS_1] = pythons_1
 
         if not pythons_2:
-            raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            raise ValueError(
+                contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+            )
 
         python_2 = pythons_2[0]
         for python_1 in pythons_1:
             if self._is_python_match(python_1, python_2, contract_violation):
                 return python_1.modules
 
-        raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+        raise ValueError(
+            contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+        )
 
     def _is_python_match(
         self,
         python_1: Python,
         python_2: Python,
-        contract_violation: PythonContractViolation
+        contract_violation: PythonContractViolation,
     ) -> bool:
         """Internal logic to compare Python version and interpreter."""
         bundle = contract_violation.bundle
@@ -233,8 +252,8 @@ class PythonValidator:
 
         if python_1.version and python_1.interpreter:
             return (
-                python_1.version == python_2.version and
-                python_1.interpreter == python_2.interpreter
+                python_1.version == python_2.version
+                and python_1.interpreter == python_2.interpreter
             )
 
         if python_1.version:
@@ -243,7 +262,7 @@ class PythonValidator:
         if python_1.interpreter:
             return python_1.interpreter == python_2.interpreter
 
-        return False
+        return True
 
 
 class ModuleValidator:
@@ -256,9 +275,9 @@ class ModuleValidator:
 
     def validate(
         self,
-        modules_1: List[Module],
+        modules_1: Sequence[Module] | None,
         module_2: Module,
-        contract_violation: ModuleContractViolation
+        contract_violation: ModuleContractViolation,
     ):
         """Validate module structure against expected SpyModel.
 
@@ -277,44 +296,47 @@ class ModuleValidator:
         bundle[Errors.KEY_MODULES_1] = modules_1
 
         if not module_2:
-            raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            raise ValueError(
+                contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+            )
 
         for module_1 in modules_1:
             bundle[Errors.KEY_MODULE_NAME] = module_1.filename
+            bundle[Errors.KEY_FILE_NAME] = module_1.filename
             bundle[Errors.KEY_MODULE_VERSION] = module_1.version
 
             if module_1.filename and module_1.filename != module_2.filename:
-                raise ValueError(contract_violation.mismatch_error_handler(module_1.filename, module_2.filename, Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.mismatch_error_handler(
+                        module_1.filename, module_2.filename, Errors.ENTITY_MESSAGES
+                    )
+                )
 
             if module_1.version and module_1.version != module_2.version:
-                raise ValueError(contract_violation.mismatch_error_handler(module_1.version, module_2.version, Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.mismatch_error_handler(
+                        module_1.version, module_2.version, Errors.ENTITY_MESSAGES
+                    )
+                )
 
             self.variable_validator.validate(
                 module_1.variables,
                 module_2.variables,
                 VariableContractViolation(
-                    Errors.SCOPE_VARIABLE,
-                    Contexts.MODULE_CONTEXT,
-                    bundle
-                )
+                    Errors.SCOPE_VARIABLE, Contexts.MODULE_CONTEXT, bundle
+                ),
             )
 
             self.function_validator.validate(
                 module_1.functions,
                 module_2.functions,
-                FunctionContractViolation(
-                    Contexts.MODULE_CONTEXT,
-                    bundle
-                )
+                FunctionContractViolation(Contexts.MODULE_CONTEXT, bundle),
             )
 
             self.class_validator.validate(
                 module_1.classes,
                 module_2.classes,
-                ModuleContractViolation(
-                    Contexts.CLASS_CONTEXT,
-                    bundle
-                )
+                ModuleContractViolation(Contexts.CLASS_CONTEXT, bundle),
             )
 
 
@@ -327,9 +349,9 @@ class ClassValidator:
 
     def validate(
         self,
-        classes_1: List[Class],
-        classes_2: List[Class],
-        contract_violation: BaseContractViolation
+        classes_1: Sequence[Class] | None,
+        classes_2: Sequence[Class] | None,
+        contract_violation: BaseContractViolation,
     ):
         """Recursively validate class structure and inheritance.
 
@@ -348,7 +370,11 @@ class ClassValidator:
         bundle[Errors.KEY_CLASSES_1] = classes_1
 
         if not classes_2:
-            raise ValueError(ModuleContractViolation(Contexts.CLASS_CONTEXT, bundle).missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            raise ValueError(
+                ModuleContractViolation(
+                    Contexts.CLASS_CONTEXT, bundle
+                ).missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+            )
 
         for class_1 in classes_1:
             class_2 = next((cls for cls in classes_2 if cls.name == class_1.name), None)
@@ -356,32 +382,40 @@ class ClassValidator:
             bundle[Errors.KEY_CLASS_NAME] = class_1.name
 
             if not class_2:
-                raise ValueError(ModuleContractViolation(Contexts.CLASS_CONTEXT, bundle).missing_error_handler(Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    ModuleContractViolation(
+                        Contexts.CLASS_CONTEXT, bundle
+                    ).missing_error_handler(Errors.ENTITY_MESSAGES)
+                )
 
             bundle[Errors.KEY_ATTRIBUTE_TYPE] = Config.CLASS_TYPE
             self.variable_validator.validate(
                 class_1.get_class_attributes(),
                 class_2.get_class_attributes(),
-                VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, bundle)
+                VariableContractViolation(
+                    Errors.SCOPE_VARIABLE, Contexts.CLASS_CONTEXT, bundle
+                ),
             )
 
             bundle[Errors.KEY_ATTRIBUTE_TYPE] = Config.INSTANCE_TYPE
             self.variable_validator.validate(
                 class_1.get_instance_attributes(),
                 class_2.get_instance_attributes(),
-                VariableContractViolation(Errors.SCOPE_ARGUMENT, Contexts.CLASS_CONTEXT, bundle)
+                VariableContractViolation(
+                    Errors.SCOPE_VARIABLE, Contexts.CLASS_CONTEXT, bundle
+                ),
             )
 
             self.function_validator.validate(
                 class_1.methods,
                 class_2.methods,
-                FunctionContractViolation(Contexts.CLASS_CONTEXT, bundle)
+                FunctionContractViolation(Contexts.CLASS_CONTEXT, bundle),
             )
 
             self.validate(
                 class_1.superclasses,
                 class_2.superclasses,
-                ModuleContractViolation(Contexts.CLASS_CONTEXT, bundle)
+                ModuleContractViolation(Contexts.CLASS_CONTEXT, bundle),
             )
 
 
@@ -393,9 +427,9 @@ class VariableValidator:
 
     def validate(
         self,
-        variables_1: List[Variable],
-        variables_2: List[Variable],
-        contract_violation: VariableContractViolation
+        variables_1: Sequence[Variable] | None,
+        variables_2: Sequence[Variable] | None,
+        contract_violation: VariableContractViolation,
     ):
         """Validate variable existence, name, value, and annotation.
 
@@ -414,7 +448,7 @@ class VariableValidator:
             Constants.LOG_MESSAGE_TEMPLATE.format(
                 operation="Variable validating",
                 status="Starting",
-                details=f"Expected Variables: {variables_1} ; Actual Variables: {variables_2}"
+                details=f"Expected variable count: {len(variables_1 or [])}; observed count: {len(variables_2 or [])}",
             )
         )
 
@@ -423,27 +457,47 @@ class VariableValidator:
             return
 
         bundle[
-            Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.scope][Errors.COLLECTIONS_MESSAGES][contract_violation.context]
+            Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.scope][
+                Errors.COLLECTIONS_MESSAGES
+            ][contract_violation.context]
         ] = variables_1
 
         if not variables_2:
-            raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            raise ValueError(
+                contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+            )
 
         for var_1 in variables_1:
-            bundle[Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.scope][Errors.ENTITY_MESSAGES][contract_violation.context]] = var_1.name
+            bundle[
+                Errors.VARIABLES_DINAMIC_PAYLOAD[contract_violation.scope][
+                    Errors.ENTITY_MESSAGES
+                ][contract_violation.context]
+            ] = var_1.name
             if var_1.name not in {var.name for var in variables_2}:
-                raise ValueError(contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES)
+                )
 
         for var_1 in variables_1:
             var_2 = next((v for v in variables_2 if v.name == var_1.name), None)
             if not var_2:
-                raise ValueError(contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES)
+                )
 
             if var_1.annotation and var_1.annotation != var_2.annotation:
-                raise ValueError(contract_violation.mismatch_error_handler(var_1.annotation, var_2.annotation, Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.mismatch_error_handler(
+                        var_1.annotation, var_2.annotation, Errors.ENTITY_MESSAGES
+                    )
+                )
 
             if var_1.value != var_2.value:
-                raise ValueError(contract_violation.mismatch_error_handler(var_1.value, var_2.value, Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.mismatch_error_handler(
+                        var_1.value, var_2.value, Errors.ENTITY_MESSAGES
+                    )
+                )
 
 
 class FunctionValidator:
@@ -455,9 +509,9 @@ class FunctionValidator:
 
     def validate(
         self,
-        functions_1: List[Function],
-        functions_2: List[Function],
-        contract_violation: BaseContractViolation
+        functions_1: Sequence[Function] | None,
+        functions_2: Sequence[Function] | None,
+        contract_violation: BaseContractViolation,
     ):
         """Compare function definitions across two modules or classes.
 
@@ -475,34 +529,53 @@ class FunctionValidator:
             self.logger.debug("No functions to validate")
             return
 
-        bundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.COLLECTIONS_MESSAGES][contract_violation.context]] = functions_1
+        bundle[
+            Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.COLLECTIONS_MESSAGES][
+                contract_violation.context
+            ]
+        ] = functions_1
 
         if not functions_2:
-            raise ValueError(contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES))
+            raise ValueError(
+                contract_violation.missing_error_handler(Errors.COLLECTIONS_MESSAGES)
+            )
 
         for function_1 in functions_1:
-            bundle[Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.ENTITY_MESSAGES][contract_violation.context]] = function_1.name
+            bundle[
+                Errors.FUNCTIONS_DINAMIC_PAYLOAD[Errors.ENTITY_MESSAGES][
+                    contract_violation.context
+                ]
+            ] = function_1.name
             if function_1.name not in {f.name for f in functions_2}:
-                raise ValueError(contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES)
+                )
 
         for function_1 in functions_1:
-            function_2 = next((f for f in functions_2 if f.name == function_1.name), None)
+            function_2 = next(
+                (f for f in functions_2 if f.name == function_1.name), None
+            )
             if not function_2:
-                raise ValueError(contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES))
+                raise ValueError(
+                    contract_violation.missing_error_handler(Errors.ENTITY_MESSAGES)
+                )
 
             self.argument_validator.validate(
                 function_1.arguments,
                 function_2.arguments,
                 VariableContractViolation(
-                    Errors.SCOPE_ARGUMENT,
-                    Contexts.MODULE_CONTEXT,
-                    bundle
-                )
+                    Errors.SCOPE_ARGUMENT, contract_violation.context, bundle
+                ),
             )
 
-            if function_1.return_annotation and function_1.return_annotation != function_2.return_annotation:
-                raise ValueError(contract_violation.mismatch_error_handler(
-                    function_1.return_annotation,
-                    function_2.return_annotation,
-                    Errors.ENTITY_MESSAGES
-                ))
+            if (
+                function_1.return_annotation
+                and function_1.return_annotation != function_2.return_annotation
+            ):
+                raise ValueError(
+                    contract_violation.mismatch_error_handler(
+                        function_1.return_annotation,
+                        function_2.return_annotation,
+                        Errors.ENTITY_MESSAGES,
+                    )
+                )

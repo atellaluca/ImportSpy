@@ -7,7 +7,6 @@ from importspy.config import Config
 from importspy.validators import RuntimeValidator
 from importspy.constants import (
     Errors,
-    Constants,
     Contexts
 )
 

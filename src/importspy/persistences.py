@@ -1,17 +1,21 @@
 """
-Defines interfaces and implementations for handling **import contracts** —  
-external YAML files used by ImportSpy to validate the structure and runtime expectations  
+Defines interfaces and implementations for handling **import contracts** —
+external YAML files used by ImportSpy to validate the structure and runtime expectations
 of dynamically loaded Python modules.
 
 Currently, only YAML is supported, but the architecture is extensible via the `Parser` interface.
 
-All file I/O operations are wrapped in `handle_persistence_error`, ensuring clear error  
+All file I/O operations are wrapped in `handle_persistence_error`, ensuring clear error
 messages in case of missing, malformed, or inaccessible contract files.
 """
 
 from abc import ABC, abstractmethod
 from ruamel.yaml import YAML
 import functools
+from typing import Any, Callable, ParamSpec, TypeVar
+
+P = ParamSpec("P")
+T = TypeVar("T")
 
 
 class Parser(ABC):
@@ -81,11 +85,11 @@ class PersistenceError(Exception):
         super().__init__(msg)
 
 
-def handle_persistence_error(func):
+def handle_persistence_error(func: Callable[P, T]) -> Callable[P, T]:
     """
     Decorator for wrapping parser I/O methods with user-friendly error handling.
 
-    Catches all exceptions and raises a `PersistenceError` with a generic message.
+    Catches ordinary exceptions and raises a `PersistenceError` with a generic message.
     This ensures ImportSpy fails gracefully if a contract file is missing,
     malformed, or inaccessible.
 
@@ -100,15 +104,17 @@ def handle_persistence_error(func):
     Callable
         A wrapped version that raises `PersistenceError` on failure.
     """
+
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         try:
             return func(*args, **kwargs)
-        except:
+        except Exception as error:
             raise PersistenceError(
                 "An error occurred while handling the import contract. "
                 "Please check the file path, format, or permissions."
-            )
+            ) from error
+
     return wrapper
 
 
@@ -116,15 +122,15 @@ class YamlParser(Parser):
     """
     YAML-based contract parser implementation.
 
-    Uses `ruamel.yaml` to read and write `.yml` files that define import contracts.  
-    Preserves formatting, indentation, and quotes for consistent serialization.
+    Uses `ruamel.yaml` to read and write `.yml` files that define import contracts.
+    Uses the safe YAML constructor; Python objects and custom tags are rejected.
     """
 
     def __init__(self):
         """
         Initializes the YAML parser and configures output formatting.
         """
-        self.yaml = YAML()
+        self.yaml = YAML(typ="safe")
         self._yml_configuration()
 
     def _yml_configuration(self):
@@ -153,17 +159,17 @@ class YamlParser(Parser):
         filepath : str
             Destination file path.
         """
-        with open(filepath, "w") as file:
+        with open(filepath, "w", encoding="utf-8") as file:
             self.yaml.dump(data, file)
 
     @handle_persistence_error
-    def load(self, filepath: str) -> dict:
+    def load(self, filepath: str) -> dict[str, Any]:
         """
         Loads and parses a `.yml` contract into a Python dictionary.
 
         Parameters:
         -----------
-        
+
         filepath : str
             Path to the contract file.
 
@@ -172,6 +178,8 @@ class YamlParser(Parser):
         dict
             Parsed contract structure.
         """
-        with open(filepath) as file:
+        with open(filepath, encoding="utf-8") as file:
             data = self.yaml.load(file)
+            if not isinstance(data, dict):
+                raise ValueError("An import contract must be a YAML mapping.")
             return dict(data)
