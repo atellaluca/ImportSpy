@@ -1,12 +1,11 @@
 import json
 import sys
-from importlib import metadata
 import pytest
 from pydantic import ValidationError
 
 from importspy.dependencies import (
     DependencyOptions, DependencyResolver, DependencyRule, OriginRule,
-    collect_dependency_evidence, evaluate_dependencies, normalize_url, read_origin,
+    collect_dependency_evidence, evaluate_dependencies, metadata, normalize_url, read_origin,
 )
 from importspy.domain import Dependency, Distribution, ImportReference, Origin
 
@@ -55,6 +54,24 @@ def test_metadata_name_mismatch_many_to_many_and_no_import(installed):
     assert [dist.name for dist in deps[1].distributions] == ["isp-namespace-one", "isp-namespace-two"]
     assert "ispy_yaml" not in sys.modules
     assert "ispy_namespace" not in sys.modules
+
+
+def test_record_only_wheels_resolve_namespaces_without_importing(installed):
+    project, install = installed
+    for name, import_name in [
+        ("ISP-Record", "ispy_record"),
+        ("ISP-Record-One", "ispy_record_namespace"),
+        ("ISP-Record-Two", "ispy_record_namespace"),
+    ]:
+        dist_info = install(name, import_name)
+        (dist_info / "top_level.txt").unlink()
+
+    deps = resolve(project, "ispy_record", "ispy_record_namespace.child")
+    assert [dep.kind for dep in deps] == ["external", "namespace"]
+    assert deps[0].distributions[0].name == "isp-record"
+    assert [dist.name for dist in deps[1].distributions] == ["isp-record-one", "isp-record-two"]
+    assert "ispy_record" not in sys.modules
+    assert "ispy_record_namespace" not in sys.modules
 
 
 def test_source_and_stdlib_paths_never_find_spec(tmp_path, monkeypatch):

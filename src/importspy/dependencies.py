@@ -3,7 +3,6 @@
 import json
 import re
 import sys
-from importlib import metadata
 from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit, urlunsplit
@@ -20,8 +19,13 @@ from importspy.domain import (
 )
 
 if sys.version_info >= (3, 11):
+    from importlib import metadata
+
     import tomllib
 else:
+    # Python 3.10's stdlib mapping ignores wheels without top_level.txt.
+    # The maintained backport also infers import names from RECORD metadata.
+    import importlib_metadata as metadata
     import tomli as tomllib
 
 

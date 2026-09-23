@@ -502,8 +502,7 @@ version = "9.0.1"
 description = "Read metadata from Python packages"
 optional = false
 python-versions = ">=3.10"
-groups = ["dev"]
-markers = "python_full_version < \"3.10.2\""
+groups = ["main", "dev"]
 files = [
     {file = "importlib_metadata-9.0.1-py3-none-any.whl", hash = "sha256:bba5600596a7e21f3eef53281cf28d6a5195634d2f2b78ff9501a3272c6eaab0"},
     {file = "importlib_metadata-9.0.1.tar.gz", hash = "sha256:ab830580bc0ef3db61ce8fae716389e5462b67e033018bab6d8f80ef17172f99"},
@@ -1809,8 +1808,7 @@ version = "4.1.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
 optional = false
 python-versions = ">=3.10"
-groups = ["dev"]
-markers = "python_full_version < \"3.10.2\""
+groups = ["main", "dev"]
 files = [
     {file = "zipp-4.1.0-py3-none-any.whl", hash = "sha256:25ad4e16390cd314347dd8f1de67a2ac538ae658ed4ab9db16029c07c188e97f"},
     {file = "zipp-4.1.0.tar.gz", hash = "sha256:4cb57381f544315db7688e976e922a2b18cdb513d21cc194eb42232ba2a3e602"},
@@ -1827,4 +1825,4 @@ type = ["pytest-mypy (>=1.0.1) ; platform_python_implementation != \"PyPy\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<4.0"
-content-hash = "1541698bd084cb9e21b351315d9dbc3f522fef1595216c30c0480608d590abc4"
+content-hash = "f2308cf2992cc8c7b606892dab8584bfdaad1d4e0586d7ad56f6d3df80419099"

@@ -21,6 +21,7 @@ dependencies = [
     "typer>=0.15.2,<0.16",
     "packaging>=24.0",
     "tomli>=2; python_version < '3.11'",
+    "importlib-metadata>=8; python_version < '3.11'",
 ]
 
 [project.urls]
@@ -37,6 +38,7 @@ packages = [{include = "importspy", from = "src"}]
 [tool.poetry.group.dev.dependencies]
 pymdown-extensions = ">=11.0.1,<12"
 tomli = ">=2"
+importlib-metadata = ">=8"
 pytest = "^8.3.3"
 mkdocs = "^1.6.1"
 mkdocstrings = {version = "^0.30.0", extras = ["python"]}

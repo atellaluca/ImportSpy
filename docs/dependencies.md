@@ -29,7 +29,10 @@ an unresolved import; this avoids guessing a distribution name from an import.
 ## Resolution and inventory
 
 The resolver uses `importlib.metadata.packages_distributions()` and distribution
-metadata. This handles import/distribution name differences such as `yaml` and
+metadata. On Python 3.10 it uses the maintained
+[`importlib-metadata` backport](https://importlib-metadata.readthedocs.io/en/latest/api.html)
+so wheels without `top_level.txt` can be mapped using their `RECORD` file too.
+This handles import/distribution name differences such as `yaml` and
 `PyYAML` without special cases. One import can map to multiple distributions, and
 one distribution can provide several imports. All mapped contributors are retained
 and evaluated. The inventory is conservative: importing one child of a namespace
