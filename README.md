@@ -4,6 +4,8 @@
 
 Decide whether Python source satisfies your module, dependency, and runtime policies before admitting it for execution.
 
+![ImportSpy banner](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-banner_500px.png)
+
 [![PyPI](https://img.shields.io/pypi/v/importspy)](https://pypi.org/project/importspy/)
 [![Tests](https://img.shields.io/github/actions/workflow/status/atellaluca/ImportSpy/ci.yml?branch=main)](https://github.com/atellaluca/ImportSpy/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/atellaluca/ImportSpy)](LICENSE)
@@ -202,3 +204,5 @@ part of the project's history. The [GDG Basilicata talk](https://profile.atellal
 describes that earlier generation; the 0.5 workflow begins with static admission.
 
 MIT licensed. Created by Luca Atella.
+
+![ImportSpy logo](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-logo_100px.png)
