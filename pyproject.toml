@@ -26,7 +26,7 @@ dependencies = [
 
 [project.urls]
 Repository = "https://github.com/atellaluca/ImportSpy"
-Documentation = "https://importspy.readthedocs.io"
+Documentation = "https://importspy.atellaluca.com"
 Issues = "https://github.com/atellaluca/ImportSpy/issues"
 
 [project.scripts]
