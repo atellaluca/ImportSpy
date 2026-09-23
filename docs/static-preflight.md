@@ -17,6 +17,12 @@ existing module contract fields. It returns structured violations together,
 without changing the source facts or importing anything. Checks use names and
 exact represented values/annotations. Unspecified values impose no value
 constraint; an explicit YAML `null` requires a known `None` value.
+For function parameters, an explicit value also requires a default to exist:
+`value: null` matches `def run(value=None)`, but not `def run(value)`. Parameter
+and class-attribute annotation requirements match written annotations; a literal
+default or attribute value does not supply a missing annotation. Module-variable
+annotation requirements retain compatibility with type inference from a known
+scalar literal when no annotation is written.
 
 Evidence marked `verified` in the static phase verifies a source declaration.
 It does not claim that arbitrary execution will leave an equivalent runtime
@@ -31,6 +37,11 @@ be harmless in a particular runtime. Metaclasses and class decorators are also
 uncertain. Base class references can be matched as written, but resolving the
 base object's inherited implementation requires runtime evidence. The inspector
 does not invoke decorators, metaclasses, annotation expressions, or defaults.
+Explicit namespace mutation in definition expressions, class suites, and
+control-flow headers is tracked conservatively. This includes calls such as
+`globals()` in a default expression and module bindings declared `global` inside
+a class. Calls buried in unexecuted function bodies are not treated as observed
+definition-time effects.
 
 Static inspection is not a sandbox or a full interpreter. It does not establish
 that a module is safe to execute, predict arbitrary mutations performed by

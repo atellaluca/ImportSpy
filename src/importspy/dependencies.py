@@ -39,7 +39,7 @@ def normalize_url(value: str, *, repository: bool = False) -> str | None:
         if ":" in host:
             host = f"[{host}]"
         port = parts.port
-        if port and (parts.scheme, port) not in {("https", 443), ("http", 80)}:
+        if port is not None and (parts.scheme, port) not in {("https", 443), ("http", 80)}:
             host += f":{port}"
         path = parts.path.rstrip("/")
         if repository and path.endswith(".git"):

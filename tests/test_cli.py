@@ -308,6 +308,8 @@ def test_reserved_provider_name_is_configuration_failure(runner, source, monkeyp
             return []
 
     monkeypatch.setattr(cli, "load_provider", lambda name: ReservedProvider())
-    result = runner.invoke(cli.app, ["check", str(source), "--provider", "reserved", "-f", "json"])
+    result = runner.invoke(
+        cli.app, ["check", str(source), "--provider", "reserved", "-f", "json"]
+    )
     assert result.exit_code == 2
     assert json.loads(result.stdout)["violations"][0]["code"] == "ISPY-C101"

@@ -163,7 +163,9 @@ def _replace(scope: Scope, name: str, certain: bool) -> None:
         scope.uncertain_names.add(name)
 
 
-def _expression_effects(node: ast.AST, scope: Scope) -> None:
+def _expression_effects(
+    node: ast.AST, scope: Scope, module_scope: SourceInspection
+) -> None:
     """Track explicit namespace mutation without evaluating an expression."""
     for child in ast.walk(node):
         if isinstance(child, ast.NamedExpr):
@@ -181,9 +183,35 @@ def _expression_effects(node: ast.AST, scope: Scope) -> None:
                 "delattr",
             }:
                 scope.dynamic_namespace = True
+                # Class bodies and method-definition expressions can mutate
+                # module globals too. We cannot resolve exec/eval payloads.
+                module_scope.dynamic_namespace = True
 
 
-def _scan_scope(statements: list[ast.stmt], scope: Scope, certain: bool = True) -> None:
+def _statement_expression_effects(
+    node: ast.AST, scope: Scope, module_scope: SourceInspection
+) -> None:
+    """Inspect statement headers, including AST wrappers, without body traversal.
+
+    Arguments/defaults, keywords, with-items, exception types and match guards
+    use wrapper nodes rather than direct expression children. Nested statements
+    are handled by scope traversal; function bodies are never visited here.
+    """
+    for child in ast.iter_child_nodes(node):
+        if isinstance(child, ast.stmt):
+            continue
+        if isinstance(child, ast.expr):
+            _expression_effects(child, scope, module_scope)
+        else:
+            _statement_expression_effects(child, scope, module_scope)
+
+
+def _scan_scope(
+    statements: list[ast.stmt],
+    scope: Scope,
+    module_scope: SourceInspection,
+    certain: bool = True,
+) -> None:
     for statement in statements:
         if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef)):
             _replace(scope, statement.name, certain)
@@ -198,8 +226,14 @@ def _scan_scope(statements: list[ast.stmt], scope: Scope, certain: bool = True) 
                 and not statement.decorator_list
                 and not statement.keywords,
             )
-            _scan_scope(statement.body, class_fact)
+            _scan_scope(statement.body, class_fact, module_scope)
             scope.classes[statement.name] = class_fact
+        elif isinstance(statement, ast.Global) and isinstance(scope, ClassFact):
+            # A class suite executes during definition. A global declaration
+            # routes its bindings to the module, not the class namespace.
+            scope.dynamic_namespace = True
+            for name in statement.names:
+                _replace(module_scope, name, False)
         elif isinstance(statement, (ast.Assign, ast.AnnAssign)):
             targets = (
                 statement.targets
@@ -256,11 +290,12 @@ def _scan_scope(statements: list[ast.stmt], scope: Scope, certain: bool = True) 
                     _scan_scope(
                         [child for child in value if isinstance(child, ast.stmt)],
                         scope,
+                        module_scope,
                         False,
                     )
                     for child in value:
                         if isinstance(child, (ast.ExceptHandler, ast.match_case)):
-                            _scan_scope(child.body, scope, False)
+                            _scan_scope(child.body, scope, module_scope, False)
                             if isinstance(child, ast.ExceptHandler) and child.name:
                                 _replace(scope, child.name, False)
                             if isinstance(child, ast.match_case):
@@ -280,15 +315,10 @@ def _scan_scope(statements: list[ast.stmt], scope: Scope, certain: bool = True) 
                     if item.optional_vars:
                         for name in _bound_names(item.optional_vars):
                             _replace(scope, name, False)
-        # Visit expressions evaluated by this statement, excluding nested
-        # statement bodies. Assignments can invoke exec/globals just as an
-        # expression statement can. Function bodies are intentionally excluded.
-        if not isinstance(
-            statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
-        ):
-            for child in ast.iter_child_nodes(statement):
-                if isinstance(child, ast.expr):
-                    _expression_effects(child, scope)
+        # Include defaults/decorators/annotations/bases: these can be evaluated
+        # while a definition is created. Deferred annotation semantics vary by
+        # Python version, so potentially dynamic annotations stay conservative.
+        _statement_expression_effects(statement, scope, module_scope)
 
 
 class _ImportVisitor(ast.NodeVisitor):
@@ -384,7 +414,7 @@ class SourceInspector:
         visitor = _ImportVisitor()
         visitor.visit(tree)
         result.imports = visitor.references
-        _scan_scope(tree.body, result)
+        _scan_scope(tree.body, result, result)
         result.evidence.append(
             Evidence(
                 kind="source.syntax",
@@ -494,12 +524,19 @@ def evaluate_structure(
             issue("ISPY-S101", name, f"Required declaration `{name}` is missing.")
         return fact
 
-    def variable(requirement: Variable, fact: VariableFact) -> None:
+    def variable(
+        requirement: Variable, fact: VariableFact, *, infer_annotation: bool = False
+    ) -> None:
         if requirement.annotation:
             annotation = fact.annotation
-            if annotation is None and fact.value_known and fact.value is not None:
+            if (
+                infer_annotation
+                and annotation is None
+                and fact.value_known
+                and fact.value is not None
+            ):
                 annotation = type(fact.value).__name__
-            if annotation is None:
+            if annotation is None and infer_annotation:
                 unknown(requirement.name, fact.line)
             elif annotation != requirement.annotation:
                 issue(
@@ -511,7 +548,16 @@ def evaluate_structure(
                     annotation,
                 )
         if "value" in requirement.model_fields_set:
-            if not fact.value_known:
+            if isinstance(fact, ArgumentFact) and not fact.has_default:
+                issue(
+                    "ISPY-S102",
+                    requirement.name,
+                    f"Required default for parameter `{requirement.name}` is missing.",
+                    fact.line,
+                    requirement.value,
+                    "no default",
+                )
+            elif not fact.value_known:
                 unknown(requirement.name, fact.line)
             elif fact.value != requirement.value:
                 issue(
@@ -613,7 +659,7 @@ def evaluate_structure(
     for requirement in expected.variables or []:
         fact = lookup(inspection, inspection.variables, requirement.name)
         if fact is not None:
-            variable(requirement, fact)
+            variable(requirement, fact, infer_annotation=True)
     for required_function in expected.functions or []:
         function_fact = lookup(inspection, inspection.functions, required_function.name)
         if function_fact is not None:

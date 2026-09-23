@@ -320,3 +320,112 @@ def test_structure_evaluation_does_not_mutate_evidence(tmp_path):
     second = evaluate_structure(expected, inspection)
     assert first == second
     assert before == [e.model_dump() for e in inspection.evidence]
+
+
+@pytest.mark.parametrize(
+    "definition",
+    [
+        "def helper(option=globals().pop('run')): pass\n",
+        "def helper(*, option=globals().pop('run')): pass\n",
+        "def helper(option: globals().pop('run')): pass\n",
+        "def helper(*args: globals().pop('run')): pass\n",
+        "def helper(**kwargs: globals().pop('run')): pass\n",
+        "def helper() -> globals().pop('run'): pass\n",
+        "@decorator(globals().pop('run'))\ndef helper(): pass\n",
+        "@decorator(globals().pop('run'))\nclass Helper: pass\n",
+        "class Helper(globals().pop('run')): pass\n",
+        "class Helper(metaclass=globals().pop('run')): pass\n",
+        "class Helper:\n    def method(self, option=globals().pop('run')): pass\n",
+        "class Helper:\n    global run\n    run = None\n",
+        "class Helper:\n    globals().pop('run')\n",
+        "with context(globals().pop('run')):\n    pass\n",
+        "try:\n    pass\nexcept (globals().pop('run') or Exception):\n    pass\n",
+        "match value:\n    case _ if globals().pop('run'):\n        pass\n",
+    ],
+)
+def test_definition_and_control_flow_expressions_cannot_hide_namespace_mutation(
+    tmp_path, definition
+):
+    inspection = inspect_source(tmp_path, "def run(): pass\n" + definition)
+    assert not inspection.violations
+    violations = evaluate_structure(Module(functions=[{"name": "run"}]), inspection)
+    assert [item.code for item in violations] == ["ISPY-S103"]
+
+
+def test_namespace_mutation_in_unexecuted_function_body_is_not_an_observed_effect(
+    tmp_path,
+):
+    inspection = inspect_source(
+        tmp_path, "def run(): pass\ndef helper():\n    globals().pop('run')\n"
+    )
+    assert evaluate_structure(Module(functions=[{"name": "run"}]), inspection) == []
+
+
+def test_definition_time_expressions_are_never_executed(tmp_path, capsys):
+    marker = tmp_path / "definition-executed"
+    inspection = inspect_source(
+        tmp_path,
+        f"def run(option=open({str(marker)!r}, 'w')) -> print('ANNOTATION EXECUTED'):\n    pass\n",
+    )
+    assert not inspection.violations
+    assert not marker.exists()
+    assert capsys.readouterr().out == ""
+
+
+@pytest.mark.parametrize("signature", ["value", "*, value", "*value", "**value"])
+def test_explicit_null_parameter_default_requires_a_default(tmp_path, signature):
+    inspection = inspect_source(tmp_path, f"def run({signature}): pass\n")
+    requirement = Module(
+        functions=[{"name": "run", "arguments": [{"name": "value", "value": None}]}]
+    )
+    violations = evaluate_structure(requirement, inspection)
+    assert [item.code for item in violations] == ["ISPY-S102"]
+    assert violations[0].observed == "no default"
+
+
+@pytest.mark.parametrize("signature", ["value=None", "*, value=None"])
+def test_explicit_null_parameter_default_matches_literal_none(tmp_path, signature):
+    inspection = inspect_source(tmp_path, f"def run({signature}): pass\n")
+    requirement = Module(
+        functions=[{"name": "run", "arguments": [{"name": "value", "value": None}]}]
+    )
+    assert evaluate_structure(requirement, inspection) == []
+
+
+def test_omitted_default_requirement_allows_required_parameter(tmp_path):
+    inspection = inspect_source(tmp_path, "def run(value): pass\n")
+    requirement = Module(functions=[{"name": "run", "arguments": [{"name": "value"}]}])
+    assert evaluate_structure(requirement, inspection) == []
+
+
+def test_parameter_annotation_is_not_inferred_from_literal_default(tmp_path):
+    inspection = inspect_source(tmp_path, "def run(value=1): pass\n")
+    requirement = Module(
+        functions=[
+            {"name": "run", "arguments": [{"name": "value", "annotation": "int"}]}
+        ]
+    )
+    violations = evaluate_structure(requirement, inspection)
+    assert [item.code for item in violations] == ["ISPY-S102"]
+    assert violations[0].observed is None
+
+
+def test_class_attribute_annotation_is_not_inferred_from_literal_value(tmp_path):
+    inspection = inspect_source(tmp_path, "class Plugin:\n    value = 1\n")
+    requirement = Module(
+        classes=[
+            {
+                "name": "Plugin",
+                "attributes": [{"name": "value", "type": "class", "annotation": "int"}],
+            }
+        ]
+    )
+    assert [item.code for item in evaluate_structure(requirement, inspection)] == [
+        "ISPY-S102"
+    ]
+
+
+def test_module_variable_annotation_can_use_literal_type(tmp_path):
+    inspection = inspect_source(tmp_path, "value = 1\n")
+    requirement = Module(variables=[{"name": "value", "annotation": "int"}])
+    assert evaluate_structure(requirement, inspection) == []

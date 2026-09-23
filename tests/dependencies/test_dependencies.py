@@ -325,3 +325,15 @@ def test_policy_evaluation_never_reads_metadata(monkeypatch):
     deps = [external()]
     assert collect_dependency_evidence(deps)
     assert evaluate_dependencies(deps, {"pyyaml": DependencyRule(version=">=2")}, DependencyOptions(), "plugin.py") == []
+
+
+def test_explicit_zero_port_is_distinct_from_default_origin(installed):
+    project, install = installed
+    install("ISP-Port", "ispy_port", origin={
+        "url": "https://example.com:0/sdk.whl", "archive_info": {},
+    })
+    dep = resolve(project, "ispy_port")[0]
+    assert dep.distributions[0].origin.url == "https://example.com:0/sdk.whl"
+    rule = DependencyRule(origin=OriginRule(url="https://example.com/sdk.whl"))
+    violations = evaluate_dependencies([dep], {"isp-port": rule}, DependencyOptions(), "plugin.py")
+    assert [item.code for item in violations] == ["ISPY-D106"]
