@@ -8,10 +8,22 @@ theme:
   custom_dir: docs/overrides
   favicon: assets/favicon.ico
   logo: assets/importspy-logo.png
-  palette:
-    - scheme: default
-      primary: purple
-      accent: light blue
+    palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
   features:
     - navigation.tabs
     - navigation.instant
