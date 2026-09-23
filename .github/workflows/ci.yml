@@ -2,136 +2,75 @@ name: CI (Poetry)
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   lint:
-    if: false
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-
-      - name: Cache venv
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py311-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-py311-
-
-      - name: Install deps (dev/test groups if present)
-        run: |
-          if poetry install --no-interaction --with dev,test; then
-            echo "Installed with groups dev,test"
-          else
-            poetry install --no-interaction
-          fi
-
-      - name: Ruff
-        run: poetry run ruff check .
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/setup
+      - run: poetry run ruff check src tests scripts examples/admission
 
   typecheck:
-    if: false
     name: typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/setup
+      - run: poetry run mypy src
+
+  test-matrix:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/setup
         with:
-          python-version: "3.11"
-      - uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-      - uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py311-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-py311-
-      - name: Install deps
-        run: |
-          if poetry install --no-interaction --with dev,test; then
-            echo "Installed with groups dev,test"
-          else
-            poetry install --no-interaction
-          fi
-      - name: mypy
-        run: |
-          poetry run mypy src || poetry run mypy .
+          python-version: ${{ matrix.python }}
+      - run: poetry run pytest -q
+      - name: Dogfood configured admission
+        run: poetry run importspy check . --format json
 
   tests:
     name: tests
+    if: always()
+    needs: test-matrix
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-      - uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py311-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-py311-
-      - name: Install deps
-        run: |
-          if poetry install --no-interaction --with dev,test; then
-            echo "Installed with groups dev,test"
-          else
-            poetry install --no-interaction
-          fi
-      - name: pytest
-        run: poetry run pytest -q
+      - name: Require every supported Python version
+        env:
+          MATRIX_RESULT: ${{ needs.test-matrix.result }}
+        run: test "$MATRIX_RESULT" = success
 
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-      - uses: actions/cache@v4
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py311-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-py311-
-      - name: Install deps (no root)
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/setup
+      - run: poetry check --strict
+      - run: poetry run mkdocs build --strict
+      - run: poetry build
+      - name: Verify installed wheel
+        shell: bash
         run: |
-          if poetry install --no-interaction --with dev,test; then
-            echo "Installed with groups dev,test"
-          else
-            poetry install --no-interaction
-          fi
-      - name: Build package
-        run: poetry build
+          python -m venv "$RUNNER_TEMP/importspy-smoke"
+          "$RUNNER_TEMP/importspy-smoke/bin/python" -m pip install dist/*.whl
+          "$RUNNER_TEMP/importspy-smoke/bin/python" scripts/smoke_package.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: importspy-distributions
+          path: dist/
+          if-no-files-found: error

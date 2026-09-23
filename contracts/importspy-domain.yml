@@ -1,0 +1,18 @@
+schema_version: 1
+policy_id: importspy-domain
+filename: domain.py
+classes:
+  - name: AdmissionRequest
+  - name: AdmissionDecision
+  - name: Evidence
+  - name: Violation
+runtime:
+  python: ">=3.10"
+dependencies:
+  pydantic:
+    version: ">=2.9.2,<3"
+    declared: true
+dependency_options:
+  unresolved: deny
+  unlisted: deny
+  undeclared: deny
