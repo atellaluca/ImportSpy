@@ -193,16 +193,22 @@ ImportSpy enforces policy at Python admission boundaries. It is not a sandbox,
 vulnerability scanner, package manager, or proof that admitted code is safe.
 It complements tools such as pip-audit, OSV, Sigstore, and SLSA by consuming
 their evidence through providers.
-
 - [Quickstart](docs/intro/quickstart.md) · [Contract reference](docs/contracts/syntax.md)
 - [Architecture](docs/architecture.md) · [Static preflight](docs/static-preflight.md)
 - [Migration from 0.4](docs/migration-0.5.md) · [Examples](examples/admission/)
 - [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md)
 
-ImportSpy's earlier runtime-contract design and its community presentations remain
-part of the project's history. The [GDG Basilicata talk](https://profile.atellaluca.com/assets/talks/importspy-gdg-basilicata-it.pdf)
-describes that earlier generation; the 0.5 workflow begins with static admission.
+## Case studies and talks
 
-MIT licensed. Created by Luca Atella.
+- **[The Missing Admission Layer in Python Plugin Systems](https://dev.to/atellaluca/case-study-the-missing-admission-layer-in-python-plugin-systems-4k80)**  
+  A case study on the architectural problem behind ImportSpy: why importability is
+  not the same as compatibility, and how the project evolved from import validation
+  toward policy-driven admission boundaries.
+
+- **[ImportSpy — GDG Basilicata talk](https://profile.atellaluca.com/assets/talks/importspy-gdg-basilicata-it.pdf)**  
+  A presentation of ImportSpy's earlier runtime-contract generation. The current
+  0.5 workflow begins with static admission before execution.
 
 ![ImportSpy logo](https://raw.githubusercontent.com/atellaluca/ImportSpy/refs/heads/main/docs/assets/importspy-logo_100px.png)
+
+MIT licensed. Created by Luca Atella.
