@@ -203,7 +203,6 @@ their evidence through providers.
 - [Examples](examples/admission/)
 - [Contributing](CONTRIBUTING.md)
 - [Security reporting](SECURITY.md)
->>>>>>> 53fd969 (docs: add Where ImportSpy fits page)
 
 ## Case studies and talks
 
