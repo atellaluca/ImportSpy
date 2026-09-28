@@ -193,10 +193,17 @@ ImportSpy enforces policy at Python admission boundaries. It is not a sandbox,
 vulnerability scanner, package manager, or proof that admitted code is safe.
 It complements tools such as pip-audit, OSV, Sigstore, and SLSA by consuming
 their evidence through providers.
-- [Quickstart](docs/intro/quickstart.md) · [Contract reference](docs/contracts/syntax.md)
-- [Architecture](docs/architecture.md) · [Static preflight](docs/static-preflight.md)
-- [Migration from 0.4](docs/migration-0.5.md) · [Examples](examples/admission/)
-- [Contributing](CONTRIBUTING.md) · [Security reporting](SECURITY.md)
+- [Where ImportSpy fits](docs/where-importspy-fits.md)
+- [Security model](docs/security-model.md)
+- [Quickstart](docs/intro/quickstart.md)
+- [Contract reference](docs/contracts/syntax.md)
+- [Architecture](docs/architecture.md)
+- [Static preflight](docs/static-preflight.md)
+- [Migration from 0.4](docs/migration-0.5.md)
+- [Examples](examples/admission/)
+- [Contributing](CONTRIBUTING.md)
+- [Security reporting](SECURITY.md)
+>>>>>>> 53fd969 (docs: add Where ImportSpy fits page)
 
 ## Case studies and talks
 

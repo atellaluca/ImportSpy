@@ -39,6 +39,7 @@ exclude_docs: |
 
 nav:
   - Home: index.md
+  - Where ImportSpy fits: where-importspy-fits.md
   - Get started:
       - Overview: intro/overview.md
       - Installation: intro/install.md
